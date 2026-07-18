@@ -1,0 +1,7 @@
+spring:
+    ai: 
+        dashscope:
+            api-key: ${DASHSCOPE_API_KEY}
+            chat:
+                options:
+                    model: qwen3-coder-plus
