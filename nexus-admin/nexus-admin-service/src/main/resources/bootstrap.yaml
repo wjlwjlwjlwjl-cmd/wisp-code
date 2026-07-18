@@ -1,0 +1,35 @@
+server:
+  port: 18083
+
+spring:
+  application:
+    name: nexus-admin
+  profiles:
+    active: ${RUN_ENV}
+  cloud:
+    nacos:
+      discovery:
+        username: nacos
+        password: bite@123
+        namespace: frameworkjava-${RUN_ENV}
+        server-addr: ${NACOS_ADDR}
+      config:
+        username: nacos
+        password: bite@123
+        namespace: frameworkjava-${RUN_ENV}
+        server-addr: ${NACOS_ADDR}
+        file-extension: yaml
+        # 共享配置
+        shared-configs:
+          # - data-id: shared-common-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          #  refresh: true
+          - data-id: shared-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true
+          # - data-id: shared-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          #  refresh: true
+          - data-id: shared-map-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true
+          - data-id: shared-caffeine-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true
+          - data-id: shared-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true
