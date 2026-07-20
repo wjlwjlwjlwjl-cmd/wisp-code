@@ -1,4 +1,4 @@
-create database frameworkjava_admin if not exists frameworkjava_admin default character set utf8mb4 collate utf8mb4_general_ci;
+create database if not exists frameworkjava_admin default character set utf8mb4 collate utf8mb4_general_ci;
 use frameworkjava_admin;
 
 create table `sys_dictionary_type` (

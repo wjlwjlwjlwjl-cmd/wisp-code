@@ -1,8 +1,7 @@
 package com.nexus.nexusadminservice.config.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.nexus.nexuscommoncore.domain.entity.BaseDO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,14 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("sys_dictionary_data")
-public class SysDictionaryData {
-
-    /**
-     * 自增主键
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
+public class SysDictionaryData extends BaseDO{
     /**
      * 字典类型主键
      */

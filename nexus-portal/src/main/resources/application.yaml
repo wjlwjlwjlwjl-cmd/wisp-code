@@ -1,3 +1,5 @@
+server:
+    port: 18084
 spring:
     ai: 
         dashscope:
@@ -5,3 +7,8 @@ spring:
             chat:
                 options:
                     model: qwen3-coder-plus
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/wispcode?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+        username: bitedev
+        password: bite@123
