@@ -1,12 +1,15 @@
 server:
     port: 18084
+    tomcat:
+        max-query-size: 102400
+        max-query-string-length: 102400
 spring:
     ai: 
         dashscope:
             api-key: ${DASHSCOPE_API_KEY}
             chat:
                 options:
-                    model: qwen3-coder-plus
+                    model: deepseek-v4-flash
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://localhost:3306/wispcode?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
