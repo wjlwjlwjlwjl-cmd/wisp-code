@@ -21,13 +21,12 @@
         <module>nexus-mstemplate</module>
         <module>nexus-file</module>
         <module>nexus-portal</module>
-        <module>nexus-mstemplate-api</module>
-        <module>demo</module>
         <module>nexus-admin</module>
         <module>nexus-common</module>
         <module>nexus-file</module>
         <module>nexus-gateway</module>
         <module>nexus-mstemplate</module>
+        <module>nexus-portal</module>
         <module>nexus-portal</module>
     </modules>
 
@@ -54,14 +53,14 @@
         <aliyun.sms.version>3.1.1</aliyun.sms.version>
 
         <!--运行环境-->
-        <runenv>test</runenv>
+        <runenv>dev</runenv>
         <java.opts.default>-Xmx256m</java.opts.default>
 
         <!--系统配置中心-->
-        <nacos.addr>http://你的云服务器内网ip/你的虚拟机内网ip:8848</nacos.addr>
+        <nacos.addr>http://127.0.0.1:8848</nacos.addr>
 
         <!--docker部署配置-->
-        <dockerhost.addr>tcp://你的云服务器内网ip/你的虚拟机内网ip:2376</dockerhost.addr>
+        <dockerhost.addr>tcp://127.0.0.1:2376</dockerhost.addr>
         <dockerregistry.url>registry.cn-chengdu.aliyuncs.com</dockerregistry.url>
         <dockerregistry.username>houyj1987@163.com</dockerregistry.username>
         <dockerregistry.password>admin@666777</dockerregistry.password>
@@ -110,12 +109,6 @@
                 <groupId>com.aliyun.oss</groupId>
                 <artifactId>aliyun-sdk-oss</artifactId>
                 <version>${aliyun.oss.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
             </dependency>
 
             <dependency>
