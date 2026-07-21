@@ -118,6 +118,18 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
+  wispcode-userapp-preview:
+    container_name: wispcode-userapp-preview
+    image: wispcode/preview
+    build:
+      dockerfile: ./userapp/preview/Dockerfile
+    volumes:
+      - ../data/wispcodedata/userapp/preview:/workspace/preview
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - frameworkjava_network
 
 networks:
   frameworkjava_network:
