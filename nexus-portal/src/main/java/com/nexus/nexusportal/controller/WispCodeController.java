@@ -6,13 +6,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nexus.nexuscommondomain.domain.R;
-import com.nexus.nexusportal.domain.dto.AppGenerateReqDTO;
 import com.nexus.nexusportal.domain.vo.AppGenerateRetVO;
 import com.nexus.nexusportal.domain.vo.RequirementVO;
 import com.nexus.nexusportal.service.impl.AppGenerateServiceImpl;
 import com.nexus.nexusportal.service.impl.RequirementServiceImpl;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 
 @RequestMapping("/wisp")
