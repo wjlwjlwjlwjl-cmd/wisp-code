@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS `app` (
     `app_screenshot` varchar(100) DEFAULT NULL COMMENT '应用截图',
     PRIMARY KEY (`id`),
     KEY `idx_apps_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='应用信息表'
+) ENGINE=InnoDB AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='应用信息表';

@@ -4,3 +4,4 @@ source /opt/sql/dictionary.sql;
 source /opt/sql/region.sql;
 source /opt/sql/userBEdge.sql;
 source /opt/sql/userCEdge.sql;
+source /opt/sql/wispcode.sql;

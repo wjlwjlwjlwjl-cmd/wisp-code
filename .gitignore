@@ -2,3 +2,4 @@ deploy/dev/data
 user-code
 */target
 *.class
+data
