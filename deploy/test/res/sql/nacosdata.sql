@@ -1,7 +1,7 @@
 # 1. 初始化nacos配置数据
 # 注意： 此前如果修改过nacos外接数据库名称，此处需确保名称一致
 
-use `nexus-stack_nacos_test`;
+use `frameworkjava_nacos_test`;
 INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,src_user,src_ip,app_name,tenant_id,c_desc,c_use,effect,`type`,c_schema,encrypted_data_key) VALUES
                                                                                                                                                                              ('share-common-test.yaml','DEFAULT_GROUP','# feign 配置
 feign:
@@ -18,7 +18,7 @@ feign:
     request:
       enabled: true
     response:
-      enabled: true','aa24e89d40f144f6d7ea2a34a9f868b9',now(),now(),'nacos','112.46.64.96','通用公共配置','nexus-stack-test','','','','yaml','',''),
+      enabled: true','aa24e89d40f144f6d7ea2a34a9f868b9',now(),now(),'nacos','112.46.64.96','通用公共配置','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-redis-test.yaml','DEFAULT_GROUP','spring:
   cache:
     type: redis
@@ -26,13 +26,13 @@ feign:
     redis:
       host: 你的云服务器内网ip/你的虚拟机内网ip
       port: 6379
-      password: @123','2f99b238a0dc181c2cca4c1c7e5cf738',now(),now(),'nacos','172.19.0.1','通用Redis公共配置','nexus-stack-test','','','','yaml','',''),
+      password: bite@123','2f99b238a0dc181c2cca4c1c7e5cf738',now(),now(),'nacos','172.19.0.1','通用Redis公共配置','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-mysql-test.yaml','DEFAULT_GROUP','spring:
   datasource:
-    url: jdbc:mysql://你的云服务器内网ip/你的虚拟机内网ip:3306/nexus-stack_test?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+    url: jdbc:mysql://你的云服务器内网ip/你的虚拟机内网ip:3306/frameworkjava_test?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: dev
-    password: @123
+    username: bitedev
+    password: bite@123
     # 指定为HikariDataSource
     type: com.zaxxer.hikari.HikariDataSource
     # hikari连接池配置
@@ -55,12 +55,12 @@ feign:
       connection-test-query: SELECT 1
 mybatis-plus:
     # 搜索指定包别名
-    typeAliasesPackage: com.**.domain
+    typeAliasesPackage: com.bitejiuyeke.**.domain
     # 配置mapper的扫描，找到所有的mapper.xml映射文件
     mapperLocations: classpath*:mapper/**.xml
     configuration:
-      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl','a4ca7eb86104d59ec129be53c3ad805d',now(),now(),'nacos','172.18.0.1','通用mysql公共配置','nexus-stack-test','','','','yaml','',''),
-                                                                                                                                                                             ('-gateway-test.yaml','DEFAULT_GROUP','spring:
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl','a4ca7eb86104d59ec129be53c3ad805d',now(),now(),'nacos','172.18.0.1','通用mysql公共配置','frameworkjava-test','','','','yaml','',''),
+                                                                                                                                                                             ('bite-gateway-test.yaml','DEFAULT_GROUP','spring:
   cloud:
     gateway:
       discovery:
@@ -69,29 +69,29 @@ mybatis-plus:
           enabled: true
       routes:
         # 用户端服务
-        - id: -mstemplate
+        - id: bite-mstemplate
           uri: lb://mstemplate
           predicates:
             - Path=/mstemplate/**
           filters:
             - StripPrefix=1
         # 门户服务
-        - id: -portal
-          uri: lb://-portal
+        - id: bite-portal
+          uri: lb://bite-portal
           predicates:
             - Path=/portal/**
           filters:
             - StripPrefix=1
         # 鉴权模块
-        - id: -admin
-          uri: lb://-admin
+        - id: bite-admin
+          uri: lb://bite-admin
           predicates:
             - Path=/admin/**
           filters:
             - StripPrefix=1
         # 文件
-        - id: -file
-          uri: lb://-file
+        - id: bite-file
+          uri: lb://bite-file
           predicates:
             - Path=/file/**
           filters:
@@ -111,7 +111,7 @@ security:
       - /**/login/**
       - /**/send_code/**
       - /**/nologin/**
-      - /**/test/**','b6476af4d05245cc366bb2b3771ec17c',now(),now(),'nacos','112.46.64.96','网关','nexus-stack-test','','','','yaml','',''),
+      - /**/test/**','b6476af4d05245cc366bb2b3771ec17c',now(),now(),'nacos','112.46.64.96','网关','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-sms-test.yaml','DEFAULT_GROUP','sms:
   send-message: false
   send-limit: 200
@@ -121,7 +121,7 @@ security:
     accessKeyId: 你的阿里云AK
     accessKeySecret: 你的阿里云SK
     endpoint: dysmsapi.aliyuncs.com
-    templateCode: 你的阿里云短信模板','b704d125c1dc1f50377bd9e1b3527dc0',now(),now(),'nacos','172.18.0.1','短信通用服务','nexus-stack-test','','','','yaml','',''),
+    templateCode: 你的阿里云短信模板','b704d125c1dc1f50377bd9e1b3527dc0',now(),now(),'nacos','172.18.0.1','短信通用服务','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-map-test.yaml','DEFAULT_GROUP','map:
   type: qqmap
   enabled: false
@@ -129,20 +129,20 @@ security:
 
 qqmap:
   key: 你的腾讯地图KEY
-  apiServer: https://apis.map.qq.com','19195726133e9c9cfc420d4064091983',now(),now(),'nacos','112.46.64.96','公共地图配置','nexus-stack-test','','','','yaml','',''),
-                                                                                                                                                                             ('-admin-test.yaml','DEFAULT_GROUP','# 用戶
+  apiServer: https://apis.map.qq.com','19195726133e9c9cfc420d4064091983',now(),now(),'nacos','112.46.64.96','公共地图配置','frameworkjava-test','','','','yaml','',''),
+                                                                                                                                                                             ('bite-admin-test.yaml','DEFAULT_GROUP','# 用戶
 appuser:
   info:
-    defaultAvatar: https://你的阿里云OSS桶名称.oss-cn-chengdu.aliyuncs.com/你的阿里云OSS路径前缀/web/profile/default-avatar.png','f88f0ecaf1e7a076cbf44df05104e1ce',now(),now(),'nacos','112.46.64.96','基础管理服务','nexus-stack-test','','','','yaml','',''),
+    defaultAvatar: https://你的阿里云OSS桶名称.oss-cn-chengdu.aliyuncs.com/你的阿里云OSS路径前缀/web/profile/default-avatar.png','f88f0ecaf1e7a076cbf44df05104e1ce',now(),now(),'nacos','112.46.64.96','基础管理服务','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-rabbitmq-test.yaml','DEFAULT_GROUP','spring:
   rabbitmq:
     port: 5672
     host: 你的云服务器内网ip/你的虚拟机内网ip
     virtual-host: /
     username: admin
-    password: @123','547905b9da54726573f9a12a50202260',now(),now(),'nacos','112.46.64.96','通用rabbitmq公共配置','nexus-stack-test','
+    password: bite@123','547905b9da54726573f9a12a50202260',now(),now(),'nacos','112.46.64.96','通用rabbitmq公共配置','frameworkjava-test','
 ','','','yaml','',''),
-                                                                                                                                                                             ('-file-test.yaml','DEFAULT_GROUP','storage:
+                                                                                                                                                                             ('bite-file-test.yaml','DEFAULT_GROUP','storage:
   type: oss
 
 oss:
@@ -163,20 +163,20 @@ spring:
   servlet:
     multipart:
       max-file-size: 50MB
-      max-request-size: 50MB','c42244faa84553043e3fc60d2420612b',now(),now(),'nacos','112.46.64.96','文件服务配置','nexus-stack-test','','','','yaml','',''),
-                                                                                                                                                                             ('-portal-test.yaml','DEFAULT_GROUP','# 微信小程序
+      max-request-size: 50MB','c42244faa84553043e3fc60d2420612b',now(),now(),'nacos','112.46.64.96','文件服务配置','frameworkjava-test','','','','yaml','',''),
+                                                                                                                                                                             ('bite-portal-test.yaml','DEFAULT_GROUP','# 微信小程序
 wx:
   applet:
     app-id: wxced773bb27a21222
-    app-secret: 21d9bf91f89d410868dde7f0b7226433','654d56916263537e391277d77bd8604f',now(),now(),'nacos','112.46.64.96','门户首页服务','nexus-stack-test',NULL,NULL,NULL,'yaml',NULL,'');
+    app-secret: 21d9bf91f89d410868dde7f0b7226433','654d56916263537e391277d77bd8604f',now(),now(),'nacos','112.46.64.96','门户首页服务','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
 INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,src_user,src_ip,app_name,tenant_id,c_desc,c_use,effect,`type`,c_schema,encrypted_data_key) VALUES
     ('share-caffeine-test.yaml','DEFAULT_GROUP','caffeine:
   build:
     initial-capacity: 128
     maximum-size: 1024
-    expire: 60','92e0d0f563d11d8e5e34e8932444ee1e',now(),now(),'nacos','112.46.64.96','本地缓存公共配置','nexus-stack-test',NULL,NULL,NULL,'yaml',NULL,'');
+    expire: 60','92e0d0f563d11d8e5e34e8932444ee1e',now(),now(),'nacos','112.46.64.96','本地缓存公共配置','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
 
 
 
 INSERT INTO tenant_info (kp,tenant_id,tenant_name,tenant_desc,create_source,gmt_create,gmt_modified) VALUES
-    ('1','nexus-stack-test','nexus-stack-test','测试环境','nacos',unix_timestamp()*1000,unix_timestamp()*1000);
+    ('1','frameworkjava-test','frameworkjava-test','测试环境','nacos',unix_timestamp()*1000,unix_timestamp()*1000);

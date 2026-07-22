@@ -36,7 +36,7 @@ services:
       retries: 10
     environment:
       TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: @123
+      MYSQL_ROOT_PASSWORD: bite@123
     ulimits:
       nproc: 65535
       nofile:
@@ -109,13 +109,13 @@ services:
       - JVM_XMN=256m
       - NACOS_APPLICATION_PORT=8858
       - SPRING_DATASOURCE_PLATFORM=mysql
-      - MYSQL_SERVICE_HOST=你的云服务器1内网ip/你的虚拟机1内网ip
+      - MYSQL_SERVICE_HOST=127.0.0.1
       - MYSQL_SERVICE_PORT=3308
       - MYSQL_SERVICE_DB_NAME=nexus-stack_nacos_prd
       - MYSQL_SERVICE_USER=dev
       - MYSQL_SERVICE_PASSWORD=@123
-      - NACOS_SERVER_IP=你的云服务器2内网ip/你的虚拟机2内网ip
-      - NACOS_SERVERS=你的云服务器1内网ip/你的虚拟机1内网ip:8854 你的云服务器1内网ip/你的虚拟机1内网ip:8856 你的云服务器2内网ip/你的虚拟机2内网ip:8858
+      - NACOS_SERVER_IP=127.0.0.2
+      - NACOS_SERVERS=127.0.0.1:8854 127.0.0.1:8856 127.0.0.2:8858
     volumes:
       - ../data2/nexus-stackdata/nacos03/logs/:/home/nacos/logs
       - ../data2/nexus-stackdata/nacos03/tomcatlogs/:/home/bit/nacos/tomcat/logs/
@@ -149,7 +149,7 @@ services:
     restart: always
     hostname: nexus-stack-rabbitmq02
     extra_hosts:
-      - "nexus-stack-rabbitmq01:你的云服务器1内网ip/你的虚拟机1内网ip"
+      - "nexus-stack-rabbitmq01:127.0.0.1"
     environment:
       RABBITMQ_ERLANG_COOKIE: 'COOKIE'
       RABBITMQ_NODE_PORT: 5673
@@ -157,7 +157,7 @@ services:
       # 用户名
       RABBITMQ_DEFAULT_USER: admin
       # 密码
-      RABBITMQ_DEFAULT_PASS: @123
+      RABBITMQ_DEFAULT_PASS: bite@123
     ports:
       - "4369:4369"
       - "5673:5673"

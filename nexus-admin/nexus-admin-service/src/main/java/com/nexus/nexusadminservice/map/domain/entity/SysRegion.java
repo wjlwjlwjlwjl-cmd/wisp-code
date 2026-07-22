@@ -1,8 +1,10 @@
 package com.nexus.nexusadminservice.map.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.nexus.nexuscommoncore.domain.entity.BaseDO;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * sys_region 表对应实体类
@@ -12,8 +14,8 @@ import lombok.Data;
 
 @TableName("sys_region")
 @Data
-public class SysRegion{
-    private Long id;            //区域 id
+@EqualsAndHashCode(callSuper = false)
+public class SysRegion extends BaseDO{
     private String name;        //区域名称
     private String fullName;    //区域全称
     private Long parentId;      //父级区域 id

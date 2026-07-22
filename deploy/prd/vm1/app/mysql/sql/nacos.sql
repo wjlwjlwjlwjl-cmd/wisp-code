@@ -7,7 +7,7 @@ SET NAMES utf8mb4;
 /*   表名称 = config_info                  */
 /******************************************/
 
-use `nexus-stack_nacos_prd`;
+use `frameworkjava_nacos_dev`;
 CREATE TABLE `config_info`
 (
     `id`                 bigint(20)   NOT NULL AUTO_INCREMENT COMMENT 'id',

@@ -10,8 +10,8 @@ services:
       - "18081:18081"
     environment:
       RUN_ENV: prd
-      NACOS_ADDR: 你的云服务器1内网ip/你的虚拟机1内网ip:8854,你的云服务器1内网ip/你的虚拟机1内网ip:8856,你的云服务器2内网ip/你的虚拟机2内网ip:8858
-      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=你的云服务器2内网ip/你的虚拟机2内网ip
+      NACOS_ADDR: 127.0.0.1:8854,127.0.0.1:8856,127.0.0.2:8858
+      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=127.0.0.2
     networks:
       nexus-stack_network_prd:
   nexus-stack-file:
@@ -23,8 +23,8 @@ services:
     container_name: nexus-stack-file-prd
     environment:
       RUN_ENV: prd
-      NACOS_ADDR: 你的云服务器1内网ip/你的虚拟机1内网ip:8854,你的云服务器1内网ip/你的虚拟机1内网ip:8856,你的云服务器2内网ip/你的虚拟机2内网ip:8858
-      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=你的云服务器2内网ip/你的虚拟机2内网ip
+      NACOS_ADDR: 127.0.0.1:8854,127.0.0.1:8856,127.0.0.2:8858
+      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=127.0.0.2
     networks:
       nexus-stack_network_prd:
   nexus-stack-gateway:
@@ -36,8 +36,8 @@ services:
     container_name: nexus-stack-gateway-prd
     environment:
       RUN_ENV: prd
-      NACOS_ADDR: 你的云服务器1内网ip/你的虚拟机1内网ip:8854,你的云服务器1内网ip/你的虚拟机1内网ip:8856,你的云服务器2内网ip/你的虚拟机2内网ip:8858
-      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=你的云服务器2内网ip/你的虚拟机2内网ip
+      NACOS_ADDR: 127.0.0.1:8854,127.0.0.1:8856,127.0.0.2:8858
+      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=127.0.0.2
     networks:
       nexus-stack_network_prd:
   nexus-stack-portal:
@@ -49,8 +49,8 @@ services:
     container_name: nexus-stack-portal-prd
     environment:
       RUN_ENV: prd
-      NACOS_ADDR: 你的云服务器1内网ip/你的虚拟机1内网ip:8854,你的云服务器1内网ip/你的虚拟机1内网ip:8856,你的云服务器2内网ip/你的虚拟机2内网ip:8858
-      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=你的云服务器2内网ip/你的虚拟机2内网ip
+      NACOS_ADDR: 127.0.0.1:8854,127.0.0.1:8856,127.0.0.2:8858
+      JAVA_OPTS: -Xmx256m -Dspring.cloud.nacos.discovery.ip=127.0.0.2
     networks:
       nexus-stack_network_prd:
 networks:

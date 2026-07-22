@@ -37,7 +37,7 @@ public class ThreadPoolConfig {
     @Value("${thread.pool-executor.prefixName: thread-service-}")
     private String prefixName;                      //线程名称前缀
 
-    @Value("${thread.pool-executor.rejectHandler: 1}")
+    @Value("${thread.pool-executor.rejectHandler}")
     private int rejectHandler;                      //线程池被打满时的拒绝策略
 
     @Bean("threadPoolExecutor")

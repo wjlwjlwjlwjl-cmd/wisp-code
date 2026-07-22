@@ -12,9 +12,9 @@ import lombok.EqualsAndHashCode;
  * SysDictionaryType
  */
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @TableName("sys_dictionary_type")
-public class SysDictionaryType extends BaseDO {
+public class SysDictionaryType extends BaseDO{
     private String typeKey;     //字典类型键
 
     private String value;       //字典类型值

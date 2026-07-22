@@ -4,18 +4,15 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com</groupId>
+        <groupId>com.nexus</groupId>
         <artifactId>nexus-file</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com</groupId>
+    <groupId>com.nexus</groupId>
     <artifactId>nexus-file-service</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <modules>
-        <module>user</module>
-    </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -59,12 +56,12 @@
             <version>1.1.6</version>
         </dependency>
         <dependency>
-            <groupId>com</groupId>
+            <groupId>com.nexus</groupId>
             <artifactId>nexus-common-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com</groupId>
+            <groupId>com.nexus</groupId>
             <artifactId>nexus-common-security</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -80,6 +77,58 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.45.0</version>
+
+                <configuration>
+                    <!--指定远程服务器的Docker服务访问地址-->
+                    <dockerHost>${dockerhost.addr}</dockerHost>
+                    <certPath>${project.basedir}/../../deploy/test/app/config/cert</certPath>
+                    <!--指定私有仓库的访问路径-->
+                    <pushRegistry>${dockerregistry.url}</pushRegistry>
+                    <!--指定库的用户名与密码-->
+                    <authConfig>
+                        <username>${dockerregistry.username}</username>
+                        <password>${dockerregistry.password}</password>
+                    </authConfig>
+                    <containerNamePattern>${dockerregistry.namespace}-%n-%i</containerNamePattern>
+                    <images>
+                        <image>
+                            <!--指定私有仓库访问地址/镜像名称-->
+                            <name>
+                                ${dockerregistry.namespace}/${project.build.finalName}:${project.version}</name>
+                            <build>
+                                <!--指定Dockerfile的路径-->
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                            </build>
+                            <run>
+                                <env>
+                                    <NACOS_ADDR>${nacos.addr}</NACOS_ADDR>
+                                    <RUN_ENV>${runenv}</RUN_ENV>
+                                    <JAVA_OPTS>${java.opts.default}</JAVA_OPTS>
+                                </env>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>build</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>stop</goal>
+                            <goal>build</goal>
+                            <goal>start</goal>
+                            <!--推送到远端仓库 -->
+                            <goal>push</goal>
                         </goals>
                     </execution>
                 </executions>

@@ -1,6 +1,7 @@
 package com.nexus.nexuscommondomain.domain;
 
 import lombok.Data;
+import com.nexus.nexuscommondomain.domain.ResultCode;
 
 /**
  * 响应报文封装

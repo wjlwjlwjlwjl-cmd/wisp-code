@@ -33,12 +33,12 @@ feign:
           max-wait: 5000
       database: 0
       cluster:
-        nodes: 你的云服务器1内网ip/你的虚拟机1内网ip:6380,你的云服务器1内网ip/你的虚拟机1内网ip:6381,你的云服务器1内网ip/你的虚拟机1内网ip:6382,你的云服务器2内网ip/你的虚拟机2内网ip:6383,你的云服务器2内网ip/你的虚拟机2内网ip:6384,你的云服务器2内网ip/你的虚拟机2内网ip:6385
+        nodes: 127.0.0.1:6380,127.0.0.1:6381,127.0.0.1:6382,127.0.0.2:6383,127.0.0.2:6384,127.0.0.2:6385
       connect-timeout: 5000
       timeout: 5000','c50bba098c68792872b1684763b388ab',now(),now(),'nacos','222.91.199.193','通用Redis公共配置','nexus-stack-prd','','','','yaml','',''),
                                                                                                                                                                              ('share-mysql-prd.yaml','DEFAULT_GROUP','spring:
   datasource:
-    url: jdbc:mysql://你的云服务器1内网ip/你的虚拟机1内网ip:3308/nexus-stack_prd?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+    url: jdbc:mysql://127.0.0.1:3308/nexus-stack_prd?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: dev
     password: @123
@@ -145,7 +145,7 @@ appuser:
     defaultAvatar: https://你的阿里云OSS桶名称.oss-cn-chengdu.aliyuncs.com/你的阿里云OSS路径前缀/web/profile/default-avatar.png','f88f0ecaf1e7a076cbf44df05104e1ce',now(),now(),'nacos','112.46.64.96','基础管理服务','nexus-stack-prd','','','','yaml','',''),
                                                                                                                                                                              ('share-rabbitmq-prd.yaml','DEFAULT_GROUP','spring:
   rabbitmq:
-    addresses: 你的云服务器1内网ip/你的虚拟机1内网ip:5673,你的云服务器2内网ip/你的虚拟机2内网ip:5673
+    addresses: 127.0.0.1:5673,127.0.0.2:5673
     virtual-host: /
     username: admin
     password: @123','c1dfdc9fdd7d50cee9d1d53b70bca94e',now(),now(),'nacos','222.91.199.193','通用rabbitmq公共配置','nexus-stack-prd','

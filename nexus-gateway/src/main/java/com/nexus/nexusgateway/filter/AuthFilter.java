@@ -141,6 +141,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
      * @param name key
      * @param value 值
      */
+    @SuppressWarnings("null")
     private void addHeader(ServerHttpRequest.Builder mutate, String name, Object value) {
         if (value == null) return;
         String valueStr = value.toString();

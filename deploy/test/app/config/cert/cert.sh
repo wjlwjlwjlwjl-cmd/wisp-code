@@ -2,8 +2,9 @@
 
 #vi /lib/systemd/system/docker.service
 #--tlsverify --tlscacert=/etc/docker/ca.pem --tlscert=/etc/docker/server-cert.pem --tlskey=/etc/docker/server-key.pem
+echo "建议在 Root 下运行此脚本"
 
-SERVER="你的云服务器内网ip/你的虚拟机内网ip"
+SERVER="127.0.0.1"
 PASSWORD="123456"
 COUNTRY="CN"
 STATE="ShanXi"
@@ -60,6 +61,5 @@ rm -v -f client.csr server.csr
 chmod -v 0444 ca-key.pem key.pem server-key.pem
 chmod -v 0444 ca.pem server-cert.pem cert.pem
 echo "复制证书到指定目录"
-cp server-*.pem  /etc/docker/
-cp ca.pem /etc/docker/
-
+sudo cp server-*.pem  /etc/docker/
+sudo cp ca.pem /etc/docker/

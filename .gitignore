@@ -1,5 +1,5 @@
-deploy/dev/data
-user-code
-*/target
-*.class
+deploy/dev/data/
+.vscode
 data
+*.jar
+*.jar.*

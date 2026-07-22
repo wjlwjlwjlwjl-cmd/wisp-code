@@ -4,12 +4,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com</groupId>
+        <groupId>com.nexus</groupId>
         <artifactId>nexus-common</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com</groupId>
+    <groupId>com.nexus</groupId>
     <artifactId>nexus-common-security</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -29,17 +29,17 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com</groupId>
+            <groupId>com.nexus</groupId>
             <artifactId>nexus-common-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com</groupId>
+            <groupId>com.nexus</groupId>
             <artifactId>nexus-common-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com</groupId>
+            <groupId>com.nexus</groupId>
             <artifactId>nexus-common-redis</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

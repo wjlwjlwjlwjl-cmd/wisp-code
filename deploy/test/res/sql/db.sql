@@ -3,7 +3,7 @@
 
 SET NAMES utf8mb4;
 
-use `nexus-stack_test`;
+use `frameworkjava_test`;
 
 CREATE TABLE `sys_region` (
                               `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -4416,11 +4416,11 @@ CREATE TABLE `app_user`  (
                              `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增主键',
                              `nick_name` varchar(64) NULL DEFAULT NULL COMMENT '昵称',
                              `phone_number` varchar(64) NULL DEFAULT NULL COMMENT '电话',
-                             `email` varchar(64) NULL DEFAULT NULL COMMENT '邮箱email',
+                             `open_id` varchar(64) NULL DEFAULT NULL COMMENT '微信openId',
                              `avatar` varchar(255) NULL DEFAULT NULL COMMENT '头像',
                              PRIMARY KEY (`id`) USING BTREE,
                              UNIQUE INDEX `uk_phone`(`phone_number`) USING BTREE,
-                             UNIQUE INDEX `uk_email`(`email`) USING BTREE
+                             UNIQUE INDEX `uk_open_id`(`open_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 10000001 CHARACTER SET = utf8mb4 COMMENT = '应用端人员表';
 
 -- sys_user definition
