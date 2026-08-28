@@ -15,12 +15,10 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>nexus-admin</module>
         <module>nexus-gateway</module>
         <module>nexus-mstemplate</module>
         <module>nexus-portal</module>
         <module>nexus-common</module>
-        <module>nexus-file</module>
     </modules>
 
     <properties>
@@ -50,10 +48,10 @@
         <java.opts.default>-Xmx256m</java.opts.default>
 
         <!--系统配置中心-->
-        <nacos.addr>http://127.0.0.1:8848</nacos.addr>
+        <nacos.addr>http://172.21.215.62:8848</nacos.addr>
 
         <!--docker部署配置-->
-        <dockerhost.addr>tcp://127.0.0.1:2376</dockerhost.addr>
+        <dockerhost.addr>tcp://172.21.215.62:2376</dockerhost.addr>
         <dockerregistry.url>registry.cn-chengdu.aliyuncs.com</dockerregistry.url>
         <dockerregistry.username>houyj1987@163.com</dockerregistry.username>
         <dockerregistry.password>admin@666777</dockerregistry.password>
@@ -94,14 +92,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
-            </dependency>
-
-
-            <!-- 阿里云OSS-->
-            <dependency>
-                <groupId>com.aliyun.oss</groupId>
-                <artifactId>aliyun-sdk-oss</artifactId>
-                <version>${aliyun.oss.version}</version>
             </dependency>
 
             <dependency>

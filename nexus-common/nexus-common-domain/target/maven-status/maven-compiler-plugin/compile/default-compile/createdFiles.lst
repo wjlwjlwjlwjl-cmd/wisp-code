@@ -1,5 +1,12 @@
-com/nexus/nexuscommondomain/constants/TokenConstants.class
-com/nexus/nexuscommondomain/constants/CacheConstants.class
-com/nexus/nexuscommondomain/constants/CommonConstants.class
-com/nexus/nexuscommondomain/constants/SecurityConstants.class
-com/nexus/nexuscommondomain/constants/RejectType.class
+com\nexus\nexuscommondomain\domain\ResultCode.class
+com\nexus\nexuscommondomain\domain\vo\BasePageVO.class
+com\nexus\nexuscommondomain\domain\vo\TokenVO.class
+com\nexus\nexuscommondomain\constants\CommonConstants.class
+com\nexus\nexuscommondomain\constants\SecurityConstants.class
+com\nexus\nexuscommondomain\exception\ServiceException.class
+com\nexus\nexuscommondomain\domain\dto\BasePageReqDTO.class
+com\nexus\nexuscommondomain\domain\R.class
+com\nexus\nexuscommondomain\constants\RejectType.class
+com\nexus\nexuscommondomain\constants\TokenConstants.class
+com\nexus\nexuscommondomain\domain\vo\LoginUserVO.class
+com\nexus\nexuscommondomain\constants\CacheConstants.class
