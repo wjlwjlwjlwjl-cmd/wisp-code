@@ -10,8 +10,8 @@ services:
       # 数据挂载
       - ../data/frameworkjavadata/mysql/data:/var/lib/mysql
       # 配置挂载
-      - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./mysql/sql:/opt/sql
+      - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: [
       'mysqld',
       '--innodb-buffer-pool-size=80M',
@@ -35,7 +35,7 @@ services:
       start_period: 30s
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 2
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: bite@123

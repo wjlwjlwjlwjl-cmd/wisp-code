@@ -22,7 +22,7 @@ import com.nexus.nexuscommondomain.constants.CommonConstants;
 @SuppressWarnings("null")
 public class RedisConfig {
 
-    @Bean
+    @Bean(value="sf_redisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory){
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(factory);

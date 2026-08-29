@@ -18,18 +18,18 @@ feign:
     request:
       enabled: true
     response:
-      enabled: true','aa24e89d40f144f6d7ea2a34a9f868b9',now(),now(),'nacos','112.46.64.96','通用公共配置','frameworkjava-test','','','','yaml','',''),
+      enabled: true','7a98e5666bfc562d278db12ea4cae5ed',now(),now(),'nacos','112.46.64.96','通用公共配置','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-redis-test.yaml','DEFAULT_GROUP','spring:
   cache:
     type: redis
   data:
     redis:
-      host: 172.21.215.62
+      host: 192.168.160.131
       port: 6379
-      password: bite@123','2f99b238a0dc181c2cca4c1c7e5cf738',now(),now(),'nacos','172.19.0.1','通用Redis公共配置','frameworkjava-test','','','','yaml','',''),
+      password: bite@123','b846123425cb2e5cd3d6083d8a98b2b5',now(),now(),'nacos','172.19.0.1','通用Redis公共配置','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-mysql-test.yaml','DEFAULT_GROUP','spring:
   datasource:
-    url: jdbc:mysql://172.21.215.62:3306/frameworkjava_test?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+    url: jdbc:mysql://192.168.160.131:3306/frameworkjava_test?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: bitedev
     password: bite@123
@@ -59,7 +59,7 @@ mybatis-plus:
     # 配置mapper的扫描，找到所有的mapper.xml映射文件
     mapperLocations: classpath*:mapper/**.xml
     configuration:
-      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl','a4ca7eb86104d59ec129be53c3ad805d',now(),now(),'nacos','172.18.0.1','通用mysql公共配置','frameworkjava-test','','','','yaml','',''),
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl','0517d425d111e174fe3f2b799acbd3b1',now(),now(),'nacos','172.18.0.1','通用mysql公共配置','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('bite-gateway-test.yaml','DEFAULT_GROUP','spring:
   cloud:
     gateway:
@@ -111,70 +111,21 @@ security:
       - /**/login/**
       - /**/send_code/**
       - /**/nologin/**
-      - /**/test/**','b6476af4d05245cc366bb2b3771ec17c',now(),now(),'nacos','112.46.64.96','网关','frameworkjava-test','','','','yaml','',''),
-                                                                                                                                                                             ('share-sms-test.yaml','DEFAULT_GROUP','sms:
-  send-message: false
-  send-limit: 200
-  code-expiration: 5
-  sing-name: "你的短信签名"
-  aliyun:
-    accessKeyId: 你的阿里云AK
-    accessKeySecret: 你的阿里云SK
-    endpoint: dysmsapi.aliyuncs.com
-    templateCode: 你的阿里云短信模板','b704d125c1dc1f50377bd9e1b3527dc0',now(),now(),'nacos','172.18.0.1','短信通用服务','frameworkjava-test','','','','yaml','',''),
-                                                                                                                                                                             ('share-map-test.yaml','DEFAULT_GROUP','map:
-  type: qqmap
-  enabled: false
-  regionenabled: false
-
-qqmap:
-  key: 你的腾讯地图KEY
-  apiServer: https://apis.map.qq.com','19195726133e9c9cfc420d4064091983',now(),now(),'nacos','112.46.64.96','公共地图配置','frameworkjava-test','','','','yaml','',''),
-                                                                                                                                                                             ('bite-admin-test.yaml','DEFAULT_GROUP','# 用戶
-appuser:
-  info:
-    defaultAvatar: https://你的阿里云OSS桶名称.oss-cn-chengdu.aliyuncs.com/你的阿里云OSS路径前缀/web/profile/default-avatar.png','f88f0ecaf1e7a076cbf44df05104e1ce',now(),now(),'nacos','112.46.64.96','基础管理服务','frameworkjava-test','','','','yaml','',''),
+      - /**/test/**','043148345f3f04a6d79a10daff04c0c3',now(),now(),'nacos','112.46.64.96','网关','frameworkjava-test','','','','yaml','',''),
                                                                                                                                                                              ('share-rabbitmq-test.yaml','DEFAULT_GROUP','spring:
   rabbitmq:
     port: 5672
-    host: 172.21.215.62
+    host: 192.168.160.131
     virtual-host: /
     username: admin
-    password: bite@123','547905b9da54726573f9a12a50202260',now(),now(),'nacos','112.46.64.96','通用rabbitmq公共配置','frameworkjava-test','
-','','','yaml','',''),
-                                                                                                                                                                             ('bite-file-test.yaml','DEFAULT_GROUP','storage:
-  type: oss
+    password: bite@123','12b937d4c3b995bd0fa22f1eb03bc51f',now(),now(),'nacos','112.46.64.96','通用rabbitmq公共配置','frameworkjava-test','','','','yaml','','');
 
-oss:
-  internal: ${FILE_UPLOAD_INTERNAL:false}
-  endpoint: oss-cn-chengdu.aliyuncs.com
-  intEndpoint: oss-cn-chengdu-internal.aliyuncs.com
-  region: cn-beijing
-  accessKeyId: 你的阿里云AK
-  accessKeySecret: 你的阿里云SK
-  bucketName: 你的阿里云OSS桶名称
-  presignedUrlExpireInMinutes: 60
-  pathPrefix: 你的阿里云OSS路径前缀/
-  expre: 600
-  minLen: 0
-  maxLen: 1073741824
-
-spring:
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB','c42244faa84553043e3fc60d2420612b',now(),now(),'nacos','112.46.64.96','文件服务配置','frameworkjava-test','','','','yaml','',''),
-                                                                                                                                                                             ('bite-portal-test.yaml','DEFAULT_GROUP','# 微信小程序
-wx:
-  applet:
-    app-id: wxced773bb27a21222
-    app-secret: 21d9bf91f89d410868dde7f0b7226433','654d56916263537e391277d77bd8604f',now(),now(),'nacos','112.46.64.96','门户首页服务','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
 INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,src_user,src_ip,app_name,tenant_id,c_desc,c_use,effect,`type`,c_schema,encrypted_data_key) VALUES
     ('share-caffeine-test.yaml','DEFAULT_GROUP','caffeine:
   build:
     initial-capacity: 128
     maximum-size: 1024
-    expire: 60','92e0d0f563d11d8e5e34e8932444ee1e',now(),now(),'nacos','112.46.64.96','本地缓存公共配置','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
+    expire: 60','2257485195db60455f57aa575950a2ff',now(),now(),'nacos','112.46.64.96','本地缓存公共配置','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
 
 
 

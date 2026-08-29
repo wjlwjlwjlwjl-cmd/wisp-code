@@ -48,10 +48,10 @@
         <java.opts.default>-Xmx256m</java.opts.default>
 
         <!--系统配置中心-->
-        <nacos.addr>http://172.21.215.62:8848</nacos.addr>
+        <nacos.addr>http://192.168.160.131:8848</nacos.addr>
 
         <!--docker部署配置-->
-        <dockerhost.addr>tcp://172.21.215.62:2376</dockerhost.addr>
+        <dockerhost.addr>tcp://192.168.160.131:2376</dockerhost.addr>
         <dockerregistry.url>registry.cn-chengdu.aliyuncs.com</dockerregistry.url>
         <dockerregistry.username>houyj1987@163.com</dockerregistry.username>
         <dockerregistry.password>admin@666777</dockerregistry.password>

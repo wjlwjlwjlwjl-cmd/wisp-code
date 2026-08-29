@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisService {
     @Autowired
+    @Qualifier(value="sf_redisTemplate")
     RedisTemplate redisTemplate;
 
     //*************** */
@@ -163,8 +165,6 @@ public class RedisService {
      * @param <T>
      * @param key
      * @param obj
-     * @param timeout
-     * @param unit
      */
     public <T> void setCacheObjectIfAbsent(final String key, T obj){
         redisTemplate.opsForValue().setIfAbsent(key, obj);
