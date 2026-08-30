@@ -8,6 +8,7 @@
 * bitedev, bite@123
 
 ## 2. Nacos
+* nacos, bite@123
 
 ## 3. Redis
 
