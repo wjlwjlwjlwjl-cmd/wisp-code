@@ -1,4 +1,4 @@
-deploy/dev/data/
+deploy/test/data/
 .vscode
 .idea
 */target
