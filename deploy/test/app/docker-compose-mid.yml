@@ -1,4 +1,3 @@
-version: '3.8'
 #启动命令 docker compose -p frameworkjava -f docker-compose-mid.yml up -d
 services:
   frameworkjava-mysql:
