@@ -3,9 +3,11 @@ server:
 
 spring:
   application:
-    name: nexus-gateway
+    name: bite-gateway
   profiles:
     active: ${RUN_ENV}
+  main:
+    web-application-type: reactive
   cloud:
     nacos:
       discovery:
@@ -19,14 +21,13 @@ spring:
         namespace: frameworkjava-${RUN_ENV}
         server-addr: ${NACOS_ADDR}
         file-extension: yaml
-      shared-configs:
-        - data-id: share-common-${RUN_ENV}.yaml
-          group: DEFAULT_GROUP
-        - data-id: share-redis-${RUN_ENV}.yaml
-          group: DEFAULT_GROUP
-        - data-id: share-mysql-${RUN_ENV}.yaml
-          group: DEFAULT_GROUP
-        - data-id: share-rabbitmq-${RUN_ENV}.yaml
-          group: DEFAULT_GROUP
-        - data-id: share-caffeine-${RUN_ENV}.yaml
-          group: DEFAULT_GROUP
+        # 共享配置
+        shared-configs:
+          - data-id: share-common-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true
+          - data-id: share-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true
+
+logging:
+    level:
+      com.alibaba.cloud.nacos: DEBUG

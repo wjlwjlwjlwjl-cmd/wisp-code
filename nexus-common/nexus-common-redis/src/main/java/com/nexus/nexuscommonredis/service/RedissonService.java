@@ -5,18 +5,14 @@ import java.util.concurrent.TimeUnit;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@SuppressWarnings({"rawtypes", "null"})
 public class RedissonService {
-    @Autowired
-    RedisTemplate redisTemplate;
-
     /**
      * Redis 操作客户端
      */
+    @Autowired
     private RedissonClient redissonClient;
 
     /**
