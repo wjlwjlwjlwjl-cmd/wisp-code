@@ -8,7 +8,7 @@ CREATE database if NOT EXISTS `frameworkjava_test` default character set utf8mb4
 CREATE USER 'bitedev'@'%' IDENTIFIED BY 'bite@123';
 grant replication slave, replication client on *.* to 'bitedev'@'%';
 
-GRANT ALL PRIVILEGES ON frameworkjava_nacos_test.* TO  'bitedev'@'%';
+GRANT ALL PRIVILEGES ON frameworkjava_nacs_test.* TO  'bitedev'@'%';
 GRANT ALL PRIVILEGES ON frameworkjava_test.* TO  'bitedev'@'%';
 
 FLUSH PRIVILEGES;
