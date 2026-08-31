@@ -24,29 +24,3 @@ spring:
     url: jdbc:mysql://frameworkjava-mysql:3306/wispcode?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: bitedev
     password: bite@123
-
-  cloud:
-    nacos:
-      discovery:
-        username: nacos
-        password: bite@123
-        namespace: frameworkjava-${RUN_ENV}
-        server-addr: ${NACOS_ADDR}
-      config:
-        username: nacos
-        password: bite@123
-        namespace: frameworkjava-${RUN_ENV}
-        server-addr: ${NACOS_ADDR}
-        file-extension: yaml
-        # 共享配置
-        shared-configs:
-          - data-id: share-common-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-            refresh: true
-          - data-id: share-redis-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-            refresh: true
-          - data-id: share-mysql-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-            refresh: true
-          - data-id: share-rabbitmq-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-            refresh: true
-          - data-id: share-caffeine-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-            refresh: true
