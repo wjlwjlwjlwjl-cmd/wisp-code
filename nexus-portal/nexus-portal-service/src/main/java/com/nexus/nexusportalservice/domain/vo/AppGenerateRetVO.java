@@ -8,5 +8,5 @@ import lombok.Data;
 public class AppGenerateRetVO {
     private Long appId;         //appId
     private String previewUrl;  //预览 url
-    private AppType appType;     //应用类型
+    private Integer appTypeNum;     //应用类型
 }

@@ -31,7 +31,6 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
@@ -82,6 +81,12 @@
 
         <dependency>
             <groupId>com.nexus</groupId>
+            <artifactId>nexus-common-domain</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nexus</groupId>
             <artifactId>nexus-common-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -97,12 +102,6 @@
             <artifactId>nexus-common-security</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>com</groupId>
-            <artifactId>nexus-common-message</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>-->
 
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
@@ -122,7 +121,7 @@
         </dependency>
 
         <!-- milvus -->
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-milvus-store</artifactId>
             <version>1.1.0</version>
@@ -138,7 +137,7 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-advisors-vector-store</artifactId>
             <version>1.1.0</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -238,6 +237,10 @@
                                     <RUN_ENV>${runenv}</RUN_ENV>
                                     <JAVA_OPTS>${java.opts.default}</JAVA_OPTS>
                                 </env>
+                                <network>
+                                    <mode>custom</mode>
+                                    <name>nexus-stack_frameworkjava_network</name>
+                                </network>
                             </run>
                         </image>
                     </images>

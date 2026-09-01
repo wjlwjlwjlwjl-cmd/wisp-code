@@ -3,6 +3,7 @@ package com.nexus.nexusportalservice.service.impl;
 import java.io.IOException;
 import java.util.Map;
 
+import com.nexus.nexusportalservice.domain.utils.LocalFileUtil;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
@@ -47,11 +48,26 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 .content();
 
         ModelParsedResult.ParsedResult parsedResult = ModelParsedResult.parse(rawContent);
-        log.info(rawContent);
+        String appType = determineAppType(parsedResult.getFiles());
+        int appNum = -1;
+        try{
+            appNum = AppType.getTypeNum(appType);
+        }
+        catch(ServiceException e){
+            System.out.println(e.getStackTrace());
+        }
+
+        //将生成的代码文件先存在运行目录 user-code
+        try{
+            LocalFileUtil.writeFiles((long)10000007, parsedResult.getFiles());
+        }
+        catch(IOException e){
+            System.out.println(e.getStackTrace());
+        }
 
         appMapper.update(new LambdaUpdateWrapper<App>()
                 .eq(App::getId, appId)
-                .set(App::getAppType, parsedResult.getAppType()));
+                .set(App::getAppType, appNum));
 
         giteeServiceImpl.commit(appId, parsedResult.getFiles());
 
@@ -63,12 +79,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();
         appGenerateRetDTO.setAppId(appId);
-        try{
-            appGenerateRetDTO.setAppType(AppType.getTypeNum(determineAppType(parsedResult.getFiles())));
-        }
-        catch(ServiceException serviceException){
-            log.warn(serviceException.getMsg());
-        }
+        appGenerateRetDTO.setAppTypeNum(appNum);
 
         return appGenerateRetDTO;
     }
@@ -158,6 +169,5 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 "```",
                 " - `<relative_path>`: ⽂件的相对路径（如 `index.html`,`frontend/src/App.vue`,`backend/src/main/resources/application.properties`）。",
                 " - `<complete_file_content>`: **完整**的⽂件内容，**绝对禁⽌**省略、使⽤占位符或 `// ...`。");
-
     }
 }

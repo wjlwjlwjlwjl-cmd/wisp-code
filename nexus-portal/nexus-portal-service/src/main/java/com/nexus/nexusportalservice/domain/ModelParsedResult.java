@@ -13,7 +13,6 @@ public class ModelParsedResult {
     @Data
     @NoArgsConstructor
     public static class ParsedResult {
-        private Integer appType;
         private Map<String, String> files = new LinkedHashMap<>();
     }
 
@@ -54,9 +53,6 @@ public class ModelParsedResult {
         if (currentPath != null && buf != null) {
             result.files.put(currentPath, buf.toString());
         }
-        // Parse APP_TYPE based on file analysis
-        // result.appType = determineAppType(result.files); todo
-        result.appType = 0;
         return result;
     }
 }

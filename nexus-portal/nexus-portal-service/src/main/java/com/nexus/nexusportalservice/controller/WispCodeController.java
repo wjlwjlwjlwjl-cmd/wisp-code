@@ -1,9 +1,7 @@
 package com.nexus.nexusportalservice.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.nexus.nexusportalservice.domain.dto.AppGenerateReqDTO;
+import org.springframework.web.bind.annotation.*;
 
 import com.nexus.nexuscommondomain.domain.R;
 import com.nexus.nexusportalservice.domain.vo.AppGenerateRetVO;
@@ -36,7 +34,9 @@ public class WispCodeController {
     }
 
     @PostMapping("/app/generate")
-    public R<AppGenerateRetVO> generateApp(@RequestParam(value = "appId", required = false) Long appId, @RequestParam(value = "appDoc", required = false) String appDoc){
+    public R<AppGenerateRetVO> generateApp(@RequestBody AppGenerateReqDTO appGenerateReqDTO){
+        Long appId = appGenerateReqDTO.getAppId();
+        String appDoc = appGenerateReqDTO.getAppDoc();
         return R.ok(appGenerateServiceImpl.appGenerate(appId, appDoc).convertToVO());
     }
 }
