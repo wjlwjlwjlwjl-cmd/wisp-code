@@ -15,5 +15,6 @@ public class App extends BaseDO {
     private String appDesc;         //应用描述
     private String appDoc;          //应用文档
     private String appType;         //应用类型
+    private String previewUrl;      //应用预览地址
     private String appScreenshot;   //应用截图
 }

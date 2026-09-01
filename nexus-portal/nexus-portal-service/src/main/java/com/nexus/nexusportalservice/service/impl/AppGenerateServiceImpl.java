@@ -1,7 +1,12 @@
 package com.nexus.nexusportalservice.service.impl;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.nexus.nexusportalservice.domain.utils.LocalFileUtil;
 import org.springframework.ai.chat.client.ChatClient;
@@ -41,14 +46,24 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         String userPrompt = getUserPrompt(appDoc);
         log.info(userPrompt);
 
+        //1. 获取 LLM 生成的源代码
         String rawContent = chatClient.prompt()
                 .system(systemPrompt)
                 .user(userPrompt)
                 .call()
                 .content();
 
+        //2. 根据源代码获取应用类型
         ModelParsedResult.ParsedResult parsedResult = ModelParsedResult.parse(rawContent);
-        String appType = determineAppType(parsedResult.getFiles());
+        Map<String, String> files = parsedResult.getFiles();
+        String appType = determineAppType(files);
+        Path appPath = null;
+        try{
+            appPath = LocalFileUtil.ensureUsercodeDir();
+        }
+        catch(IOException e){
+            System.out.println(e.getStackTrace());
+        }
         int appNum = -1;
         try{
             appNum = AppType.getTypeNum(appType);
@@ -57,31 +72,98 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
             System.out.println(e.getStackTrace());
         }
 
-        //将生成的代码文件先存在运行目录 user-code
+        //3. 存储、处理生成的代码
         try{
-            LocalFileUtil.writeFiles((long)10000007, parsedResult.getFiles());
+            LocalFileUtil.writeFiles(appId, files); //将代码文件放到 appPath/appId
         }
         catch(IOException e){
             System.out.println(e.getStackTrace());
         }
 
+        String previewUrl = "";
+        if(appNum == 0){
+            previewUrl = handleHtml(appId, files, appPath);
+        }
+        else if(appNum == 1){
+            previewUrl = handleVue(appId, files, appPath);
+        }
+        else if(appNum == 2){
+            previewUrl = handleSpring(appId, files, appPath);
+        }
+
+        //4. 更新数据库信息
         appMapper.update(new LambdaUpdateWrapper<App>()
                 .eq(App::getId, appId)
                 .set(App::getAppType, appNum));
+                //.set(App::getPreviewUrl, previewUrl));
 
+        //5. Gitee MCP todo
         giteeServiceImpl.commit(appId, parsedResult.getFiles());
-
-        try {
-            localFileStorageImpl.store(appId, parsedResult.getFiles());
-        } catch (IOException e) {
-            log.warn(e.getMessage());
-        }
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();
         appGenerateRetDTO.setAppId(appId);
         appGenerateRetDTO.setAppTypeNum(appNum);
+        appGenerateRetDTO.setPreviewUrl(previewUrl);
 
         return appGenerateRetDTO;
+    }
+
+    //Html不需要额外处理，直接拷贝到app自己的目录即可
+    private String handleHtml(Long appId, Map<String, String> files, Path appPath){
+        String previewUrl = "192.168.160.131" + ":80/" + appId;
+        return previewUrl;
+    }
+
+    private String handleVue(Long appId, Map<String, String> files, Path appPath){
+        runProcess("npm install", appPath);
+        runProcess("npm run build", appPath); //生成 appPath/appId/dist目录
+        Path appPreviewPath = appPath.resolve("dist");
+        String previewUrl = "192.168.160.131" + ":80/" + appId + appPreviewPath;
+        return previewUrl;
+    }
+
+    private String handleSpring(Long appId, Map<String, String> files, Path appPath){
+        //处理前端部分
+        Path appFrontendPath = appPath.resolve("frontend");
+        runProcess("npm install", appFrontendPath);
+        runProcess("npm run build", appFrontendPath); //生成 appPath/appId/dist目录
+        Path appPreviewPath = appFrontendPath.resolve("dist");
+
+        //处理后端部分
+        Path appBackendPath = appPath.resolve("backend");
+        runProcess("maven clean package -DskipTests", appBackendPath);
+        Path appTargetPath = appBackendPath.resolve("target");
+        List<String> jarPathList = null;
+        try{
+            jarPathList = Files.list(appTargetPath)
+                    // 只取文件，排除文件夹
+                    .filter(Files::isRegularFile)
+                    //后缀匹配.jar，大小写敏感；如需忽略大小写: .endsWith(".jar") || .endsWith(".JAR")
+                    .filter(path -> path.getFileName().toString().endsWith(".jar"))
+                    //转为字符串路径，可选择 toAbsolutePath()拿绝对路径
+                    .map(Path::toString)
+                    .toList();
+        }
+        catch(IOException e){
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+        if (jarPathList != null) {
+            runProcess("java -jar", appTargetPath, jarPathList);
+        }
+
+        return "";
+    }
+
+    private void runProcess(String cmd, Path path){
+
+    }
+    private void runProcess(String cmd, Path path, List<String> args){
+        StringBuilder cmdBuilder = new StringBuilder(cmd);
+        for(String arg: args){
+            cmdBuilder.append(arg);
+        }
+        cmd = cmdBuilder.toString();
+        System.out.println(cmd);
     }
 
     private String getUserPrompt(String appDoc) {
@@ -140,7 +222,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 " - `vite.config.js`: 必须配置 `base: './'`，配置 `@` 别名指向`./src`。",
                 " - `router`: 必须使⽤ `createWebHashHistory()`。",
                 " - `package.json`: 必须包含 `dev` (`vite`) 和 `build` (`vitebuild`) 脚本。",
-                "- **质量保证**:", " - 必须能够通过`npm install`安装项⽬所需依赖，并且能够通过`npm runbuild`正确完成构建⽣成dist⽬录",
+                "- **质量保证**:", " - 必须能够通过`npm install`安装项⽬所需依赖，并且能够通过`npm run build`正确完成构建⽣成dist⽬录",
                 "#### 3. Vue3 + SpringBoot ⼯程 (VUE3_SPRING)",
                 "- **⽬录结构**: 前端代码置于 `frontend/` ⽬录下，后端代码置于`backend/` ⽬录下。",
                 "- **前端部分 (frontend/)**: ",
@@ -152,7 +234,8 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 " - **代码规范**: 务必通过java⾃⾝语法完成代码不要引⼊其它资源",
                 " - **⽂件结构**: 必须包含标准⼯程结构（`pom.xml`,`xxxApplication.java(启动类)` 等）。",
                 " - **核⼼依赖**: `pom.xml` 必须继承 `spring-boot-starter-parent`，引⼊ `spring-boot-starter-web`。",
-                " - **构建配置**: `pom.xml` 必须包含 `spring-boot-maven-plugin` 以⽀持 `java -jar` 运⾏。",
+                " - **构建配置**: `pom.xml` 必须包含 `spring-boot-maven-plugin` 以⽀持 `java -jar` 运⾏。项目名称为" +
+                appId + "，最后生成的 jar 包名称为 xxx.jar，例如 10000015.jar",
                 " - **代码实现**: 所有 Controller 的 `@RequestMapping` 必须以 `/api`开头 (例如 `@RequestMapping(\"/api/users\")`)。注意此处不加："
                         + appId,
                 " - **数据存储**: **严禁**依赖 MySQL/Redis 等外部服务。仅使⽤内存(`ConcurrentHashMap`) 或本地⽂件模拟数据库。",

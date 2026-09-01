@@ -9,6 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class NexusPortalApplication {
     public static void main(String[] args){
         SpringApplication.run(NexusPortalApplication.class, args);
-        log.info("wisp-code start successfully");
+        System.out.println("wisp-code start successfully");
     }
 }

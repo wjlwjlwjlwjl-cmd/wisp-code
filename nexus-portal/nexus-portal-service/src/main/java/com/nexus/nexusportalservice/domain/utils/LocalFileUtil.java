@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LocalFileUtil {
     public static Path ensureUsercodeDir() throws IOException {
         String userDir = System.getProperty("user.dir");
-        Path base = Paths.get(userDir, "user-code").toAbsolutePath();
+        Path base = Path.of(userDir, "user-code").toAbsolutePath();
         if (!Files.exists(base)) {
             Files.createDirectories(base);
         }
@@ -21,10 +20,10 @@ public class LocalFileUtil {
     }
 
     /**
-     * 将⽂件写⼊ usercode ⽬录。
+     * 将⽂件写⼊ user-code ⽬录。
      * 
      * @param id    应⽤ ID
-     * @param files ⽂件列表zhuyi
+     * @param files ⽂件列表
      * @return 应⽤⽬录
      */
     public static Path writeFiles(Long id, Map<String, String> files) throws IOException {
