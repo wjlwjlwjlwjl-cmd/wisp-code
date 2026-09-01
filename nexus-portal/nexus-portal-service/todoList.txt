@@ -1,0 +1,1 @@
+1. 将 portal 的 application.yaml 移动到 nacos 中

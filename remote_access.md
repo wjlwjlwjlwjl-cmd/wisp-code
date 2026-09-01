@@ -16,3 +16,8 @@
     将 /lib/systemd/system/docker.service中的相应部分替换
     ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2376 --tlsverify=true --tlscacert=/etc/docker/ca.pem --tlscert=/etc/docker/server-cert.pem --tlskey=/etc/docker/server-key.pem -H fd:// --containerd=/run/containerd/containerd.sock
     随后重启 docker 服务
+
+3. 环境变量配置：
+    * DASHSCOPE_API_KEY
+    * NACOS_ADDR
+    * RUN_ENV
