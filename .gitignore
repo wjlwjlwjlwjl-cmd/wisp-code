@@ -3,3 +3,4 @@ deploy/test/data/
 .idea
 */target
 */*/target
+env.sh
