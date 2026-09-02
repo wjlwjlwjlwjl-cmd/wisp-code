@@ -225,9 +225,9 @@
                                 <volumes>
                                     <bind>
                                         <!--<volume>/home/diinki/flashcode/test/data/flashcodedata/userapp/user-code:/workspace/user-code</volume>-->
-                                        <volume>/home/diinki/wisp-code/deploy/dev/data/wispcodedata/userapp/preview:/workspace/preview</volume>
+                                        <volume>/home/diinki/wisp-code/deploy/test/data/wispcodedata/userapp/preview:/workspace/preview</volume>
                                         <!--<volume>/home/diinki/flashcode/dev/data/flashcodedata/userapp/user-deploy:/workspace/user-deploy</volume>-->
-                                        <!--<volume>/home/diinki/flashcode/test/app/config/cert:/workspace/cert</volume>-->
+                                        <volume>/home/diinki/wisp-code/deploy/test/app/config/cert:/workspace/cert</volume>
                                     </bind>
                                 </volumes>
                                 <!--<dependsOn>
