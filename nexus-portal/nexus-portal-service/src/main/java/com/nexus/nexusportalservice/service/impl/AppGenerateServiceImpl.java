@@ -1,14 +1,17 @@
 package com.nexus.nexusportalservice.service.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.nexus.nexusportalservice.domain.utils.LocalFileUtil;
+import net.bytebuddy.asm.Advice;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
@@ -72,9 +75,9 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
             System.out.println(e.getStackTrace());
         }
 
-        //3. 存储、处理生成的代码
+        //3. 存储、处理生成的代码，统一存放到 user-code/${appId} 目录
         try{
-            LocalFileUtil.writeFiles(appId, files); //将代码文件放到 appPath/appId
+            LocalFileUtil.writeFiles(appId, files);
         }
         catch(IOException e){
             System.out.println(e.getStackTrace());
@@ -82,20 +85,22 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
         String previewUrl = "";
         if(appNum == 0){
-            previewUrl = handleHtml(appId, files, appPath);
+            previewUrl = handleHtml(appId, appPath);
         }
         else if(appNum == 1){
-            previewUrl = handleVue(appId, files, appPath);
+            previewUrl = handleVue(appId, appPath);
         }
         else if(appNum == 2){
-            previewUrl = handleSpring(appId, files, appPath);
+            previewUrl = handleSpring(appId, appPath);
         }
 
         //4. 更新数据库信息
         appMapper.update(new LambdaUpdateWrapper<App>()
                 .eq(App::getId, appId)
                 .set(App::getAppType, appNum));
-                //.set(App::getPreviewUrl, previewUrl));
+        appMapper.update(new LambdaUpdateWrapper<App>()
+                .eq(App::getId, appId)
+                .set(App::getPreviewUrl, previewUrl));
 
         //5. Gitee MCP todo
         giteeServiceImpl.commit(appId, parsedResult.getFiles());
@@ -108,62 +113,94 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         return appGenerateRetDTO;
     }
 
-    //Html不需要额外处理，直接拷贝到app自己的目录即可
-    private String handleHtml(Long appId, Map<String, String> files, Path appPath){
-        String previewUrl = "192.168.160.131" + ":80/" + appId;
-        return previewUrl;
+    public static void main(String[] args) throws IOException {
+        Path appPath = LocalFileUtil.ensureUsercodeDir();
+        AppGenerateServiceImpl appGenerateService = new AppGenerateServiceImpl(null, null, null, null);
+        System.out.println(appGenerateService.handleSpring((long)10000016, appPath.resolve("10000016")));
     }
 
-    private String handleVue(Long appId, Map<String, String> files, Path appPath){
+    //Html不需要额外处理，直接拷贝到app自己的目录即可
+    private String handleHtml(Long appId, Path appPath){
+        return "192.168.160.131" + ":80/" + appId;
+    }
+
+    //Vue 前端应用，在源目录 npm install、npm run build 生成 dist 目录
+    private String handleVue(Long appId, Path appPath){
         runProcess("npm install", appPath);
         runProcess("npm run build", appPath); //生成 appPath/appId/dist目录
-        Path appPreviewPath = appPath.resolve("dist");
-        String previewUrl = "192.168.160.131" + ":80/" + appId + appPreviewPath;
-        return previewUrl;
+        return "192.168.160.131" + ":80/" + appId + "/dist";
     }
 
-    private String handleSpring(Long appId, Map<String, String> files, Path appPath){
+    //前端同 Vue 前端应用；后端使用 maven 打包，在docker 容器中通过 java -jar 运行 jar 包
+    private String handleSpring(Long appId, Path appPath){
         //处理前端部分
         Path appFrontendPath = appPath.resolve("frontend");
         runProcess("npm install", appFrontendPath);
         runProcess("npm run build", appFrontendPath); //生成 appPath/appId/dist目录
-        Path appPreviewPath = appFrontendPath.resolve("dist");
 
-        //处理后端部分
+        //处理后端部分，运行 Java 后端
         Path appBackendPath = appPath.resolve("backend");
-        runProcess("maven clean package -DskipTests", appBackendPath);
+        runProcess("mvn clean package -DskipTests", appBackendPath);
         Path appTargetPath = appBackendPath.resolve("target");
-        List<String> jarPathList = null;
-        try{
-            jarPathList = Files.list(appTargetPath)
-                    // 只取文件，排除文件夹
-                    .filter(Files::isRegularFile)
-                    //后缀匹配.jar，大小写敏感；如需忽略大小写: .endsWith(".jar") || .endsWith(".JAR")
-                    .filter(path -> path.getFileName().toString().endsWith(".jar"))
-                    //转为字符串路径，可选择 toAbsolutePath()拿绝对路径
-                    .map(Path::toString)
-                    .toList();
-        }
-        catch(IOException e){
-            System.out.println(Arrays.toString(e.getStackTrace()));
-        }
-        if (jarPathList != null) {
-            runProcess("java -jar", appTargetPath, jarPathList);
-        }
-
-        return "";
+        String jarName = appId + ".jar";
+        String cmd = "java -jar " + jarName;
+        runProcess(cmd, appTargetPath);
+        return "192.168.160.131" + ":80/" + appId + "/frontend/dist";
     }
 
-    private void runProcess(String cmd, Path path){
+    private void runProcess(String cmd, Path path) {
+        System.out.println("【Running cmd】" + cmd);
+        try {
+            // Windows 使用 cmd.exe，Linux/macOS 使用 bash
+            ProcessBuilder processBuilder;
 
-    }
-    private void runProcess(String cmd, Path path, List<String> args){
-        StringBuilder cmdBuilder = new StringBuilder(cmd);
-        for(String arg: args){
-            cmdBuilder.append(arg);
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                processBuilder = new ProcessBuilder(
+                        "cmd.exe", "/c", cmd
+                );
+            } else {
+                processBuilder = new ProcessBuilder(
+                        "bash", "-c", cmd
+                );
+            }
+
+            // 设置命令执行目录
+            processBuilder.directory(path.toFile());
+
+            // 合并标准错误和标准输出
+            processBuilder.redirectErrorStream(true);
+
+            // 启动进程
+            Process process = processBuilder.start();
+
+            // 实时读取输出
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(
+                            process.getInputStream(),
+                            StandardCharsets.UTF_8
+                    )
+            )) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+
+            // 等待命令执行完成
+            int exitCode = process.waitFor();
+
+            if (exitCode != 0) {
+                throw new RuntimeException(
+                        "命令执行失败，退出码：" + exitCode + "，命令：" + cmd
+                );
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("执行命令失败：" + cmd, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("命令执行被中断：" + cmd, e);
         }
-        cmd = cmdBuilder.toString();
-        System.out.println(cmd);
     }
 
     private String getUserPrompt(String appDoc) {
