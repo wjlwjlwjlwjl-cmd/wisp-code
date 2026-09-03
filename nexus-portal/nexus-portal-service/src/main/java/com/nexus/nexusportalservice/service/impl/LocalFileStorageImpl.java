@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.nexus.nexusportalservice.domain.utils.LocalFileUtil;
+import com.nexus.nexusportalservice.utils.LocalFileUtil;
 import com.nexus.nexusportalservice.service.ILocalFileStorage;
 
 @Service
