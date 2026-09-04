@@ -80,16 +80,8 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
             System.out.println(e.getStackTrace());
         }
 
-        String previewUrl = "";
-        if(appNum == 0){
-            previewUrl = AppBuildUtil.handleHtml(appId, appPath);
-        }
-        else if(appNum == 1){
-            previewUrl = AppBuildUtil.handleVue(appId, appPath);
-        }
-        else if(appNum == 2){
-            previewUrl = AppBuildUtil.handleSpring(appId, appPath);
-        }
+        //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
+        String previewUrl = "https://serverIp:80/preview/" + appId + "/#";
 
         //4. 更新数据库信息（应用类型、应用预览连接）
         appMapper.update(new LambdaUpdateWrapper<App>()
@@ -109,13 +101,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
         return appGenerateRetDTO;
     }
-
-    public static void main(String[] args) throws IOException {
-        Path appPath = LocalFileUtil.ensureUsercodeDir();
-        AppGenerateServiceImpl appGenerateService = new AppGenerateServiceImpl(null, null, null, null);
-        System.out.println(appGenerateService.handleSpring((long)10000016, appPath.resolve("10000016")));
-    }
-
 
     private String getUserPrompt(String appDoc) {
         return String.join("\n",

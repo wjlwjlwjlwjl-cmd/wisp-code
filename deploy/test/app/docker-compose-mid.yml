@@ -117,17 +117,33 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
-  frameworkjava-web:
+
+  wispcode-userapp-preview:
+    container_name: wispcode-userapp-preview
+    image: wispcode/userapp
+    build:
+      dockerfile: ./userapp/preview/Dockerfile
+    volumes:
+      - ../data/wispcodedata/userapp/user-preview:/workspace/preview
+      - ./userapp/preview/nginx/scripts:/workspace/scripts
+      - ./userapp/preview/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - frameworkjava_network
+
+  wispcode-web:
     image: nginx:1.24.0
-    container_name: frameworkjava-web
+    container_name: wispcode-web
     restart: always
     networks:
       - frameworkjava_network
     ports:
-      - "80:80"
+      - "19080:19080"
     volumes:
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/web/dist:/data/frameworkjava/web/dist
+      - ./nginx/web/dist:/data/flashcode/web/dist
     ulimits:
       nproc: 65535
       nofile:
