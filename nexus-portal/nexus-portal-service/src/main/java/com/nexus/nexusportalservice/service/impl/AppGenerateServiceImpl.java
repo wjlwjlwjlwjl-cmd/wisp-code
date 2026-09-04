@@ -1,15 +1,13 @@
 package com.nexus.nexusportalservice.service.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 
 import com.nexus.nexusportalservice.utils.AppBuildUtil;
-import com.nexus.nexusportalservice.utils.LocalFileUtil;
+import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -31,6 +29,11 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     private final GiteeServiceImpl giteeServiceImpl;
     private final LocalFileStorageImpl localFileStorageImpl;
     private final AppMapper appMapper;
+
+    @Value("server.ip")
+    String serverIp;
+    @Value("server.port")
+    String port;
 
     public AppGenerateServiceImpl(ChatClient chatClient, GiteeServiceImpl giteeServiceImpl,
             LocalFileStorageImpl localFileStorageImpl, AppMapper appMapper) {
@@ -59,7 +62,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         String appType = determineAppType(files);
         Path appPath = null;
         try{
-            appPath = LocalFileUtil.ensureUsercodeDir();
+            appPath = GeneratedAppWriter.ensureUsercodeDir();
         }
         catch(IOException e){
             System.out.println(e.getStackTrace());
@@ -73,15 +76,19 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         }
 
         //3. 存储、处理生成的代码，统一存放到 user-code/${appId} 目录
-        try{
-            LocalFileUtil.writeFiles(appId, files);
+
+        if(appNum == 1){
+            AppBuildUtil.handleHtml(appId, appPath);
         }
-        catch(IOException e){
-            System.out.println(e.getStackTrace());
+        else if(appNum == 2){
+            AppBuildUtil.handleVue(appId, appPath);
+        }
+        else if(appNum == 3){
+            AppBuildUtil.handleSpring(appId, appPath);
         }
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
-        String previewUrl = "https://serverIp:80/preview/" + appId + "/#";
+        String previewUrl = "https://192.168.160.131:80/preview/" + appId + "/#";
 
         //4. 更新数据库信息（应用类型、应用预览连接）
         appMapper.update(new LambdaUpdateWrapper<App>()

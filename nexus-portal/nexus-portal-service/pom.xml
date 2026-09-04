@@ -222,6 +222,11 @@
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
                             <run>
+                                <ports>
+                                    <port>
+                                        8080:8080
+                                    </port>
+                                </ports>
                                 <volumes>
                                     <bind>
                                         <!--<volume>/home/diinki/flashcode/test/data/flashcodedata/userapp/user-code:/workspace/user-code</volume>-->

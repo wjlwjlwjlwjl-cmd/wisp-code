@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.nexus.nexusportalservice.utils.LocalFileUtil;
+import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
 import com.nexus.nexusportalservice.service.ILocalFileStorage;
 
 @Service
 public class LocalFileStorageImpl implements ILocalFileStorage{
     @Override
     public void store(Long appId, Map<String, String> files) throws IOException {
-        LocalFileUtil.writeFiles(appId, files);
+        GeneratedAppWriter.writeFiles(appId, files);
     }
 }
