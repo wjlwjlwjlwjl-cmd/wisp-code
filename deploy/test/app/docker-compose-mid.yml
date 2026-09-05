@@ -9,8 +9,9 @@ services:
       # 数据挂载
       - ../data/frameworkjavadata/mysql/data:/var/lib/mysql
       # 配置挂载
-      - ./mysql/sql:/opt/sql
-      - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./mysql/sql:/opt/sql
+      # - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql/sql:/docker-entrypoint-initdb.d
     command: [
       'mysqld',
       '--innodb-buffer-pool-size=80M',
