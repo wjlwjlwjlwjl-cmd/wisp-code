@@ -1,17 +1,50 @@
 package com.nexus.nexusportalservice.utils;
 
+import com.nexus.nexuscommondomain.exception.ServiceException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class FileUtil {
+@Slf4j
+public final class FileUtil {
+
+    private static final ConcurrentHashMap<Long, Process> RUNNING_JARS = new ConcurrentHashMap<>();
+
+    private FileUtil() {}
+
     /**
-     * 将 source 拷贝到 target
-     *
-     * @param source
-     * @param target
-     * @throws IOException
+     * 确保 preview 基础目录存在
+     */
+    public static Path ensureBaseDir(String path) throws IOException {
+        String userDir = System.getProperty("user.dir");
+        Path base = Paths.get(userDir, path).toAbsolutePath();
+        if (!Files.exists(base)) {
+            Files.createDirectories(base);
+        }
+        return base;
+    }
+
+    /**
+     * 确保 preview 应用的目录存在
+     */
+    public static Path ensureAppDir(Long appId, String path) throws IOException {
+        Path base = ensureBaseDir(path);
+        Path appDir = base.resolve(appId.toString());
+        if (!Files.exists(appDir)) {
+            Files.createDirectories(appDir);
+        }
+        return appDir;
+    }
+
+    /**
+     * 复制目录
      */
     public static void copyDirectory(Path source, Path target) throws IOException {
         if (!Files.exists(source)) {
@@ -38,4 +71,31 @@ public class FileUtil {
         }
     }
 
+    public static String saveFile(MultipartFile file, String fileName) throws ServiceException {
+        if (file == null || file.isEmpty()) {
+            throw new ServiceException("文件为空");
+        }
+        String userDir = System.getProperty("user.dir");
+        Path basePath = Paths.get(userDir, "/tmp").toAbsolutePath();
+        try {
+            if (!Files.exists(basePath)) {
+                Files.createDirectories(basePath);
+            }
+            String suffix = getSuffix(file.getOriginalFilename());
+            fileName = fileName + suffix;
+            Path filePath = basePath.resolve(fileName);
+            InputStream is = file.getInputStream();
+            Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
+            return filePath.toAbsolutePath().toString();
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
+    private static String getSuffix(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "";
+        }
+        return fileName.substring(fileName.lastIndexOf("."));
+    }
 }

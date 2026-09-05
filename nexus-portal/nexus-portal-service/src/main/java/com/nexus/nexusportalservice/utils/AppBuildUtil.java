@@ -1,6 +1,5 @@
 package com.nexus.nexusportalservice.utils;
 
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectExecResponse;
 import com.github.dockerjava.api.model.Container;
@@ -12,173 +11,58 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 public class AppBuildUtil {
-    public static void runProcess(String cmd, Path path) {
-        System.out.println("【Running cmd】" + cmd);
+
+    public static void buildVuePro(Long appId, Path nodeProjectDir, String previewDeployPath) {
         try {
-            // Windows 使用 cmd.exe，Linux/macOS 使用 bash
-            ProcessBuilder processBuilder;
-
-            if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                processBuilder = new ProcessBuilder(
-                        "cmd.exe", "/c", cmd
-                );
-            } else {
-                processBuilder = new ProcessBuilder(
-                        "bash", "-c", cmd
-                );
-            }
-
-            // 设置命令执行目录
-            processBuilder.directory(path.toFile());
-
-            // 合并标准错误和标准输出
-            processBuilder.redirectErrorStream(true);
-
-            // 启动进程
-            Process process = processBuilder.start();
-
-            // 实时读取输出
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(
-                            process.getInputStream(),
-                            StandardCharsets.UTF_8
-                    )
-            )) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-            }
-
-            // 等待命令执行完成
-            int exitCode = process.waitFor();
-
-            if (exitCode != 0) {
-                throw new RuntimeException(
-                        "命令执行失败，退出码：" + exitCode + "，命令：" + cmd
-                );
-            }
-
+            runProcess(List.of("npm", "install"), nodeProjectDir);
+            runProcess(List.of("npm", "run", "build"), nodeProjectDir);
+            Path distDir = nodeProjectDir.resolve("dist");
+            Path targetDistDir = FileUtil.ensureAppDir(appId, previewDeployPath).resolve("dist");
+            FileUtil.copyDirectory(distDir, targetDistDir);
         } catch (IOException e) {
-            throw new RuntimeException("执行命令失败：" + cmd, e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("命令执行被中断：" + cmd, e);
+            throw new RuntimeException(e);
         }
     }
 
-    //Html不需要额外处理，直接拷贝到app自己的目录即可
-    public static void handleHtml(Long appId, Path appPath){}
-
-    //Vue 前端应用，在源目录 npm install、npm run build 生成 dist 目录
-    public static void handleVue(Long appId, Path appPath){
-        AppBuildUtil.runProcess("npm install", appPath);
-        AppBuildUtil.runProcess("npm run build", appPath); //生成 appPath/appId/dist目录
-    }
-
-    //前端同 Vue 前端应用；后端使用 maven 打包，在docker 容器中通过 java -jar 运行 jar 包
-    public static void handleSpring(Long appId, Path appPath){
-        //处理前端部分
-        Path appFrontendPath = appPath.resolve("frontend");
-        AppBuildUtil.runProcess("npm install", appFrontendPath);
-        AppBuildUtil.runProcess("npm run build", appFrontendPath); //生成 appPath/appId/dist目录
-
-        //处理后端部分，在容器中运行 Java 后端
-        Path appBackendPath = appPath.resolve("backend");
-        AppBuildUtil.runProcess("mvn clean package -DskipTests", appBackendPath);
-        Path appTargetPath = appBackendPath.resolve("target");
-        String jarName = appId + ".jar";
-        String cmd = "java -jar " + jarName;
-        AppBuildUtil.runProcess(cmd, appTargetPath);
-    }
-
-    ////////////////////////////////////////
-
-    /**
-     * 使用 appId 生成固定端口，范围：8001-9999
-     * @param appId
-     * @param previewDeployPath user-deploy，那么就直接部署在 8080 端口
-     * @return 分配的端口
-     */
-    private static int generatePort(Long appId, String previewDeployPath) {
-        // 8001 + (appId % 1999) 可以生成 8001-9999 范围内的端口
-        if ("user-deploy".equals(previewDeployPath)) {
-            return 8080; //部署固定使用8080端口
-        }
-        int port = 8001 + (int) (appId % 1999);
-        log.info("为 appId {} 分配端口: {}", appId, port);
-        return port;
-    }
-
-    /**
-     *
-     * @param containerId
-     * @param command
-     * @param actionDesc
-     * @param dockerClient
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    private static void execInContainer(String containerId, String command, String actionDesc, DockerClient dockerClient)
-            throws IOException, InterruptedException {
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-
-        String execId = dockerClient.execCreateCmd(containerId)
-                .withAttachStdout(true)
-                .withAttachStderr(true)
-                .withCmd("bash", "-c", command)
-                .exec()
-                .getId();
-
-        dockerClient.execStartCmd(execId)
-                .exec(new ExecStartResultCallback(stdout, stderr))
-                .awaitCompletion();
-
-        InspectExecResponse inspect = dockerClient.inspectExecCmd(execId).exec();
-        Long exitCode = inspect.getExitCodeLong();
-        if (exitCode == null || exitCode != 0) {
-            String errorOutput = stderr.toString(StandardCharsets.UTF_8);
-            throw new IOException(actionDesc + "失败，退出码=" + exitCode + "，错误输出: " + errorOutput);
-        }
-
-        if (stdout.size() > 0) {
-            log.info("{} 成功，输出: {}", actionDesc, stdout.toString(StandardCharsets.UTF_8).trim());
-        } else {
-            log.info("{} 成功", actionDesc);
-        }
-    }
-
-    /**
-     * 更新 nginx config
-     *
-     * @param containerId
-     * @param appId
-     * @param port
-     * @param dockerClient
-     */
-    private static void updateNginxConfig(String containerId, Long appId, int port, DockerClient dockerClient) {
-        log.info("更新 nginx 配置，appId={}, port={}", appId, port);
-        String scriptPath = "/workspace/scripts/update_nginx_location.sh";
-        String updateCommand = scriptPath + " " + appId + " " + port;
-        String reloadCommand = "nginx -s reload";
-
+    public static void buildSpringBoot(Long appId, Path springRootDir, DockerClient dockerClient, String previewDeployPath, String containerName) {
         try {
-            execInContainer(containerId, updateCommand, "更新 nginx 配置", dockerClient);
-            execInContainer(containerId, reloadCommand, "重载 nginx", dockerClient);
-            log.info("容器 {} 的 nginx 配置已更新并重载，appId={}, port={}", containerId, appId, port);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            log.error("更新 nginx 配置时线程被中断，appId={}, port={}", appId, port, ie);
-            throw new RuntimeException("更新 nginx 配置过程中线程被中断", ie);
-        } catch (Exception e) {
-            log.error("更新 nginx 配置失败，appId={}, port={}, 错误: {}", appId, port, e.getMessage(), e);
-            throw new RuntimeException("更新 nginx 配置失败: " + e.getMessage(), e);
+            runProcess(List.of("mvn", "clean", "package", "-DskipTests"), springRootDir);
+            Path targetDir = springRootDir.resolve("target");
+            Path previewDir = FileUtil.ensureAppDir(appId, previewDeployPath);
+            if (Files.exists(targetDir)) {
+                try (Stream<Path> s = Files.list(targetDir)) {
+                    Path jar = s
+                            .filter(p -> p.getFileName().toString().endsWith(".jar"))
+                            .findFirst()
+                            .orElse(null);
+                    if (jar != null) {
+                        Files.copy(jar, previewDir.resolve(jar.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                        log.info("已将后端 jar 复制到预览目录: {}", previewDir.resolve(jar.getFileName()));
+
+                        // 在容器中执行 jar 包
+                        try {
+                            executeJarInContainer(appId, jar.getFileName().toString(), dockerClient, previewDeployPath, containerName);
+                        } catch (Exception e) {
+                            log.error("在容器中执行 jar 包失败，appId={}, jar={}, 错误: {}", appId, jar.getFileName(), e.getMessage(), e);
+                        }
+                    } else {
+                        log.warn("未在 target 目录找到 jar 文件，appId={}", appId);
+                    }
+                }
+            } else {
+                log.warn("后端构建目录不存在: {}", targetDir);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -235,5 +119,134 @@ public class AppBuildUtil {
                     containerName, appId, jarFileName, e.getMessage(), e);
             throw new RuntimeException("在容器中执行 jar 包失败: " + e.getMessage(), e);
         }
+    }
+
+    private static int generatePort(Long appId, String previewDeployPath) {
+        // 使用 appId 生成固定端口，范围：8001-9999
+        // 8001 + (appId % 1999) 可以生成 8001-9999 范围内的端口
+        if ("user-deploy".equals(previewDeployPath)) {
+            return 8080; //部署固定使用8080端口
+        }
+        int port = 8001 + (int) (appId % 1999);
+        log.info("为 appId {} 分配端口: {}", appId, port);
+        return port;
+    }
+
+    private static void updateNginxConfig(String containerId, Long appId, int port, DockerClient dockerClient) {
+        log.info("更新 nginx 配置，appId={}, port={}", appId, port);
+        String scriptPath = "/workspace/scripts/update_nginx_location.sh";
+        String updateCommand = scriptPath + " " + appId + " " + port;
+        String reloadCommand = "nginx -s reload";
+
+        try {
+            execInContainer(containerId, updateCommand, "更新 nginx 配置", dockerClient);
+            execInContainer(containerId, reloadCommand, "重载 nginx", dockerClient);
+            log.info("容器 {} 的 nginx 配置已更新并重载，appId={}, port={}", containerId, appId, port);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("更新 nginx 配置时线程被中断，appId={}, port={}", appId, port, ie);
+            throw new RuntimeException("更新 nginx 配置过程中线程被中断", ie);
+        } catch (Exception e) {
+            log.error("更新 nginx 配置失败，appId={}, port={}, 错误: {}", appId, port, e.getMessage(), e);
+            throw new RuntimeException("更新 nginx 配置失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 在指定容器中执行命令并校验退出码
+     *
+     * @param containerId 容器 ID
+     * @param command     需要执行的命令
+     * @param actionDesc  日志描述
+     */
+    private static void execInContainer(String containerId, String command, String actionDesc, DockerClient dockerClient)
+            throws IOException, InterruptedException {
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+
+        String execId = dockerClient.execCreateCmd(containerId)
+                .withAttachStdout(true)
+                .withAttachStderr(true)
+                .withCmd("bash", "-c", command)
+                .exec()
+                .getId();
+
+        dockerClient.execStartCmd(execId)
+                .exec(new ExecStartResultCallback(stdout, stderr))
+                .awaitCompletion();
+
+        InspectExecResponse inspect = dockerClient.inspectExecCmd(execId).exec();
+        Long exitCode = inspect.getExitCodeLong();
+        if (exitCode == null || exitCode != 0) {
+            String errorOutput = stderr.toString(StandardCharsets.UTF_8);
+            throw new IOException(actionDesc + "失败，退出码=" + exitCode + "，错误输出: " + errorOutput);
+        }
+
+        if (stdout.size() > 0) {
+            log.info("{} 成功，输出: {}", actionDesc, stdout.toString(StandardCharsets.UTF_8).trim());
+        } else {
+            log.info("{} 成功", actionDesc);
+        }
+    }
+
+    /**
+     * 运行命令
+     */
+    public static void runProcess(List<String> command, Path cwd) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.directory(cwd.toFile());
+        pb.redirectErrorStream(true);
+
+        // 捕获输出以便在错误时提供详细信息
+        StringBuilder outputBuilder = new StringBuilder();
+        try {
+            Process p = pb.start();
+
+            // 读取进程输出
+            try (var reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    outputBuilder.append(line).append("\n");
+                    System.out.println(line); // 保持实时输出
+                }
+            }
+
+            int code = p.waitFor();
+            if (code != 0) {
+                String errorMsg = String.format(
+                        "命令执行失败\n命令: %s\n工作目录: %s\n退出码: %d\n输出:\n%s",
+                        String.join(" ", command),
+                        cwd.toString(),
+                        code,
+                        truncateOutput(outputBuilder.toString(), 2000)
+                );
+                throw new IOException(errorMsg);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            String errorMsg = String.format(
+                    "命令执行被中断\n命令: %s\n工作目录: %s\n已捕获输出:\n%s",
+                    String.join(" ", command),
+                    cwd.toString(),
+                    truncateOutput(outputBuilder.toString(), 1000)
+            );
+            throw new IOException(errorMsg, e);
+        }
+    }
+
+    /**
+     * 截断输出以避免过长的错误消息
+     */
+    private static String truncateOutput(String output, int maxLength) {
+        if (output.length() <= maxLength) {
+            return output;
+        }
+
+        // 保留开头和结尾的部分内容
+        int halfLength = maxLength / 2;
+        return output.substring(0, halfLength) +
+                "\n... (省略 " + (output.length() - maxLength) + " 字符) ...\n" +
+                output.substring(output.length() - halfLength);
     }
 }

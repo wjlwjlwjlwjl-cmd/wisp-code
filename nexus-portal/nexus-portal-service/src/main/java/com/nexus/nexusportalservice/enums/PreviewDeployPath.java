@@ -1,5 +1,8 @@
 package com.nexus.nexusportalservice.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PreviewDeployPath {
     PREVIEW("user-preview", "预览地址"),
     DEPLOY("user-deploy", "部署地址");

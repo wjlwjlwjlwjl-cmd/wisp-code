@@ -1,12 +1,18 @@
 package com.nexus.nexusportalservice.service.impl;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
+import com.github.dockerjava.api.DockerClient;
+import com.nexus.nexusportalservice.enums.PreviewDeployPath;
 import com.nexus.nexusportalservice.utils.AppBuildUtil;
+import com.nexus.nexusportalservice.utils.FileUtil;
 import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,10 +36,16 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     private final LocalFileStorageImpl localFileStorageImpl;
     private final AppMapper appMapper;
 
-    @Value("server.ip")
-    String serverIp;
-    @Value("server.port")
+    @Autowired
+    DockerClient dockerClient;
+
+    @Value("app.host")
+    String serverHost;
+    @Value("app.port")
     String port;
+    @Value("app.preview.container-name")
+    String containerName;
+
 
     public AppGenerateServiceImpl(ChatClient chatClient, GiteeServiceImpl giteeServiceImpl,
             LocalFileStorageImpl localFileStorageImpl, AppMapper appMapper) {
@@ -60,13 +72,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         ModelParsedResult.ParsedResult parsedResult = ModelParsedResult.parse(rawContent);
         Map<String, String> files = parsedResult.getFiles();
         String appType = determineAppType(files);
-        Path appPath = null;
-        try{
-            appPath = GeneratedAppWriter.ensureUsercodeDir();
-        }
-        catch(IOException e){
-            System.out.println(e.getStackTrace());
-        }
         int appNum = -1;
         try{
             appNum = AppType.getTypeNum(appType);
@@ -75,27 +80,20 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
             System.out.println(e.getStackTrace());
         }
 
-        //3. 将生成的代码，放到 preview 目录，在我们打包的docker容器中，就是 /workspace/portal
+        //3. 整体代码，放到 user-code/${appId} 之中，处理后把需要预览
+        //   将生成的预览内容，放到 user-preview 目录，在我们打包的docker容器中，就是 /workspace/portal
         //   同时，我们将这个目录挂载到 docker 主机，userapp-preview 容器，也挂在docker主机相同目录
         //   这样 nginx 容器就可以直接拿到内容进行展示了
         try{
-            GeneratedAppWriter.writeFiles(appId, files);
+            Path appPath = GeneratedAppWriter.writeFiles(appId, files);
+            handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
         }
         catch(Exception e){
             System.out.println(e.getStackTrace());
         }
-        if(appNum == 1){
-            AppBuildUtil.handleHtml(appId, appPath);
-        }
-        else if(appNum == 2){
-            AppBuildUtil.handleVue(appId, appPath);
-        }
-        else if(appNum == 3){
-            AppBuildUtil.handleSpring(appId, appPath);
-        }
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
-        String previewUrl = "https://192.168.160.131:80/preview/" + appId + "/#";
+        String previewUrl = "https://" + serverHost + ":" + port + "/preview/" + appId + "/#";
 
         //4. 更新数据库信息（应用类型、应用预览连接）
         appMapper.update(new LambdaUpdateWrapper<App>()
@@ -202,5 +200,30 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 "```",
                 " - `<relative_path>`: ⽂件的相对路径（如 `index.html`,`frontend/src/App.vue`,`backend/src/main/resources/application.properties`）。",
                 " - `<complete_file_content>`: **完整**的⽂件内容，**绝对禁⽌**省略、使⽤占位符或 `// ...`。");
+    }
+
+    private void handleApp(Long appId, Path appPath, int appNum, String previewDeployPath){
+        if(appNum == 0){
+            Path indexFile = appPath.resolve(String.valueOf(appId));
+            try{
+                Path targetFile = FileUtil.ensureBaseDir("preview");
+                Files.copy(indexFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch(IOException e){
+                System.out.println(e.getStackTrace());
+            }
+        }
+        else if(appNum == 1){
+            AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
+        }
+        else if(appNum == 2){
+            //部署前端
+            Path appFrontendPath = appPath.resolve("frontend");
+            AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
+
+            //部署后端
+            Path springBootDir = appPath.resolve("backend");
+            AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
+        }
     }
 }

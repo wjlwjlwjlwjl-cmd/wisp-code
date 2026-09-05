@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,7 @@ public class GeneratedAppWriter {
     //确保代码目录创建
     public static Path ensureUsercodeDir() throws IOException {
         String userDir = System.getProperty("user.dir");
-        Path base = Path.of(userDir, "preview").toAbsolutePath();
+        Path base = Path.of(userDir, "user-code").toAbsolutePath();
         if (!Files.exists(base)) {
             Files.createDirectories(base);
         }
