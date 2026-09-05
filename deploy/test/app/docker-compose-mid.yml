@@ -1,4 +1,4 @@
-#启动命令 docker compose -p frameworkjava -f docker-compose-mid.yml up -d
+#启动命令 docker compose -p nexus-stack -f docker-compose-mid.yml up -d
 services:
   frameworkjava-mysql:
     container_name: frameworkjava-mysql
