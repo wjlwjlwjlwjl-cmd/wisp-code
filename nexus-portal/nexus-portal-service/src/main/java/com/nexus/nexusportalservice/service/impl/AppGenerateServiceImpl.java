@@ -75,8 +75,15 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
             System.out.println(e.getStackTrace());
         }
 
-        //3. 存储、处理生成的代码，统一存放到 user-code/${appId} 目录
-
+        //3. 将生成的代码，放到 preview 目录，在我们打包的docker容器中，就是 /workspace/portal
+        //   同时，我们将这个目录挂载到 docker 主机，userapp-preview 容器，也挂在docker主机相同目录
+        //   这样 nginx 容器就可以直接拿到内容进行展示了
+        try{
+            GeneratedAppWriter.writeFiles(appId, files);
+        }
+        catch(Exception e){
+            System.out.println(e.getStackTrace());
+        }
         if(appNum == 1){
             AppBuildUtil.handleHtml(appId, appPath);
         }
