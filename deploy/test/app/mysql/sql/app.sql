@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS wispcode;
+CREATE DATABASE IF NOT EXISTS wispcode default character set utf8mb4 collate utf8mb4_general_ci;
 USE wispcode;
 CREATE TABLE `app` (
                        `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '应用主键ID',
@@ -11,5 +11,6 @@ CREATE TABLE `app` (
                        `app_screenshot` varchar(100) DEFAULT NULL COMMENT '应用截图',
                        PRIMARY KEY (`id`),
                        KEY `idx_apps_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8mb4 COMMENT='应用信息表'
+) ENGINE=InnoDB AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8mb4 COMMENT='应用信息表';
 GRANT ALL PRIVILEGES ON wispcode.* TO  'bitedev'@'%';
+FLUSH PRIVILEGES;
