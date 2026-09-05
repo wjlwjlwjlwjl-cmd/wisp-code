@@ -32,10 +32,10 @@ services:
       - frameworkjava_network
     healthcheck:
       test: mysql --user=bitedev -h127.0.0.1 --password='bite@123' -e "SELECT 1;"
-      start_period: 60s
-      interval: 3s
-      timeout: 3s
-      retries: 2
+      start_period: 180s
+      interval: 5s
+      timeout: 5s
+      retries: 12
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: bite@123
