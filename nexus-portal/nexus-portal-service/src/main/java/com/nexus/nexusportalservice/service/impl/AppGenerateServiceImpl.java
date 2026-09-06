@@ -229,6 +229,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
  * HTML
  * appDoc: # 应用需求文档\n\n## 1. 应用名称\n你好页面\n\n## 2. 应用描述\n一个仅显示“你好”文本的极简HTML页面，无任何装饰元素。\n\n## 3. 应用核心功能\n3.1 显示“你好”文本内容。
  *
- *
+ * VUE
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\n最小 Vue 示例\n\n## 2. 应用描述\n一个最最简单、最最小的 Vue 项目，用于演示 Vue 应用的最小可运行结构。\n\n## 3. 应用核心功能\n\n### 3.1 显示静态文本\n在页面中展示一段固定的文本内容。\n\n### 3.2 点击按钮更新文本\n提供一个按钮，点击后更新页面中显示的文本内容。
  *
  */
