@@ -41,7 +41,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
     @Value("${app.host}")
     String serverHost;
-    @Value("#{app.preview.container-name}")
+    @Value("${app.preview.container-name}")
     String containerName;
 
     public AppGenerateServiceImpl(ChatClient chatClient, GiteeServiceImpl giteeServiceImpl,
