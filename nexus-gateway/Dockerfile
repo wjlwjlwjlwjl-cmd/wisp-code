@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-jammy
+FROM jdk21-mvn-npm:latest
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /workspace
