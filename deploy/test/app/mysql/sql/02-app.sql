@@ -14,3 +14,13 @@ CREATE TABLE `app` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8mb4 COMMENT='应用信息表';
 GRANT ALL PRIVILEGES ON wispcode.* TO  'bitedev'@'%';
 FLUSH PRIVILEGES;
+
+DROP TABLE IF EXISTS `chat_history`;
+CREATE TABLE `chat_history` (
+                        `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                        `app_id` bigint UNSIGNED NOT NULL COMMENT '应用主键ID',
+                        `msg_role` INT NOT NULL COMMENT '消息角色：0=用户，1=AI助手',
+                        `content` TEXT NOT NULL COMMENT '消息内容',
+                        PRIMARY KEY (`id`),
+                        KEY `idx_chat_history_app` (`app_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='聊天历史记录';
