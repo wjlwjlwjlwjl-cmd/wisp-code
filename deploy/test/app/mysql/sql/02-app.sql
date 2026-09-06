@@ -12,7 +12,6 @@ CREATE TABLE `app` (
                        PRIMARY KEY (`id`),
                        KEY `idx_apps_user` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10000001 DEFAULT CHARSET=utf8mb4 COMMENT='应用信息表';
-GRANT ALL PRIVILEGES ON wispcode.* TO  'bitedev'@'%';
 FLUSH PRIVILEGES;
 
 DROP TABLE IF EXISTS `chat_history`;
@@ -24,3 +23,4 @@ CREATE TABLE `chat_history` (
                         PRIMARY KEY (`id`),
                         KEY `idx_chat_history_app` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='聊天历史记录';
+GRANT ALL PRIVILEGES ON wispcode.* TO  'bitedev'@'%';
