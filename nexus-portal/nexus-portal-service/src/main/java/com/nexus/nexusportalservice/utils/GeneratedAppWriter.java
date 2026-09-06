@@ -32,12 +32,12 @@ public class GeneratedAppWriter {
     }
 
     /**
-     * 将⽂件写⼊ usercode ⽬录。
+     * 将⽂件写⼊ user-code/${appId} ⽬录。
      * 
      * @param id         应⽤ ID
      * @param files      ⽂件列表
      * @param cleanFirst 是否先清理已存在的⽬录
-     * @return 应⽤⽬录
+     * @return 应⽤⽬录   user-code/${appId}
      */
     public static Path writeFiles(String id, Map<String, String> files, boolean cleanFirst) throws IOException {
         Path base = ensureUsercodeDir();

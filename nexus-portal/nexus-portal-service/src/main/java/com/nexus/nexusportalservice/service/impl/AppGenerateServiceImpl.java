@@ -39,13 +39,10 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     @Autowired
     DockerClient dockerClient;
 
-    @Value("app.host")
+    @Value("${app.host}")
     String serverHost;
-    @Value("app.port")
-    String port;
-    @Value("app.preview.container-name")
+    @Value("#{app.preview.container-name}")
     String containerName;
-
 
     public AppGenerateServiceImpl(ChatClient chatClient, GiteeServiceImpl giteeServiceImpl,
             LocalFileStorageImpl localFileStorageImpl, AppMapper appMapper) {
@@ -93,7 +90,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         }
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
-        String previewUrl = "https://" + serverHost + ":" + port + "/preview/" + appId + "/#";
+        String previewUrl = "http://" + serverHost + ":80" + "/preview/" + appId + "/#";
 
         //4. 更新数据库信息（应用类型、应用预览连接）
         appMapper.update(new LambdaUpdateWrapper<App>()
@@ -204,10 +201,9 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
     private void handleApp(Long appId, Path appPath, int appNum, String previewDeployPath){
         if(appNum == 0){
-            Path indexFile = appPath.resolve(String.valueOf(appId));
             try{
-                Path targetFile = FileUtil.ensureBaseDir("preview");
-                Files.copy(indexFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
+                FileUtil.copyDirectory(appPath, targetFile);
             }
             catch(IOException e){
                 System.out.println(e.getStackTrace());
@@ -227,3 +223,12 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         }
     }
 }
+
+
+/**
+ * HTML
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\n你好页面\n\n## 2. 应用描述\n一个仅显示“你好”文本的极简HTML页面，无任何装饰元素。\n\n## 3. 应用核心功能\n3.1 显示“你好”文本内容。
+ *
+ *
+ *
+ */

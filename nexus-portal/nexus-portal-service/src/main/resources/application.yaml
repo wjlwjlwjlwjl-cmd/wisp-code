@@ -16,13 +16,6 @@ spring:
     vectorstore: # 本地运行先关闭 milvus bean 的创建
       milvus:
         enabled: false
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.160.131:3306/wispcode?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: bitedev
-    password: bite@123
-
 management:
   health:
     redis:
