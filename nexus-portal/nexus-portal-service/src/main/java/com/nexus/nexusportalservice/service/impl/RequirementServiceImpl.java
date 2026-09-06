@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 
 import com.nexus.nexusportalservice.domain.dto.RequirementDTO;
@@ -34,8 +35,14 @@ public class RequirementServiceImpl implements IRequirementService {
     @Override
     public RequirementDTO requirementGenerate(String input) {
         String systemPrompt = composeSystemPrompt();
+        App app = new App();
+        app.setUserId(0L);
+        appMapper.insert(app);
+        String conversationId = String.valueOf(app.getId());
+
         String rawMarkDown = chatClient.prompt()
-            .system(systemPrompt) 
+            .system(systemPrompt)
+            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
             .user(input)
             .call()
             .content();
@@ -44,12 +51,11 @@ public class RequirementServiceImpl implements IRequirementService {
         String appDesc = parseSection(rawMarkDown, 2, "应用描述");
         Long userId = 1L; // todo
 
-        App app = new App();
         app.setUserId(userId);
         app.setAppName(appName);
         app.setAppDoc(rawMarkDown);
         app.setAppDesc(appDesc);
-        appMapper.insert(app);
+        appMapper.updateById(app);
 
         RequirementDTO requirementDTO = new RequirementDTO();
         requirementDTO.setAppId(app.getId());

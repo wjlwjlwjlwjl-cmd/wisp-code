@@ -316,6 +316,16 @@ public class RedisService {
     }
 
     /**
+     * 保留列表前 N 项（多余项裁剪）
+     * @param key 键
+     * @param maxLen 最大保留长度
+     */
+    public void trimList(final String key, final int maxLen) {
+        long end = Math.max(0, maxLen - 1);
+        redisTemplate.opsForList().trim(key, 0, end);
+    }
+
+    /**
      * 获取整个列表，并指定列表元素类型（复杂类型）
      * 
      * @param <T>           列表元素类型

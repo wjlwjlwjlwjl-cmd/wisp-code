@@ -1,7 +1,10 @@
 package com.nexus.nexusportalservice.config;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,6 +13,9 @@ import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 @SuppressWarnings("null")
 @Configuration
 public class ChatClientConfig {
+    @Autowired
+    ChatMemoryConfig chatMemoryConfig;
+
     private final ChatClient.Builder builder;
 
     public ChatClientConfig(ChatClient.Builder builder){
@@ -18,8 +24,9 @@ public class ChatClientConfig {
 
     @Bean("chatClient")
     public ChatClient getChatClient(){
+        PromptChatMemoryAdvisor messageChatMemoryAdvisor = PromptChatMemoryAdvisor.builder(chatMemoryConfig).build();
         return builder
-            .defaultAdvisors(new SimpleLoggerAdvisor())
+            .defaultAdvisors(new SimpleLoggerAdvisor(), messageChatMemoryAdvisor)
             .defaultOptions(DashScopeChatOptions
                 .builder()
                 .topP(0.7)

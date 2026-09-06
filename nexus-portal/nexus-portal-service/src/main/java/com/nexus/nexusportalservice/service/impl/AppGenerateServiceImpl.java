@@ -7,11 +7,13 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import com.github.dockerjava.api.DockerClient;
+import com.nexus.nexusportalservice.config.ChatMemoryConfig;
 import com.nexus.nexusportalservice.enums.PreviewDeployPath;
 import com.nexus.nexusportalservice.utils.AppBuildUtil;
 import com.nexus.nexusportalservice.utils.FileUtil;
 import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,8 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
     @Autowired
     DockerClient dockerClient;
+    @Autowired
+    ChatMemoryConfig chatMemoryConfig;
 
     @Value("${app.host}")
     String serverHost;
@@ -59,8 +63,10 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         log.info(userPrompt);
 
         //1. 获取 LLM 生成的源代码
+        String conversationId = String.valueOf(appId);
         String rawContent = chatClient.prompt()
                 .system(systemPrompt)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .user(userPrompt)
                 .call()
                 .content();
