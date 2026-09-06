@@ -1,0 +1,17 @@
+# 执行：docker build -t jdk21-mvn-npm:latest -f dockerfile.base .
+FROM maven:3.9.9-eclipse-temurin-21
+
+# 安装 Node 20 + npm (debian)
+RUN apt-get update -y \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 验证工具可用
+RUN java -version \
+    && mvn -v \
+    && node -v \
+    && npm -v
+
+WORKDIR /app
