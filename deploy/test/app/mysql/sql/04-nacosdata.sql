@@ -3,6 +3,51 @@
 
 use `frameworkjava_nacos_test`;
 INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,src_user,src_ip,app_name,tenant_id,c_desc,c_use,effect,`type`,c_schema,encrypted_data_key) VALUES
+
+('share-wispcode-test.yaml','DEFAULT_GROUP','app:
+  preview:
+    container-name: wispcode-userapp-preview
+  host: 192.168.160.131
+docker:
+  host: tcp://192.168.160.131:2376
+  cert: /workspace/cert
+chat:
+  memory:
+    maxLen: 5
+    ttl: 24
+
+spring:
+  ai:
+    dashscope:
+      api-key: {fill your api_key here}
+      chat:
+        options:
+          model: deepseek-v4-pro-0813
+          temperature: 0.7
+    # -------- TEI bge‑m3 embedding --------
+    openai:
+      base-url: http://192.168.160.131:8090/v1
+      api-key: dummy-tei
+      chat:
+        enabled: false
+    # -------- Milvus --------
+    vectorstore:
+      milvus:
+        enabled: true
+        client:
+          host: 192.168.160.131
+          port: 19530
+        collection-name: RAG
+        embedding-dimension: 1024
+        initialize-schema: true
+        index-type: HNSW
+        metric-type: COSINE
+
+management:
+  health:
+    redis:
+      enabled: false','42080302708734148213090210300147',now(),now(),'nacos','112.46.64.96','wisp-code configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
+
 ('share-common-test.yaml','DEFAULT_GROUP','feign:
   okhttp:
     enabled: true
@@ -18,13 +63,7 @@ INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,sr
       enabled: true
     response:
       enabled: true
-app:
-  preview:
-    container-name: wispcode-userapp-preview
-  host: 192.168.160.131
-docker:
-  host: tcp://192.168.160.131:2376
-  cert: /workspace/cert','6572759c52633434823509b70b430c4e',now(),now(),'nacos','112.46.64.96','通用公共配置','frameworkjava-test','','','','yaml','',''),
+','6572759c52633434823509b70b430c4e',now(),now(),'nacos','112.46.64.96','common configuration','frameworkjava-test','','','','yaml','',''),
 
 ('share-redis-test.yaml','DEFAULT_GROUP','spring:
   cache:
@@ -38,7 +77,7 @@ docker:
     host: frameworkjava-redis
     port: 6379
     password: bite@123
-','15803074b36c38b09331395091643875',now(),now(),'nacos','172.19.0.1','通用Redis公共配置','frameworkjava-test','','','','yaml','',''),
+','15803074b36c38b09331395091643875',now(),now(),'nacos','172.19.0.1','Common Redis Configuration','frameworkjava-test','','','','yaml','',''),
 
 ('share-mysql-test.yaml','DEFAULT_GROUP','spring:
   datasource:
@@ -60,7 +99,7 @@ mybatis-plus:
     typeAliasesPackage: com.bitejiuyeke.**.domain
     mapperLocations: classpath*:mapper/**.xml
     configuration:
-      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl','2256b897837515b4253601b87468809e',now(),now(),'nacos','172.18.0.1','通用mysql公共配置','frameworkjava-test','','','','yaml','',''),
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl','2256b897837515b4253601b87468809e',now(),now(),'nacos','172.18.0.1','Common MySQL Configuration','frameworkjava-test','','','','yaml','',''),
 
 ('bite-gateway-test.yaml','DEFAULT_GROUP','spring:
   cloud:
@@ -70,28 +109,24 @@ mybatis-plus:
           lowerCaseServiceId: true
           enabled: true
       routes:
-        # 用户端服务
         - id: bite-mstemplate
           uri: lb://mstemplate
           predicates:
             - Path=/mstemplate/**
           filters:
             - StripPrefix=1
-        # 门户服务
         - id: bite-portal
           uri: lb://bite-portal
           predicates:
             - Path=/portal/**
           filters:
             - StripPrefix=1
-        # 鉴权模块
         - id: bite-admin
           uri: lb://bite-admin
           predicates:
             - Path=/admin/**
           filters:
             - StripPrefix=1
-        # 文件
         - id: bite-file
           uri: lb://bite-file
           predicates:
@@ -102,9 +137,7 @@ mybatis-plus:
             response-timeout: 300000
             connect-timeout: 300000
 
-# 安全配置
 security:
-  # 不校验白名单
   ignore:
     whites:
       - /admin/logout
@@ -113,7 +146,7 @@ security:
       - /**/login/**
       - /**/send_code/**
       - /**/nologin/**
-      - /**/test/**','a0519254280c43363872c546441b4655',now(),now(),'nacos','112.46.64.96','网关','frameworkjava-test','','','','yaml','',''),
+      - /**/test/**','a0519254280c43363872c546441b4655',now(),now(),'nacos','112.46.64.96','Gateway','frameworkjava-test','','','','yaml','',''),
 
 ('share-rabbitmq-test.yaml','DEFAULT_GROUP','spring:
   rabbitmq:
@@ -121,7 +154,7 @@ security:
     host: 192.168.160.131
     virtual-host: /
     username: admin
-    password: bite@123','3b76b88c362b16b73256b7715248c78c',now(),now(),'nacos','112.46.64.96','通用rabbitmq公共配置','frameworkjava-test','','','','yaml','','');
+    password: bite@123','3b76b88c362b16b73256b7715248c78c',now(),now(),'nacos','112.46.64.96','Common RabbitMQ Configuration','frameworkjava-test','','','','yaml','','');
 
 
 INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,src_user,src_ip,app_name,tenant_id,c_desc,c_use,effect,`type`,c_schema,encrypted_data_key) VALUES
@@ -129,8 +162,8 @@ INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,sr
   build:
     initial-capacity: 128
     maximum-size: 1024
-    expire: 60','6304904002990117226212343872707c',now(),now(),'nacos','112.46.64.96','本地缓存公共配置','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
+    expire: 60','6304904002990117226212343872707c',now(),now(),'nacos','112.46.64.96','Local Cache Configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
 
 
 INSERT INTO tenant_info (kp,tenant_id,tenant_name,tenant_desc,create_source,gmt_create,gmt_modified) VALUES
-    ('1','frameworkjava-test','frameworkjava-test','测试环境','nacos',unix_timestamp()*1000,unix_timestamp()*1000);
+    ('1','frameworkjava-test','frameworkjava-test','Test Environment','nacos',unix_timestamp()*1000,unix_timestamp()*1000);

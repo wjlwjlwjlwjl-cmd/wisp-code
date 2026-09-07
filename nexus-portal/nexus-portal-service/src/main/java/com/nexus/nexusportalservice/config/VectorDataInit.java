@@ -15,15 +15,10 @@ public class VectorDataInit implements ApplicationRunner {
     @Autowired
     private MilvusVectorStore vectorStore;
 
-    /**
-     * 在这里存放你需要让 LLM 获得的 RAG 内容
-     *
-     * @param args incoming application arguments
-     * @throws Exception
-     */
     @Override
     public void run(ApplicationArguments args) throws Exception {
         List<Document> documents = List.of(
+                new Document("null")
         );
         vectorStore.add(documents);
         log.info("vectorStore initialized，一共加载 {} 条平台知识库文档", documents.size());
