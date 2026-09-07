@@ -27,7 +27,7 @@ public class DockerClientConfig {
     @Bean
     public DockerClient dockerClient() throws ServiceException, IOException {
         log.info("Docker host: {}", dockerHost);
-        System.out.printf("Docker cert-path: {%s}\n\n\n\n\n\n", dockerCertPath);
+        System.out.printf("Docker cert-path: {%s}", dockerCertPath);
         String path = System.getProperty("user.dir");
         System.out.println(path);
 

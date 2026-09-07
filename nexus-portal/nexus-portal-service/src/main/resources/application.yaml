@@ -8,14 +8,29 @@ spring:
   ai:
     dashscope:
       api-key: ${DASHSCOPE_API_KEY}
-      #base-url: https://ws-jif4zqqb15c1hesv.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions
       chat:
         options:
           model: deepseek-v4-pro-0813
           temperature: 0.7
-    vectorstore: # 本地运行先关闭 milvus bean 的创建
+    # -------- TEI bge‑m3 embedding（OpenAI兼容端点） --------
+    openai:
+      base-url: http://192.168.160.131:8090/v1
+      api-key: dummy-tei
+      chat:
+        enabled: false # TEI没有chat接口，关闭chat自动配置，只使用embedding
+    # -------- Milvus向量存储，启用 --------
+    vectorstore:
       milvus:
-        enabled: false
+        enabled: true
+        client:
+          host: 192.168.160.131
+          port: 19530
+        collection-name: RAG
+        embedding-dimension: 1024
+        initialize-schema: true
+        index-type: HNSW
+        metric-type: COSINE
+
 management:
   health:
     redis:

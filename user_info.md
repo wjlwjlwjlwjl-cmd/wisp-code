@@ -19,3 +19,9 @@
 ### 用户与密码
 
 * admin, bite@123
+
+## 5. Milvus
+
+### 用户与密码
+
+* root, minioadmin
