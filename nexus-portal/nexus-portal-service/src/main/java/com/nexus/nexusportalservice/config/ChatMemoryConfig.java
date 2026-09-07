@@ -23,10 +23,10 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class ChatMemoryConfig implements ChatMemory {
-    @Value("${chat.memory.maxLen}")
+    @Value("${chat.memory.maxLen: 5}")
     int maxLen;
 
-    @Value("${chat.memory.ttl}")
+    @Value("${chat.memory.ttl: 24}")
     int ttl;
 
     @Autowired
