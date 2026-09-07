@@ -209,6 +209,24 @@ services:
     depends_on:
       - "etcd"
       - "minio"
+        
+  bge-m3-embedding:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.6
+    ports:
+      - "8090:80"
+    volumes:
+      - ./hf_model_cache:/data
+    environment:
+      - HF_HUB_ENABLE_HF_TRANSFER=1
+    command: >
+      --model-id BAAI/bge-m3
+      --dtype float32
+      --pooling mean
+      --max-batch-tokens 4096
+      --max-batch-requests 4
+      --max-client-batch-size 4
+      --max-concurrent-requests 2
+      --auto-truncate
 
 networks:
   frameworkjava_network:
