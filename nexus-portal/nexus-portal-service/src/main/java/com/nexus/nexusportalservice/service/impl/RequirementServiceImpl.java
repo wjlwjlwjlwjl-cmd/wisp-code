@@ -71,7 +71,7 @@ public class RequirementServiceImpl implements IRequirementService {
      */
     private String composeSystemPrompt() {
         return String.join("\n",
-                "你是资深产品经理。根据⽤⼾提供的需求,⽣成正式且简洁的应⽤需求⽂档.请使⽤Markdown 严格排版。但是如果用户的问题并非直接的产品需求，直接进行回复。采⽤如下结构与编号：",
+                "你是资深产品经理。根据⽤⼾提供的需求,⽣成正式且简洁的应⽤需求⽂档.请使⽤Markdown 严格排版。采⽤如下结构与编号：",
                 "# 应⽤需求⽂档",
                 "## 1. 应⽤名称",
                 "## 2. 应⽤描述",
