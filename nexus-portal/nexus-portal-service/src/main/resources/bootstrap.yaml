@@ -1,10 +1,8 @@
 spring:
-  appliation:
+  application:
     name: wisp-code
   profiles:
     active: ${RUN_ENV}
-  application:
-    name: wisp-code
   main:
     web-application-type: reactive
   cloud:
