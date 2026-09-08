@@ -4,22 +4,20 @@
 use `frameworkjava_nacos_test`;
 INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,src_user,src_ip,app_name,tenant_id,c_desc,c_use,effect,`type`,c_schema,encrypted_data_key) VALUES
 
-('share-wispcode-test.yaml','DEFAULT_GROUP','app:
-  preview:
-    container-name: wispcode-userapp-preview
-  host: 192.168.160.131
-docker:
-  host: tcp://192.168.160.131:2376
-  cert: /workspace/cert
-chat:
-  memory:
-    maxLen: 5
-    ttl: 24
-
-spring:
+('share-wispcode-test.yaml','DEFAULT_GROUP','spring:
   ai:
+    mcp:
+      client:
+        type: async
+        request-timeout: 60s
+        toolcallback:
+          enabled: true
+        sse:
+          connections:
+            mcp-server1:
+              url: http://192.168.160.131:19090
     dashscope:
-      api-key: {fill your api_key here}
+      api-key: {fill your api-key here}
       chat:
         options:
           model: deepseek-v4-pro-0813
@@ -46,7 +44,25 @@ spring:
 management:
   health:
     redis:
-      enabled: false','42080302708734148213090210300147',now(),now(),'nacos','112.46.64.96','wisp-code configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
+      enabled: false
+
+app:
+  preview:
+    container-name: wispcode-userapp-preview
+  host: 192.168.160.131
+docker:
+  host: tcp://192.168.160.131:2376
+  cert: /workspace/cert
+chat:
+  memory:
+    maxLen: 5
+    ttl: 24
+
+gitee:
+  user-code:
+    repo: wispcode-gitee-repo
+    branch: master
+    owner: wangs-joyful-home','c1e87a90d5a041439d98ac0ccbc4d1cd',now(),now(),'nacos','112.46.64.96','wisp-code configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,'');
 
 ('share-common-test.yaml','DEFAULT_GROUP','feign:
   okhttp:
@@ -64,6 +80,19 @@ management:
     response:
       enabled: true
 ','6572759c52633434823509b70b430c4e',now(),now(),'nacos','112.46.64.96','common configuration','frameworkjava-test','','','','yaml','',''),
+
+('share-gitee-mcp-server-test.yaml','DEFAULT_GROUP','server:
+  port: 19090
+spring:
+  ai:
+    mcp:
+      server:
+        name: wispcode-gitee-mcp-server
+        version: 1.0.0
+        type: async
+gitee:
+  api-base-url: https://gitee.com/api/v5/
+  access-token: {fill your Gitee access-token here}','6572759c52633434823509b70b430c4e',now(),now(),'nacos','112.46.64.96','common configuration','frameworkjava-test','','','','yaml','',''),
 
 ('share-redis-test.yaml','DEFAULT_GROUP','spring:
   cache:
