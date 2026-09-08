@@ -8,4 +8,4 @@ LABEL maintainer="wangjiale"
 
 COPY target/*.jar /workspace/app.jar
 
-ENTRYPOINT ["exec", "java", "$JAVA_OPTS", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

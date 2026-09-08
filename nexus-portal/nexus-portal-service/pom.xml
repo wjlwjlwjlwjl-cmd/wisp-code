@@ -229,7 +229,7 @@
                                 </ports>
                                 <volumes>
                                     <bind>
-                                        <!--<volume>/home/diinki/flashcode/test/data/flashcodedata/userapp/user-code:/workspace/user-code</volume>-->
+                                        <volume>/home/diinki/wisp-code/deploy/test/data/wispcodedata/userapp/user-code:/workspace/user-code</volume>-->
                                         <volume>/home/diinki/wisp-code/deploy/test/data/wispcodedata/userapp/preview:/workspace/user-preview</volume>
                                         <!--<volume>/home/diinki/flashcode/dev/data/flashcodedata/userapp/user-deploy:/workspace/user-deploy</volume>-->
                                         <volume>/home/diinki/wisp-code/deploy/test/app/config/cert:/workspace/cert</volume>
@@ -241,7 +241,6 @@
                                 <env>
                                     <NACOS_ADDR>${nacos.addr}</NACOS_ADDR>
                                     <RUN_ENV>${runenv}</RUN_ENV>
-                                    <DASHSCOPE_API_KEY></DASHSCOPE_API_KEY>
                                     <JAVA_OPTS>${java.opts.default}</JAVA_OPTS>
                                 </env>
                                 <network>
