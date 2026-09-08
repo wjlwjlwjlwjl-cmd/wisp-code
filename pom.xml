@@ -17,9 +17,9 @@
     <modules>
         <module>nexus-gateway</module>
         <module>nexus-mstemplate</module>
+        <module>wispcode-gitee-mcp-server</module>
         <module>nexus-portal</module>
         <module>nexus-common</module>
-        <module>wispcode-gitee-mcp-server</module>
     </modules>
 
     <properties>

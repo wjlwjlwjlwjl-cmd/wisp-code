@@ -35,7 +35,7 @@ public class GeneratedAppWriter {
      * 将⽂件写⼊ user-code/${appId} ⽬录。
      * 
      * @param id         应⽤ ID
-     * @param files      ⽂件列表
+     * @param files      ⽂件列表（文件名，文件内容）
      * @param cleanFirst 是否先清理已存在的⽬录
      * @return 应⽤⽬录   user-code/${appId}
      */

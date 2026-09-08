@@ -57,7 +57,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     }
 
     @Override
-    public AppGenerateRetDTO appGenerate(Long appId, String appDoc) {
+    public AppGenerateRetDTO appGenerate(Long appId, String appDoc) throws Exception{
         String systemPrompt = getSystemPrompt(String.valueOf(appId));
         String userPrompt = getUserPrompt(appDoc);
         log.info(userPrompt);
@@ -65,35 +65,24 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         //1. 获取 LLM 生成的源代码
         String conversationId = String.valueOf(appId);
         String rawContent = chatClient.prompt()
-                .system(systemPrompt)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
-                .user(userPrompt)
-                .call()
-                .content();
+            .system(systemPrompt)
+            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+            .user(userPrompt)
+            .call()
+            .content();
 
         //2. 根据源代码获取应用类型
         ModelParsedResult.ParsedResult parsedResult = ModelParsedResult.parse(rawContent);
         Map<String, String> files = parsedResult.getFiles();
         String appType = determineAppType(files);
-        int appNum = -1;
-        try{
-            appNum = AppType.getTypeNum(appType);
-        }
-        catch(ServiceException e){
-            System.out.println(e.getStackTrace());
-        }
+        int appNum = AppType.getTypeNum(appType);
 
         //3. 整体代码，放到 user-code/${appId} 之中，处理后把需要预览
         //   将生成的预览内容，放到 user-preview 目录，在我们打包的docker容器中，就是 /workspace/portal
         //   同时，我们将这个目录挂载到 docker 主机，userapp-preview 容器，也挂在docker主机相同目录
         //   这样 nginx 容器就可以直接拿到内容进行展示了
-        try{
-            Path appPath = GeneratedAppWriter.writeFiles(appId, files);
-            handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
-        }
-        catch(Exception e){
-            System.out.println(e.getStackTrace());
-        }
+        Path appPath = GeneratedAppWriter.writeFiles(appId, files);
+        handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
         String previewUrl = "http://" + serverHost + ":80" + "/preview/" + appId + "/#";
@@ -106,8 +95,8 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 .eq(App::getId, appId)
                 .set(App::getPreviewUrl, previewUrl));
 
-        //5. Gitee MCP todo
-        giteeServiceImpl.commit(appId, parsedResult.getFiles());
+        //5. Gitee MCP，上传代码到 wispcode-gitee-repo 仓库
+        giteeServiceImpl.commit(appId, appPath, appType, files);
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();
         appGenerateRetDTO.setAppId(appId);

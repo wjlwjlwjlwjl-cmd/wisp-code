@@ -127,7 +127,7 @@ public class GiteeService {
                 return;
             }
             String str = response.body().string();
-            System.out.println(str);
+            log.info("deleteFileRecursive: {}", str);
             JsonNode node = objectMapper.readTree(str);
             if(!node.isArray()){
                 log.warn("delete not an dir");
@@ -142,13 +142,13 @@ public class GiteeService {
                 if("file".equalsIgnoreCase(type)){
                     //文件，删除
                     String filePath = dirPath + "/" + name;
-                    System.out.println("deleting file: " + filePath);
+                    log.info("deleting file: {}", filePath);
                     String resp = deleteFile(owner, repo, branch, filePath, message, sha);
                     resps.add(resp);
                 }
                 else if("dir".equalsIgnoreCase(type)){
                     String newDir = dirPath + '/' + name;
-                    System.out.println("diving into dir: " + dirPath);
+                    log.info("diving into dir: {}", dirPath);
                     deleteFileRecursive(owner, repo, branch, newDir, message, resps);
                 }
             }
@@ -160,7 +160,7 @@ public class GiteeService {
 
     private String deleteFile(String owner, String repo, String branch, String dirPath, String message, String sha) throws Exception{
         String url = giteeConfig.getApiBaseUrl() + "repos/" + owner + "/" + repo + "/contents/" + dirPath + "?access_token=" + giteeConfig.getAccessToken() + "&message=" + message + "&sha=" + sha;
-        System.out.println("url: " + url);
+        log.info("url: {}", url);
         Request request = new Request.Builder()
                 .url(url)
                 .delete()
@@ -183,7 +183,7 @@ public class GiteeService {
                 .put("message", message)
                 .put("access_token", giteeConfig.getAccessToken())
                 .toString();
-        System.out.println("requesting:\n" + url + "\n");
+        log.info("requesting:\n{}\n", url);
         Request request = new Request.Builder()
                 .url(url)
                 .post(RequestBody.create(bodyJson, MediaType.parse("application/json")))

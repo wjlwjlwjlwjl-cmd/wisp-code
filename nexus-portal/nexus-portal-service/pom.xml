@@ -236,7 +236,7 @@
                                     </bind>
                                 </volumes>
                                 <!--<dependsOn>
-                                    <container>flashcode-bite-gitee-mcp-server-1</container>
+                                    <container>nexus-stack-wispcode-gitee-mcp-server-1</container>
                                 </dependsOn>-->
                                 <env>
                                     <NACOS_ADDR>${nacos.addr}</NACOS_ADDR>

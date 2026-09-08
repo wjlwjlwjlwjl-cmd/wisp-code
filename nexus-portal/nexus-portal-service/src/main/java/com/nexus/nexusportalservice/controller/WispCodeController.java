@@ -34,7 +34,7 @@ public class WispCodeController {
     }
 
     @PostMapping("/app/generate")
-    public R<AppGenerateRetVO> generateApp(@RequestBody AppGenerateReqDTO appGenerateReqDTO){
+    public R<AppGenerateRetVO> generateApp(@RequestBody AppGenerateReqDTO appGenerateReqDTO) throws Exception{
         Long appId = appGenerateReqDTO.getAppId();
         String appDoc = appGenerateReqDTO.getAppDoc();
         return R.ok(appGenerateServiceImpl.appGenerate(appId, appDoc).convertToVO());
