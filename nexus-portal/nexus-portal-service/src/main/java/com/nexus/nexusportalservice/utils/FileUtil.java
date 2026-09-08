@@ -71,6 +71,7 @@ public final class FileUtil {
         }
     }
 
+    //将文件传入 ./tmp 目录下
     public static String saveFile(MultipartFile file, String fileName) throws ServiceException {
         if (file == null || file.isEmpty()) {
             throw new ServiceException("文件为空");

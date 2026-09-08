@@ -8,4 +8,5 @@ import lombok.Setter;
 public class AppGenerateReqDTO {
     private Long appId;
     private String appDoc;
+    private String sketch;
 }

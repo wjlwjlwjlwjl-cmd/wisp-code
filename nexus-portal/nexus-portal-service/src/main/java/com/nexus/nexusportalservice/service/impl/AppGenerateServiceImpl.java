@@ -100,7 +100,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();
         appGenerateRetDTO.setAppId(appId);
-        appGenerateRetDTO.setAppTypeNum(appNum);
+        appGenerateRetDTO.setAppType(appType);
         appGenerateRetDTO.setPreviewUrl(previewUrl);
 
         return appGenerateRetDTO;
