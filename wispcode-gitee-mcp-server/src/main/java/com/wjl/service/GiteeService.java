@@ -60,7 +60,7 @@ public class GiteeService {
 
     //将下载下来的文件存放在 /workspace 的 wispcode-data/${appId} 下
     @Tool(description = "从 wispcode-gitee-repo 更新、拉取远端文件到本地")
-    public String pullCodeFromRemote(
+    public String pullUserAppCode(
             @ToolParam(description = "仓库拥有者") String owner,
             @ToolParam(description = "仓库名称") String repo,
             @ToolParam(description = "仓库分支") String branch,
@@ -87,7 +87,7 @@ public class GiteeService {
     }
 
     @Tool(description = "递归删除 wispcode-gitee-repo 中的某个目录")
-    public String deleteRecursive(
+    public String deleteDirectory(
             @ToolParam(description = "仓库拥有者") String owner,
             @ToolParam(description = "仓库名称") String repo,
             @ToolParam(description = "仓库分支") String branch,

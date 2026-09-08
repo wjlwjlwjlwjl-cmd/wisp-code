@@ -28,13 +28,13 @@ class GiteeServiceTest {
 
     @Test
     void pullCodeFromRemote() throws Exception{
-        String resp = giteeService.pullCodeFromRemote("wangs-joyful-home", "wispcode-gitee-repo", "master", "10000002", "../wispcode-gitee");
+        String resp = giteeService.pullUserAppCode("wangs-joyful-home", "wispcode-gitee-repo", "master", "10000002", "../wispcode-gitee");
         System.out.println(resp);
     }
 
     @Test
     void deleteRecursive() throws Exception{
-        String resp = giteeService.deleteRecursive("wangs-joyful-home", "wispcode-gitee-repo", "master", "10000002", "delete test");
+        String resp = giteeService.deleteDirectory("wangs-joyful-home", "wispcode-gitee-repo", "master", "10000002", "delete test");
         System.out.println(resp);
     }
 }

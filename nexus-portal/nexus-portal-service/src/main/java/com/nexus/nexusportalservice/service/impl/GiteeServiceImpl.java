@@ -82,13 +82,71 @@ public class GiteeServiceImpl implements IGiteeService{
         log.info("comming result: {}", resp);
     }
 
+    //从 wispcode-gitee-repo/${appId} 拉取代码
     @Override
     public void pullUserAppCode(Long appId, Path userCodeBaseDir) {
-
+        try {
+            String systemPrompt = "你是一个代码同步助手，负责调用 pullUserAppCode 工具从 Gitee 仓库同步代码到本地。并且请务必调用此工具";
+            String userPrompt = String.format(
+                    "请调用 pullUserAppCode 工具，将 wispcode-gitee-repo 仓库中 appId=%s 的代码同步到目录 \"%s\"。\n" +
+                            "工具参数如下：\n" +
+                            "- owner: \"%s\"\n" +
+                            "- repo: \"%s\"\n" +
+                            "- branch: \"%s\"\n" +
+                            "- appId: \"%s\"\n" +
+                            "- targetDir: \"%s\"\n" +
+                            "特别注意：请直接调用该工具并返回工具输出，不要添加其他说明。",
+                    appId, userCodeBaseDir, userAppCodeOwner, userAppCodeRepo, userAppCodeBranch, appId, userCodeBaseDir
+            );
+            String result = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(userPrompt)
+                    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, String.valueOf(appId)))
+                    .call()
+                    .content();
+            log.debug("MCP pullUserAppCode 调用结果: {}", result);
+        } catch (Exception e) {
+            log.error("调用 MCP pullUserAppCode 失败: {}", e.getMessage(), e);
+            throw new RuntimeException("调用 MCP pullUserAppCode 失败: " + e.getMessage(), e);
+        }
     }
 
+    //删除 wispcode-gitee-repo/${appId} 下的代码
     @Override
     public void delete(Long appId) {
+        try {
+            String systemPrompt = "你是一个代码删除助手，负责调用 deleteDirectory 工具删除 Gitee 仓库中的指定目录。请严格按照用户提供的参数调用工具，不要添加任何解释。";
 
+            String userPrompt = String.format(
+                    "请调用 deleteDirectory 工具，将 wispcode-gitee-repo 仓库中 appId=%s 对应目录删除。\n" +
+                            "工具参数如下：\n" +
+                            "- owner: \"%s\"\n" +
+                            "- repo: \"%s\"\n" +
+                            "- branch: \"%s\"\n" +
+                            "- dirPath: \"%s\"\n" +
+                            "- message: \"%s\"\n" +
+                            "特别注意：请直接调用该工具并返回工具输出，不要添加其他说明。",
+                    appId,
+                    userAppCodeOwner,
+                    userAppCodeRepo,
+                    userAppCodeBranch,
+                    appId, // 目录就是 appId
+                    "删除应用代码 appId=" + appId
+            );
+
+            String result = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(userPrompt)
+                    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, String.valueOf(appId)))
+                    .call()
+                    .content();
+
+            log.debug("MCP deleteDirectory 调用结果: {}", result);
+
+        } catch (Exception e) {
+            log.error("调用 MCP deleteDirectory 失败: {}", e.getMessage(), e);
+            throw new RuntimeException("调用 MCP deleteDirectory 失败: " + e.getMessage(), e);
+        }
     }
+
 }
