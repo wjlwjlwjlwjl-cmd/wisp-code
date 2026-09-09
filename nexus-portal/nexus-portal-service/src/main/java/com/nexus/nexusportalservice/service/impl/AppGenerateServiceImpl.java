@@ -1,9 +1,7 @@
 package com.nexus.nexusportalservice.service.impl;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import com.github.dockerjava.api.DockerClient;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.nexus.nexuscommondomain.exception.ServiceException;
 import com.nexus.nexusportalservice.domain.AppType;
 import com.nexus.nexusportalservice.domain.ModelParsedResult;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateRetDTO;
@@ -28,6 +25,17 @@ import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.service.IAppGenerateService;
 
 import lombok.extern.slf4j.Slf4j;
+
+/**
+ * HTML
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\n你好页面\n\n## 2. 应用描述\n一个仅显示“你好”文本的极简HTML页面，无任何装饰元素。\n\n## 3. 应用核心功能\n3.1 显示“你好”文本内容。
+ *
+ * VUE
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\n最小 Vue 示例\n\n## 2. 应用描述\n一个最最简单、最最小的 Vue 项目，用于演示 Vue 应用的最小可运行结构。\n\n## 3. 应用核心功能\n\n### 3.1 显示静态文本\n在页面中展示一段固定的文本内容。\n\n### 3.2 点击按钮更新文本\n提供一个按钮，点击后更新页面中显示的文本内容。
+ *
+ * SPRING_VUE
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\nspring_vue 极简示例项目\n\n## 2. 应用描述\n一个最最简单、最最小的前后端分离示例项目。后端使用 Spring 提供接口，前端使用 Vue 展示数据，用于演示前后端基本通信流程。\n\n## 3. 应用核心功能\n\n### 3.1 后端接口\n- 提供一个 GET 接口，返回一条固定的文本消息。\n\n### 3.2 前端展示\n- 页面加载时调用后端接口，并将返回的消息显示在页面上。
+ */
 
 @Slf4j
 @Service
@@ -43,7 +51,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     @Autowired
     ChatMemoryConfig chatMemoryConfig;
 
-    @Value("${app.host}")
+    @Value("${app.preview.host}")
     String serverHost;
     @Value("${app.preview.container-name}")
     String containerName;
@@ -219,16 +227,3 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     }
 }
 
-
-/**
- * HTML
- * appDoc: # 应用需求文档\n\n## 1. 应用名称\n你好页面\n\n## 2. 应用描述\n一个仅显示“你好”文本的极简HTML页面，无任何装饰元素。\n\n## 3. 应用核心功能\n3.1 显示“你好”文本内容。
- *
- * VUE
- * appDoc: # 应用需求文档\n\n## 1. 应用名称\n最小 Vue 示例\n\n## 2. 应用描述\n一个最最简单、最最小的 Vue 项目，用于演示 Vue 应用的最小可运行结构。\n\n## 3. 应用核心功能\n\n### 3.1 显示静态文本\n在页面中展示一段固定的文本内容。\n\n### 3.2 点击按钮更新文本\n提供一个按钮，点击后更新页面中显示的文本内容。
- *
- * SPRING_VUE
- * appDoc: # 应用需求文档\n\n## 1. 应用名称\nspring_vue 极简示例项目\n\n## 2. 应用描述\n一个最最简单、最最小的前后端分离示例项目。后端使用 Spring 提供接口，前端使用 Vue 展示数据，用于演示前后端基本通信流程。\n\n## 3. 应用核心功能\n\n### 3.1 后端接口\n- 提供一个 GET 接口，返回一条固定的文本消息。\n\n### 3.2 前端展示\n- 页面加载时调用后端接口，并将返回的消息显示在页面上。
- */
-
-//云计算与虚拟化技术

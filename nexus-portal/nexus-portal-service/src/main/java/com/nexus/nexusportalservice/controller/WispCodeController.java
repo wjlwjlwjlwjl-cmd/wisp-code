@@ -40,8 +40,7 @@ public class WispCodeController {
 
     @PostMapping("/app/generate")
     public R<AppGenerateRetVO> generateApp(@RequestParam(value="appId") Long appId,
-                                           @RequestParam(value="appDoc") String appDoc,
-                                           @RequestPart(value="sketch") MultipartFile sketch) throws Exception{
+                                           @RequestParam(value="appDoc") String appDoc){
         //return R.ok(appGenerateServiceImpl.appGenerate(appId, appDoc).convertToVO());
         return R.ok();
     }

@@ -37,14 +37,21 @@ public class ChatClientConfig {
 
     @Bean("chatClient")
     public ChatClient getChatClient(){
+        //Memory
         PromptChatMemoryAdvisor messageChatMemoryAdvisor = PromptChatMemoryAdvisor.builder(chatMemoryConfig).build();
+
+        //RAG
         QuestionAnswerAdvisor questionAnswerAdvisor = QuestionAnswerAdvisor
                 .builder(vectorStore)
                 .searchRequest(SearchRequest.builder().build())
                 .build();
-        builder.defaultAdvisors(new SimpleLoggerAdvisor(), messageChatMemoryAdvisor, questionAnswerAdvisor)
+
+        builder.defaultAdvisors(
+                new SimpleLoggerAdvisor(), messageChatMemoryAdvisor, questionAnswerAdvisor
+                )
                 .defaultOptions(DashScopeChatOptions.builder().topP(0.7).build()); //topP是将所有可能token从高到底排序后，可能性从高到低加到topP后只在这些范围里随机选，相比 temperature 直接过滤掉冷门词
 
+        //Tool Adding
         for(ToolCallbackProvider toolCallbackProvider: toolCallbackProviders){
             builder.defaultToolCallbacks(toolCallbackProvider);
         }
