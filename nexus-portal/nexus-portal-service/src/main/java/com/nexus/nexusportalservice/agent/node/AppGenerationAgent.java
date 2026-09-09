@@ -21,12 +21,10 @@ import java.util.Map;
 
 @Slf4j
 public class AppGenerationAgent implements NodeAction {
-    private MilvusVectorStore vectorStore;
     private AppMapper appMapper;
     private ChatClient chatClient;
 
-    public AppGenerationAgent(MilvusVectorStore vectorStore, AppMapper appMapper, ChatClient chatClient){
-        this.vectorStore = vectorStore;
+    public AppGenerationAgent(AppMapper appMapper, ChatClient chatClient){
         this.appMapper = appMapper;
         this.chatClient = chatClient;
     }

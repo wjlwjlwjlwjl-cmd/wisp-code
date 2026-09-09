@@ -40,9 +40,8 @@ public class WispCodeController {
 
     @PostMapping("/app/generate")
     public R<AppGenerateRetVO> generateApp(@RequestParam(value="appId") Long appId,
-                                           @RequestParam(value="appDoc") String appDoc){
-        //return R.ok(appGenerateServiceImpl.appGenerate(appId, appDoc).convertToVO());
-        return R.ok();
+                                           @RequestParam(value="appDoc") String appDoc) throws Exception {
+        return R.ok(appGenerateServiceImpl.appGenerate(appId, appDoc).convertToVO());
     }
 
     private AppGenerateRetVO convert2VO(Long appId, OverAllState result) throws ServiceException {

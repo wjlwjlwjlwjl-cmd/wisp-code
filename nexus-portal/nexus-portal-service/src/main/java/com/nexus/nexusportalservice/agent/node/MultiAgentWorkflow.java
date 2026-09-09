@@ -1,39 +1,45 @@
 package com.nexus.nexusportalservice.agent.node;
 
-import com.alibaba.cloud.ai.graph.KeyStrategy;
+import com.alibaba.cloud.ai.graph.*;
+import com.alibaba.cloud.ai.graph.action.AsyncNodeAction;
+import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
 import com.alibaba.cloud.ai.graph.state.strategy.ReplaceStrategy;
 import com.github.dockerjava.api.DockerClient;
+import com.nexus.nexuscommondomain.exception.ServiceException;
 import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.service.IGiteeService;
+import com.nexus.nexusportalservice.service.impl.GiteeServiceImpl;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.vectorstore.VectorStore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class MultiAgentWorkflow {
+    private StateGraph stateGraph;
     private AppMapper appMapper;
     private ChatClient chatClient;
     private VectorStore vectorStore;
     private DockerClient dockerClient;
     private String containerName;
     private String previewHost;
-    private IGiteeService giteeService;
+    private GiteeServiceImpl giteeService;
 
     //节点名称
     private static final String NODE_APP_GENERATION = "appGeneration"; //负责应用生成
     private static final String NODE_BUILD_PREVIEW = "buildPreview";   // 负责构建预览
-    private static final String NODE_ERROR_FIX = "errorFix";           //负责构建出错修复
-    private static final String NODE_APP_SCREENSHOT = "appScreenshot"; //负责制作镜像截图
-    private static final String NODE_CODE_COMMIT = "codeCommit";       //负责代码提交 gitee
+    private static final String NODE_ERROR_FIXING = "errorFixing";           //负责构建出错修复
+    private static final String NODE_GITEE_COMMIT = "giteeCommit";       //负责代码提交 gitee
 
     public MultiAgentWorkflow(
             AppMapper appMapper, ChatClient chatClient,
             VectorStore vectorStore, DockerClient dockerClient,
             String containerName, String previewHost,
-            IGiteeService giteeService
+            GiteeServiceImpl giteeService
     ){
+        stateGraph = new StateGraph(createKeyStrategyFactory());
         this.appMapper = appMapper;
         this.chatClient = chatClient;
         this.vectorStore = vectorStore;
@@ -41,6 +47,61 @@ public class MultiAgentWorkflow {
         this.containerName = containerName;
         this.previewHost = previewHost;
         this.giteeService = giteeService;
+
+        addNodes();
+        addEdges();
+    }
+
+    private void addNodes(){
+        try{
+            stateGraph.addNode(NODE_APP_GENERATION, AsyncNodeAction.node_async(new AppGenerationAgent(appMapper, chatClient)));
+            stateGraph.addNode(NODE_BUILD_PREVIEW, AsyncNodeAction.node_async(new BuildPreviewAgent(appMapper, dockerClient, containerName, previewHost)));
+            stateGraph.addNode(NODE_ERROR_FIXING, AsyncNodeAction.node_async(new ErrorFixingAgent(chatClient)));
+            stateGraph.addNode(NODE_GITEE_COMMIT, AsyncNodeAction.node_async(new GiteeCommitAgent(giteeService)));
+        }
+        catch(GraphStateException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void addEdges(){
+        try{
+            stateGraph.addEdge(StateGraph.START, NODE_APP_GENERATION); //先生成应用代码
+            stateGraph.addEdge(NODE_APP_GENERATION, NODE_BUILD_PREVIEW); //先生成应用代码
+            stateGraph.addConditionalEdges(NODE_BUILD_PREVIEW, state -> {
+                Boolean buildPreview = state.value("buildPreview", Boolean.class).orElse(null);
+                if(buildPreview){
+                    return CompletableFuture.completedFuture("SUCCESS");
+                }
+                return CompletableFuture.completedFuture("ERROR");
+            }, Map.of("SUCCESS", NODE_GITEE_COMMIT, "ERROR", NODE_ERROR_FIXING));
+
+            stateGraph.addConditionalEdges(NODE_ERROR_FIXING, state -> {
+                Boolean fixSuccess = state.value("fixSuccess", Boolean.class).orElse(null);
+                if(fixSuccess){
+                    return CompletableFuture.completedFuture("SUCCESS");
+                }
+                return CompletableFuture.completedFuture("ERROR");
+
+            }, Map.of("SUCCESS", NODE_BUILD_PREVIEW, "ERROR", StateGraph.END));
+
+            stateGraph.addEdge(NODE_GITEE_COMMIT, StateGraph.END);
+        }
+        catch(GraphStateException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void execute(OverAllState overAllState){
+        try{
+            CompiledGraph compiledGraph = stateGraph.compile();
+            RunnableConfig runnableConfig = RunnableConfig.builder().build();
+            overAllState.registerKeyAndStrategy(createKeyStrategies());
+            compiledGraph.invoke(overAllState, runnableConfig).orElseThrow(() -> new ServiceException("StateGraph Running failed"));
+        }
+        catch(GraphStateException | ServiceException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private static Map<String, KeyStrategy> createKeyStrategies() {
@@ -68,12 +129,16 @@ public class MultiAgentWorkflow {
         keyStrategies.put("appScreenshot", new ReplaceStrategy());
 
         // CodeCommitAgent 输出
-        keyStrategies.put("codeCommit", new ReplaceStrategy());
+        keyStrategies.put("codeCommit", new ReplaceStrategy()); //推送 gitee 是否成功
 
         // 通用状态键
         keyStrategies.put("status", new ReplaceStrategy()); //生成状态（不断更新）
-        keyStrategies.put("error", new AppendStrategy()); //错误内容（不断更新）
+        keyStrategies.put("error", new AppendStrategy()); //错误内容，叠加输出（不断更新）
 
         return keyStrategies;
+    }
+
+    private KeyStrategyFactory createKeyStrategyFactory(){
+        return KeyStrategy.builder().addStrategies(createKeyStrategies()).build();
     }
 }

@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.nexus.nexusportalservice.agent.node.MultiAgentWorkflow;
 import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.service.IGiteeService;
+import com.nexus.nexusportalservice.service.impl.GiteeServiceImpl;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,7 @@ public class MultiAgentWorkFlowConfig {
     @Bean
     public MultiAgentWorkflow multiAgentWorkflow(AppMapper appMapper, ChatClient chatClient,
                                                  VectorStore vectorStore, DockerClient dockerClient,
-                                                 IGiteeService giteeService) {
+                                                 GiteeServiceImpl giteeService) {
         return new MultiAgentWorkflow(
                 appMapper,
                 chatClient,
