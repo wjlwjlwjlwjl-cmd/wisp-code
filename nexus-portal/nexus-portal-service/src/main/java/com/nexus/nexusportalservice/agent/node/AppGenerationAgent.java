@@ -77,12 +77,16 @@ public class AppGenerationAgent implements NodeAction {
             ret.put("appPath", appPath);
             ret.put("files", files);
             ret.put("status", "SUCCESS");
+
+            System.out.println("App Generation Success");
         }
         catch(Exception e){
             //应用生成失败，返回错误信息
             ret.put("appGenerated", false);
             ret.put("status", "FAILED");
             ret.put("error", e.getMessage());
+
+            System.out.println("App Generation Failed");
         }
         return ret;
     }

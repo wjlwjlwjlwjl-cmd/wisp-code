@@ -14,6 +14,7 @@ import com.nexus.nexusportalservice.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.HashedMap;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
@@ -52,29 +53,14 @@ public class BuildPreviewAgent implements NodeAction {
 
         String appType = state.value("appType", String.class).orElse(null);
         Path appPath = state.value("appPath", Path.class).orElse(null);
-        Long appId = state.value("appId", Long.class).orElse(null);
+        String appId = state.value("appId", String.class).orElse(null);
 
-        String previewDeployPath = PreviewDeployPath.PREVIEW.getPath();
         String previewUrl = "http://" + previewHost + ":80" + "/preview/" + appId + "/#";
 
-        try{
-            //1. 根据不同类型对应用进行处理
-            if(appType == AppType.HTML.getType()){
-                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
-                FileUtil.copyDirectory(appPath, targetFile);
-            }
-            else if(appType == AppType.VUE3.getType()){
-                AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
-            }
-            else if(appType == AppType.VUE3_SPRING.getType()){
-                //部署前端
-                Path appFrontendPath = appPath.resolve("frontend");
-                AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
+        log.info("appId: {}, appPath: {}, appType: {}, previewUrl: {}", appId, appPath, appType, previewUrl);
 
-                //部署后端
-                Path springBootDir = appPath.resolve("backend");
-                AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
-            }
+        try{
+            handleApp(Long.valueOf(appId), appPath, appType, PreviewDeployPath.PREVIEW.getPath());
 
             //2. 更新数据库中预览 Url
             appMapper.update(new LambdaUpdateWrapper<App>()
@@ -84,14 +70,70 @@ public class BuildPreviewAgent implements NodeAction {
             ret.put("buildPreview", true);
             ret.put("previewUrl", previewUrl);
             ret.put("status", "SUCCESS");
+
+            System.out.println("Build Preview Success");
         }
         catch(Exception e){
             ret.put("status", "FAILED");
             ret.put("buildPreview", false);
             ret.put("errorType", determineBuildErrorType(e));
             ret.put("error", buildDetailedBuildErrorMessage(e, appType));
+
+            System.out.println("Build Preview Failed");
+            System.out.println(e.getMessage());
         }
         return ret;
+    }
+
+    private void handleApp(Long appId, Path appPath, String appType, String previewDeployPath) throws ServiceException {
+        Integer appNum = AppType.getTypeNum(appType);
+        if(appNum == 0){
+            try{
+                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
+                FileUtil.copyDirectory(appPath, targetFile);
+            }
+            catch(IOException e){
+                System.out.println(e.getStackTrace());
+            }
+        }
+        else if(appNum == 1){
+            AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
+        }
+        else if(appNum == 2){
+            //部署前端
+            Path appFrontendPath = appPath.resolve("frontend");
+            AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
+
+            //部署后端
+            Path springBootDir = appPath.resolve("backend");
+            AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
+        }
+    }
+
+    private static String determineAppType(Map<String, String> files) {
+        if (files == null || files.isEmpty()) {
+            return null;
+        }
+        // 规则1: 如果仅⽣成了⼀个⽂件并且⽂件后缀为.html，则应⽤类型为HTML
+        if (files.size() == 1) {
+            String singleFile = files.keySet().iterator().next();
+            if (singleFile.toLowerCase().endsWith(".html")) {
+                return AppType.HTML.getType();
+            }
+        }
+        // 规则2: 如果⽣成的⽂件同时包含.java⽂件和.vue⽂件，则应⽤类型为VUE_SPRING
+        boolean hasJavaFile = files.keySet().stream()
+                .anyMatch(path -> path.toLowerCase().endsWith(".java"));
+        boolean hasVueFile = files.keySet().stream()
+                .anyMatch(path -> path.toLowerCase().endsWith(".vue"));
+        if (hasJavaFile && hasVueFile) {
+            return AppType.VUE3_SPRING.getType();
+        }
+        // 规则3: 如果既不是HTML类型也不是VUE_SPRING类型，并且⽣成的⽂件中包含.vue⽂件，则
+        if (hasVueFile) {
+            return AppType.VUE3.getType();
+        }
+        return "error";
     }
 
     private String determineBuildErrorType(Exception e) {

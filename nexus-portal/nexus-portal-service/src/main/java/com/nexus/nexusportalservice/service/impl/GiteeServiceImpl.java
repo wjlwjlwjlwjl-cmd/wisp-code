@@ -23,9 +23,6 @@ public class GiteeServiceImpl implements IGiteeService{
     @Autowired
     private ChatClient chatClient;
 
-    @Autowired
-    private ChatMemory chatMemory;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${gitee.user-code.owner}")
@@ -45,7 +42,7 @@ public class GiteeServiceImpl implements IGiteeService{
      * @param files 文件（fileName，fileContent）
      */
     @Override
-    public void commit(Long appId, Path appPath, String appType, Map<String, String> files) throws Exception{
+    public void commit(String appId, Path appPath, String appType, Map<String, String> files) throws Exception{
         List<FileDTO> fileDTOs = new ArrayList<>();
         for(String fileName: files.keySet()){
             Path filePath = appPath.resolve(fileName).toAbsolutePath().normalize();
@@ -57,7 +54,7 @@ public class GiteeServiceImpl implements IGiteeService{
         }
 
         String filesJson = objectMapper.writeValueAsString(fileDTOs);
-        String commitMessage = String.format("appId: %d, appType: %s", appId, appType);
+        String commitMessage = String.format("appId: %s, appType: %s", appId, appType);
 
         String systemPrompt = "你是一个代码提交助手，负责调用 commitFile 工具将代码提交到 Gitee 仓库。请严格按照用户提供的参数调用工具，不要添加任何解释。";
         String userPrompt = String.format(
@@ -72,7 +69,7 @@ public class GiteeServiceImpl implements IGiteeService{
                 userAppCodeOwner, userAppCodeRepo, userAppCodeBranch, commitMessage, filesJson
         );
 
-        String conversationId = String.valueOf(appId);
+        String conversationId = appId;
         String resp = chatClient.prompt()
                 .system(systemPrompt)
                 .user(userPrompt)
@@ -113,7 +110,7 @@ public class GiteeServiceImpl implements IGiteeService{
 
     //删除 wispcode-gitee-repo/${appId} 下的代码
     @Override
-    public void delete(Long appId) {
+    public void delete(String appId) {
         try {
             String systemPrompt = "你是一个代码删除助手，负责调用 deleteDirectory 工具删除 Gitee 仓库中的指定目录。请严格按照用户提供的参数调用工具，不要添加任何解释。";
 

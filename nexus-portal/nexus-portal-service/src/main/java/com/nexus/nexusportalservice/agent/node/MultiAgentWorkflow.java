@@ -21,7 +21,6 @@ public class MultiAgentWorkflow {
     private StateGraph stateGraph;
     private AppMapper appMapper;
     private ChatClient chatClient;
-    private VectorStore vectorStore;
     private DockerClient dockerClient;
     private String containerName;
     private String previewHost;
@@ -35,14 +34,12 @@ public class MultiAgentWorkflow {
 
     public MultiAgentWorkflow(
             AppMapper appMapper, ChatClient chatClient,
-            VectorStore vectorStore, DockerClient dockerClient,
-            String containerName, String previewHost,
-            GiteeServiceImpl giteeService
+            DockerClient dockerClient, String containerName,
+            String previewHost, GiteeServiceImpl giteeService
     ){
         stateGraph = new StateGraph(createKeyStrategyFactory());
         this.appMapper = appMapper;
         this.chatClient = chatClient;
-        this.vectorStore = vectorStore;
         this.dockerClient = dockerClient;
         this.containerName = containerName;
         this.previewHost = previewHost;
@@ -92,16 +89,11 @@ public class MultiAgentWorkflow {
         }
     }
 
-    public void execute(OverAllState overAllState){
-        try{
-            CompiledGraph compiledGraph = stateGraph.compile();
-            RunnableConfig runnableConfig = RunnableConfig.builder().build();
-            overAllState.registerKeyAndStrategy(createKeyStrategies());
-            compiledGraph.invoke(overAllState, runnableConfig).orElseThrow(() -> new ServiceException("StateGraph Running failed"));
-        }
-        catch(GraphStateException | ServiceException e){
-            System.out.println(e.getMessage());
-        }
+    public OverAllState execute(OverAllState overAllState) throws Exception{
+        CompiledGraph compiledGraph = stateGraph.compile();
+        RunnableConfig runnableConfig = RunnableConfig.builder().build();
+        overAllState.registerKeyAndStrategy(createKeyStrategies());
+        return compiledGraph.invoke(overAllState, runnableConfig).orElseThrow(() -> new ServiceException("StateGraph Running failed"));
     }
 
     private static Map<String, KeyStrategy> createKeyStrategies() {

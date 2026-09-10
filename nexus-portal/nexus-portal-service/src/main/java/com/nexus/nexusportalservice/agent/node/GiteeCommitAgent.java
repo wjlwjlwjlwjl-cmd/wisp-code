@@ -30,18 +30,23 @@ public class GiteeCommitAgent implements NodeAction {
 
         try{
             Map<String, String> filesToCommit = state.value("files", Map.class).orElse(null);
-            Long appId = state.value("appId", Long.class).orElse(null);
+            String appId = state.value("appId", String.class).orElse(null);
             Path appPath = state.value("appPath", Path.class).orElse(null);
             String appType = state.value("appType", String.class).orElse(null);
 
+            //如果能够获取到先删除旧有文件，再创建新文件
             giteeService.commit(appId, appPath, appType, filesToCommit);
             ret.put("codeCommit", true);
             ret.put("status", "SUCCESS");
+
+            System.out.println("Gitee Commit Success");
         }
         catch(Exception e){
             ret.put("codeCommit", false);
             ret.put("status", "FAILED");
             ret.put("error", e.getMessage());
+
+            log.warn("Gitee Commit Failed: {}", e.getMessage());
         }
         return ret;
     }

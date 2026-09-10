@@ -1,5 +1,8 @@
 package com.nexus.nexuscommoncore.utils;
 
+import com.nexus.nexuscommondomain.constants.CommonConstants;
+import com.nexus.nexuscommondomain.domain.R;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
@@ -10,19 +13,13 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.nexus.nexuscommondomain.constants.CommonConstants;
-import com.nexus.nexuscommondomain.domain.R;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import jakarta.servlet.http.HttpServletRequest;
 import reactor.core.publisher.Mono;
 
 /**
  * Servlet工具类
  */
-@SuppressWarnings({"null"})
 public class ServletUtil {
 
     /**

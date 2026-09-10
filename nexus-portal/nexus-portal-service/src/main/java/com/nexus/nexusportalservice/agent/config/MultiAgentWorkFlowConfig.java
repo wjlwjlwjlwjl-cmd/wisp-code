@@ -16,7 +16,7 @@ public class MultiAgentWorkFlowConfig {
     @Value("${app.preview.container-name}")
     private String containerName;
 
-    @Value("${app.preview.host")
+    @Value("${app.preview.host}")
     private String previewHost;
 
     @Bean
@@ -26,7 +26,6 @@ public class MultiAgentWorkFlowConfig {
         return new MultiAgentWorkflow(
                 appMapper,
                 chatClient,
-                vectorStore,
                 dockerClient,
                 containerName,
                 previewHost,

@@ -24,20 +24,20 @@ public class WispCodeAgentController {
     public R<AppGenerateRetVO> agentAppGenerate(
             @RequestParam(value="appId") String appId,
             @RequestParam(value="appDoc") String appDoc
-    ) throws ServiceException{
+    ) throws Exception{
         Map<String, Object> initData = new HashMap<>();
         initData.put("appId", appId);
         initData.put("appDoc", appDoc);
         OverAllState overAllState = new OverAllState(initData);
-        workflow.execute(overAllState);
-        return R.ok(convert2TO(Long.valueOf(appId), overAllState));
+        OverAllState result = workflow.execute(overAllState);
+        return R.ok(convert2TO(Long.valueOf(appId), result));
     }
 
     private AppGenerateRetVO convert2TO(Long appId, OverAllState result) throws ServiceException{
         String status = result.value("status", String.class).orElse(null);
         if (!"SUCCESS".equals(status)) {
             String errorMsg = result.value("error", String.class).orElse(null);
-            throw new ServiceException("工作流执行失败：" + errorMsg);
+            throw new ServiceException("【" + status + "】工作流执行失败：" + errorMsg);
         }
         String appType = result.value("appType", String.class).orElse(null);
         String previewUrl = result.value("previewUrl", String.class).orElse(null);

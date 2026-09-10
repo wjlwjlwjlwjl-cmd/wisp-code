@@ -35,7 +35,7 @@ public class ErrorFixingAgent implements NodeAction {
         System.out.println("\n【ErrorFixingAgent Starting...】\n");
         Map<String, Object> ret = new HashMap<>();
         try{
-            Long appId = state.value("appId", Long.class).orElse(null);
+            String appId = state.value("appId", String.class).orElse(null);
             String appDoc = state.value("appDoc", String.class).orElse(null);
             String appType = state.value("appType", String.class).orElse(null);
             String error = state.value("error", String.class).orElse(null);
@@ -52,10 +52,14 @@ public class ErrorFixingAgent implements NodeAction {
             ret.put("fixSuccess", true);
             ret.put("status", "SUCCESS");
             ret.put("files", fixedFiles);
+
+            System.out.println("Error Fixing Success");
         }
         catch(Exception e){
             ret.put("fixSuccess", false);
             ret.put("status", "FAILED");
+
+            System.out.println("Error Fixing Failed");
         }
 
         return ret;
@@ -63,11 +67,11 @@ public class ErrorFixingAgent implements NodeAction {
 
     private String errorFix(String errorMessage, String errorType,
                           Map<String, String> currentFiles, String appType,
-                          String appDoc, Long appId){
+                          String appDoc, String appId){
         String systemPrompt = buildFixSystemPrompt();
         String userPrompt = buildFixUserPrompt(errorMessage, errorType, currentFiles, appType, appDoc);
 
-        String conversationId = String.valueOf(appId);
+        String conversationId = appId;
 
         return chatClient.prompt()
                 .system(systemPrompt)
