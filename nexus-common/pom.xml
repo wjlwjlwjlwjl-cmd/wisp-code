@@ -20,6 +20,7 @@
         <module>nexus-common-redis</module>
         <module>nexus-common-cache</module>
         <module>nexus-common-rabbitmq</module>
+        <module>nexus-common-message</module>
     </modules>
 
     <properties>

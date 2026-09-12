@@ -34,3 +34,7 @@
 ### 7. Mcp Server
 
 * 端口，19090
+
+### 8. QQ 邮箱授权码
+
+* bxmscpqzgairghje
