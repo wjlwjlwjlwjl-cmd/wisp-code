@@ -10,6 +10,7 @@ import com.nexus.nexusportalservice.domain.dto.EmailRegisterDTO;
 import com.nexus.nexusportalservice.domain.entity.EmailUser;
 import com.nexus.nexusportalservice.domain.vo.EmailLoginVO;
 import com.nexus.nexusportalservice.domain.vo.EmailRegisterVO;
+import com.nexus.nexusportalservice.domain.vo.UserVO;
 import com.nexus.nexusportalservice.mapper.EmailUserMapper;
 import com.nexus.nexusportalservice.service.IUserService;
 import com.nexus.nexuscommonmessage.service.EmailService;
@@ -48,6 +49,18 @@ public class UserServiceImpl implements IUserService {
         String email = emailRegisterDTO.getEmail();
         String code = emailRegisterDTO.getCode();
 
+        //去查看一下，如果已经数据库中已经注册，那么拒绝重复注册
+        EmailUser emailUser = emailUserMapper.selectOne(new LambdaQueryWrapper<EmailUser>()
+                .eq(EmailUser::getEmail, email)
+                .or()
+                .eq(EmailUser::getUsername, username)
+        );
+        if(emailUser != null){
+            emailRegisterVO.setSuccess(false);
+            emailRegisterVO.setErrMsg("邮箱已注册，或者用户名已存在");
+            return emailRegisterVO;
+        }
+
         //将验证码和 Redis 中存储的验证码进行比较
         String retCode = redisService.getCacheObject(email, String.class);
         if(retCode == null || !retCode.equals(code)){
@@ -59,10 +72,10 @@ public class UserServiceImpl implements IUserService {
         //比较通过，更新用户信息
         String userId = "WispUser-" + UUID.randomUUID().toString();
 
-        EmailUser emailUser = new EmailUser();
+        emailUser = new EmailUser();
         emailUser.setEmail(email);
         emailUser.setPassword(password);
-        emailUser.setUserName(username);
+        emailUser.setUsername(username);
         emailUser.setUserId(userId);
 
         emailUserMapper.insert(emailUser);
@@ -105,12 +118,12 @@ public class UserServiceImpl implements IUserService {
             return emailLoginVO;
         }
         String userId = emailUser.getUserId();
-        String userName = emailUser.getUserName();
+        String userName = emailUser.getUsername();
 
         LoginUserDTO loginUserDTO = new LoginUserDTO();
         loginUserDTO.setUserId(userId);
         loginUserDTO.setEmail(email);
-        loginUserDTO.setUserName(userName);
+        loginUserDTO.setUsername(userName);
 
         TokenDTO tokenDTO = tokenService.createToken(loginUserDTO);
         BeanUtils.copyProperties(tokenDTO, emailLoginVO);
@@ -118,6 +131,15 @@ public class UserServiceImpl implements IUserService {
         System.out.printf("返回Accesskey: %s\n", emailLoginVO.getAccessToken());
 
         return emailLoginVO;
+    }
+
+    @Override
+    public UserVO getInfo(String token) {
+        LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(loginUserDTO, userVO);
+        System.out.printf("%s %s %s", userVO.getUsername(), userVO.getUserId(), userVO.getEmail());
+        return userVO;
     }
 
     private boolean checkEmail(String email){

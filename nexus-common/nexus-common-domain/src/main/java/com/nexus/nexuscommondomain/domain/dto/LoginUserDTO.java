@@ -20,7 +20,7 @@ public class LoginUserDTO {
     /**
      * 用户名称
      */
-    private String userName;
+    private String username;
 
     /**
      * 登录时间

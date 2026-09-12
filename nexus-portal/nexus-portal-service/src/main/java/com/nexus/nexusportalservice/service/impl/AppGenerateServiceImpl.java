@@ -104,7 +104,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 .set(App::getPreviewUrl, previewUrl));
 
         //5. Gitee MCP，上传代码到 wispcode-gitee-repo 仓库，如果已经存在，那么就删除原有的内容
-        giteeServiceImpl.delete(String.valueOf(appId));
         giteeServiceImpl.commit(String.valueOf(appId), appPath, appType, files);
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();

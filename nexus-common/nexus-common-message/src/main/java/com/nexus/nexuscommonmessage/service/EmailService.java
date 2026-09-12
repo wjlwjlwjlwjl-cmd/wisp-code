@@ -22,8 +22,8 @@ public class EmailService {
     }
 
     public Boolean sendSimpleEmail(String to, String content){
-        String msg = String.format("您好！您的验证码为 %s，请在五分钟内完成验证！", content);
-        return sendSimpleEmail(to, "登录验证码", msg);
+        String msg = String.format("您好！您的 WispCode 注册验证码为 %s，请在五分钟内完成验证！", content);
+        return sendSimpleEmail(to, "WispCode 登录验证码", msg);
     }
 
     public Boolean sendSimpleEmail(String to, String subject, String content){

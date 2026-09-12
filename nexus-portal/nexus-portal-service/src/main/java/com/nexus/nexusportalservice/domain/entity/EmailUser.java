@@ -13,7 +13,7 @@ public class EmailUser {
 
     private String userId;
 
-    private String userName;
+    private String username;
 
     private String email;
 

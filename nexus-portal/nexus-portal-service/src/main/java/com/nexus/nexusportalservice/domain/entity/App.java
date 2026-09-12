@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=false)
 @TableName("app")
 public class App extends BaseDO {
-    private Long userId;            //用户ID
+    private String userId;            //用户ID
     private String appName;         //应用名称
     private String appDesc;         //应用描述
     private String appDoc;          //应用文档

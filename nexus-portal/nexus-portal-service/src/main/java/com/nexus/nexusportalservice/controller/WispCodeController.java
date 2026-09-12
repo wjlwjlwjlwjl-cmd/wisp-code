@@ -34,8 +34,8 @@ public class WispCodeController {
      * @return  生成结果(需求文档)
      */
     @PostMapping("/requirement/generate")
-    public R<RequirementVO> generateRequirement(@RequestParam String input){
-        return R.ok(requirementServiceImpl.requirementGenerate(input).convertToVO());
+    public R<RequirementVO> generateRequirement(@RequestParam String input, @RequestHeader(value="Authorization") String token){
+        return R.ok(requirementServiceImpl.requirementGenerate(input, token).convertToVO());
     }
 
     @PostMapping("/app/generate")

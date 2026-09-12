@@ -4,6 +4,7 @@ import com.nexus.nexusportalservice.domain.dto.EmailLoginDTO;
 import com.nexus.nexusportalservice.domain.dto.EmailRegisterDTO;
 import com.nexus.nexusportalservice.domain.vo.EmailLoginVO;
 import com.nexus.nexusportalservice.domain.vo.EmailRegisterVO;
+import com.nexus.nexusportalservice.domain.vo.UserVO;
 
 public interface IUserService {
     public EmailRegisterVO emailRegister(EmailRegisterDTO emailRegisterDTO);
@@ -11,4 +12,6 @@ public interface IUserService {
     public boolean sendCode(String email);
 
     public EmailLoginVO emailLogin(EmailLoginDTO emailLoginDTO);
+
+    public UserVO getInfo(String token);
 }

@@ -3,8 +3,10 @@ package com.nexus.nexusportalservice.service.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.nexus.nexuscommonsecurity.service.TokenService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nexus.nexusportalservice.domain.dto.RequirementDTO;
@@ -21,6 +23,9 @@ public class RequirementServiceImpl implements IRequirementService {
     private final ChatClient chatClient;
     private final AppMapper appMapper;
 
+    @Autowired
+    private TokenService tokenService;
+
     public RequirementServiceImpl(ChatClient chatClient, AppMapper appMapper) {
         this.chatClient = chatClient;
         this.appMapper = appMapper;
@@ -29,14 +34,16 @@ public class RequirementServiceImpl implements IRequirementService {
     /**
      * 生成应用需求文档
      * 
-     * @param 用户初始描述
+     * @param input 用户初始描述
      * @return 文档生成与解析结果
      */
     @Override
-    public RequirementDTO requirementGenerate(String input) {
+    public RequirementDTO requirementGenerate(String input, String token) {
         String systemPrompt = composeSystemPrompt();
         App app = new App();
-        app.setUserId(0L);
+
+        String userId = tokenService.getLoginUser(token).getUserId();
+        app.setUserId(userId);
         appMapper.insert(app);
         String conversationId = String.valueOf(app.getId());
 
@@ -49,7 +56,6 @@ public class RequirementServiceImpl implements IRequirementService {
 
         String appName = parseSection(rawMarkDown, 1, "应用名称");
         String appDesc = parseSection(rawMarkDown, 2, "应用描述");
-        Long userId = 1L; // todo
 
         app.setUserId(userId);
         app.setAppName(appName);

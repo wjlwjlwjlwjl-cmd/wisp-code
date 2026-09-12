@@ -68,6 +68,7 @@ public class TokenService {
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put(SecurityConstants.USER_ID, loginUserDTO.getUserId());
         claimsMap.put(SecurityConstants.EMAIL, loginUserDTO.getEmail());
+        claimsMap.put(SecurityConstants.USERNAME, loginUserDTO.getUsername());
         // 3 生成TokenDTO
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setAccessToken(JwtUtil.createToken(claimsMap));
@@ -105,14 +106,6 @@ public class TokenService {
     public LoginUserDTO getLoginUser(HttpServletRequest request) {
         String token = SecurityUtil.getToken(request);
         return getLoginUser(token);
-    }
-
-    /**
-     * 不传参数获取用户信息
-     * @return 用户信息
-     */
-    public LoginUserDTO getLoginUser() {
-        return getLoginUser(ServletUtil.getRequest());
     }
 
     /**

@@ -66,13 +66,18 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         // 4 根据令牌获取有效信息
-        Claims claims;
-        claims = JwtUtil.parseToken(token);
-        if (claims == null) {
-            return unauthorizedResponse(exchange, ResultCode.TOKEN_INVALID);
+        Claims claims = null;
+        try{
+            claims = JwtUtil.parseToken(token);
+            if (claims == null) {
+                return unauthorizedResponse(exchange, ResultCode.TOKEN_INVALID);
+            }
+        }
+        catch(Exception e){
+            log.warn("jwt 解析失败");
         }
 
-        // 5 获取缓存中的key（ACCESS_TOKEN + user_id）
+        // 5 获取缓存中的key（ACCESS_TOKEN + user_id），Redis 中设置了 ttl，过期时间到后 Token 将无法完成验证
         String userKey = JwtUtil.getUserId(token);
         boolean isLogin = redisService.hasKey(getTokenKey(userKey));
         System.out.printf("尝试用 TokenKey: %s获取用户登录信息\n", getTokenKey(userKey));
@@ -82,17 +87,18 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         // 6 获取用户数据信息
         String userId = JwtUtil.getUserId(claims);
-        String userName = JwtUtil.getUserName(token);
-        String email = JwtUtil.getEmail(token);
-        if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(userName) || StringUtils.isEmpty(email)) {
+        String username = JwtUtil.getUserName(claims);
+        String email = JwtUtil.getEmail(claims);
+        System.out.printf("============ userId %s, userName %s, email %s ============", userId, username, email);
+        if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(username) || StringUtils.isEmpty(email)) {
             return unauthorizedResponse(exchange, ResultCode.TOKEN_CHECK_FAILED);
         }
 
         // 7 设置用户信息到请求
         ServerHttpRequest.Builder mutate = request.mutate();
         addHeader(mutate, SecurityConstants.USER_ID, userId);
-        addHeader(mutate, SecurityConstants.USERNAME, userId);
-        addHeader(mutate, SecurityConstants.EMAIL, userId);
+        addHeader(mutate, SecurityConstants.USERNAME, username);
+        addHeader(mutate, SecurityConstants.EMAIL, email);
 
         // 8 加上header信息之后继续执行
         return chain.filter(exchange.mutate().request(mutate.build()).build());
