@@ -15,9 +15,14 @@ public class BasePageDTO<T> {
     Integer totals;
 
     /**
-     * 总页数
+     * 单页大小
      */
-    Integer totalPages;
+    Integer pageSize;
+
+    /**
+     * 当前分页
+     */
+    Integer current;
 
     /**
      * 数据列表

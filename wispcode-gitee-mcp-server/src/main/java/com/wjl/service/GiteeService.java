@@ -110,7 +110,7 @@ public class GiteeService {
     }
 
     private String buildUrl(String owner, String repo, String path){
-        return giteeConfig.getApiBaseUrl() + "repos/" + owner + "/" + repo + "/contents/" + normalizePath(path);
+        return giteeConfig.getApiBaseUrl() + "repos/" + owner + "/" + repo + "/contents/" + normalizePath(path) + "?access_token=" + giteeConfig.getAccessToken();
     }
 
     private String buildContentUrl(String owner, String repo, String remotePath, String branch){
@@ -175,20 +175,48 @@ public class GiteeService {
     }
 
     private String writeFile(String owner, String repo, String filePath, String fileContent, String branch, String message) throws IOException{
-        String encodedContent = encodeToBase64(fileContent);
         String url = buildUrl(owner, repo, filePath);
-        String bodyJson = objectMapper.createObjectNode()
-                .put("content", encodedContent)
-                .put("branch", branch)
-                .put("message", message)
-                .put("access_token", giteeConfig.getAccessToken())
-                .toString();
-        log.info("requesting:\n{}\n", url);
+
+        //先看文件是否存在，如果不存在，新建，否则更新
         Request request = new Request.Builder()
                 .url(url)
-                .post(RequestBody.create(bodyJson, MediaType.parse("application/json")))
+                .get()
                 .build();
-        try(Response response = okHttpClient.newCall(request).execute()){
+        Response response = okHttpClient.newCall(request).execute();
+        JsonNode node = objectMapper.readTree(response.body().string());
+        String encodedContent = encodeToBase64(fileContent);
+        String sha = node.path("sha").asText();
+
+        System.out.println("writefile sha: " + sha);
+
+        if(sha.isBlank()){
+            //文件不存在，新建
+            String bodyJson = objectMapper.createObjectNode()
+                    .put("content", encodedContent)
+                    .put("branch", branch)
+                    .put("message", message)
+                    .toString();
+            log.info("requesting:\n{}\n", url);
+            request = new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create(bodyJson, MediaType.parse("application/json")))
+                    .build();
+            response = okHttpClient.newCall(request).execute();
+            return response.body().string();
+        }
+        else{
+            log.info("文件存在，更新");
+            String bodyJson = objectMapper.createObjectNode()
+                    .put("message", message)
+                    .put("sha", sha)
+                    .put("content", encodedContent)
+                    .toString();
+            log.info("requesting:\n{}\n", url);
+            request = new Request.Builder()
+                    .url(url)
+                    .put(RequestBody.create(bodyJson, MediaType.parse("application/json")))
+                    .build();
+            response = okHttpClient.newCall(request).execute();
             return response.body().string();
         }
     }
