@@ -52,11 +52,6 @@ public class EmailConfig {
     }
 
     @Bean
-    EmailService getEmailService(){
-        return new EmailService();
-    }
-
-    @Bean
     public JavaMailSender getBean(){
         JavaMailSenderImpl sender = new JavaMailSenderImpl();
         sender.setHost(emailHost);

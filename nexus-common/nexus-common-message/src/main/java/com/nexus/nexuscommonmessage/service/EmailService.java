@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class EmailService {
-    @Value("${email.username: 1393265226@qq.com}")
+    @Value("${email.username:1393265226@qq.com}")
     String from;
 
     @Autowired
