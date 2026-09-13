@@ -137,6 +137,9 @@ public class UserServiceImpl implements IUserService {
     public UserVO getInfo(String token) {
         LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
         UserVO userVO = new UserVO();
+        if(loginUserDTO == null){
+            return userVO;
+        }
         BeanUtils.copyProperties(loginUserDTO, userVO);
         System.out.printf("%s %s %s", userVO.getUsername(), userVO.getUserId(), userVO.getEmail());
         return userVO;

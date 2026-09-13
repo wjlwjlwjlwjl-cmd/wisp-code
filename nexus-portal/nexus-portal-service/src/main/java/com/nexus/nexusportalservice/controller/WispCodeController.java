@@ -6,7 +6,9 @@ import com.nexus.nexuscommoncore.utils.BeanCopyUtil;
 import com.nexus.nexuscommondomain.domain.vo.BasePageVO;
 import com.nexus.nexuscommondomain.exception.ServiceException;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateReqDTO;
+import com.nexus.nexusportalservice.domain.dto.DeployAppDTO;
 import com.nexus.nexusportalservice.domain.vo.AppVO;
+import com.nexus.nexusportalservice.domain.vo.DeployAppVO;
 import com.nexus.nexusportalservice.service.impl.AppBaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -64,24 +66,52 @@ public class WispCodeController {
      * @return 数据库查询结果
      */
     @GetMapping("/app/list/mine")
-    public BasePageVO<AppVO> listMyAppVO(@RequestHeader(value="Authorization") String token, @RequestParam(value="current")Integer current, @RequestParam(value="size")Integer pageSize){
+    public R<BasePageVO<AppVO>> listMyAppVO(@RequestHeader(value="Authorization") String token, @RequestParam(value="current")Integer current, @RequestParam(value="size")Integer pageSize){
         BasePageDTO<AppVO> basePageDTO = appBaseService.listMyApp(token, current, pageSize);
         BasePageVO<AppVO> basePageVO = new BasePageVO<>();
         BeanCopyUtil.copyProperties(basePageDTO, basePageVO);
-        return basePageVO;
+        return R.ok(basePageVO);
     }
 
+    /**
+     * 列出来所有已经部署的应用
+     *
+     * @param token jwt token
+     * @param current 当前分页
+     * @param pageSize 分页大小
+     * @return 应用页
+     */
     @GetMapping("/app/list/deploy")
-    public BasePageVO<AppVO> listDeployAppVO(@RequestHeader(value="Authorization") String token, @RequestParam(value="current")Integer current, @RequestParam(value="size")Integer pageSize){
+    public R<BasePageVO<AppVO>> listDeployAppVO(@RequestHeader(value="Authorization") String token, @RequestParam(value="current")Integer current, @RequestParam(value="size")Integer pageSize){
         BasePageDTO<AppVO> basePageDTO = appBaseService.listDeployApp(token, current, pageSize);
         BasePageVO<AppVO> basePageVO = new BasePageVO<>();
         BeanCopyUtil.copyProperties(basePageDTO, basePageVO);
-        return basePageVO;
+        return R.ok(basePageVO);
     }
 
+    /**
+     * 部署一个应用
+     * @param token jwt token
+     * @param appId 应用id
+     * @return 是否部署成功
+     */
     @GetMapping("/app/deploy")
-    public Boolean deployApp(@RequestHeader("Authorization") String token, @RequestParam(value="appId") String appId){
-        return true;
+    public R<DeployAppVO> deployApp(@RequestHeader("Authorization") String token, @RequestParam(value="appId") String appId){
+        DeployAppVO deployAppVO = appBaseService.appDeploy(token, appId, true).convert2VO();
+        return R.ok(deployAppVO);
+    }
+
+    /**
+     * 取消部署应用
+     *
+     * @param token jwt token
+     * @param appId 应用 id
+     * @return 是否取消部署成功
+     */
+    @GetMapping("/app/deploy/cancel")
+    public R<DeployAppVO> deployAppCancel(@RequestHeader("Authorization") String token, @RequestParam(value="appId") String appId){
+        DeployAppVO deployAppVO = appBaseService.appDeploy(token, appId, false).convert2VO();
+        return R.ok(deployAppVO);
     }
 
     private AppGenerateRetVO convert2VO(Long appId, OverAllState result) throws ServiceException {

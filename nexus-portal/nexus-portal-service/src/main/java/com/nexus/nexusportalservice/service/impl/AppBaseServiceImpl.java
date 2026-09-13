@@ -1,11 +1,13 @@
 package com.nexus.nexusportalservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nexus.nexuscommoncore.domain.dto.BasePageDTO;
 import com.nexus.nexuscommoncore.utils.BeanCopyUtil;
 import com.nexus.nexuscommondomain.domain.dto.LoginUserDTO;
 import com.nexus.nexuscommonsecurity.service.TokenService;
+import com.nexus.nexusportalservice.domain.dto.DeployAppDTO;
 import com.nexus.nexusportalservice.domain.entity.App;
 import com.nexus.nexusportalservice.domain.vo.AppVO;
 import com.nexus.nexusportalservice.mapper.AppMapper;
@@ -80,7 +82,21 @@ public class AppBaseServiceImpl implements IAppBaseService {
     }
 
     @Override
-    public Boolean appDeploy(String token, String appId) {
-        return null;
+    public DeployAppDTO appDeploy(String token, String appId, Boolean deploy) {
+        DeployAppDTO deployAppDTO = new DeployAppDTO();
+        String userId = tokenService.getLoginUser(token).getUserId();
+        LambdaUpdateWrapper<App> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper
+                .eq(App::getId, appId)
+                .eq(App::getUserId, userId)
+                .set(App::getDeploy, deploy);
+        int cnt = appMapper.update(lambdaUpdateWrapper);
+        if(cnt == 0){
+            deployAppDTO.setSuccess(false);
+            deployAppDTO.setErrMsg("部署失败，检查 userId 及 appId");
+            return deployAppDTO;
+        }
+        deployAppDTO.setSuccess(true);
+        return deployAppDTO;
     }
 }
