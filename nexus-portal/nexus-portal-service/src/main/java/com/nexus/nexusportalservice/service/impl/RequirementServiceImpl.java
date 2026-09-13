@@ -3,6 +3,7 @@ package com.nexus.nexusportalservice.service.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.nexus.nexuscommonredis.service.RedisService;
 import com.nexus.nexuscommonsecurity.service.TokenService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -13,6 +14,8 @@ import com.nexus.nexusportalservice.domain.dto.RequirementDTO;
 import com.nexus.nexusportalservice.domain.entity.App;
 import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.service.IRequirementService;
+
+import com.github.benmanes.caffeine.cache.Cache;
 
 import lombok.extern.slf4j.Slf4j;
 

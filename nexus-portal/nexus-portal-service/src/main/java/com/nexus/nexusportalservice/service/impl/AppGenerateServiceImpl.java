@@ -48,8 +48,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
     @Autowired
     DockerClient dockerClient;
-    @Autowired
-    ChatMemoryConfig chatMemoryConfig;
 
     @Value("${app.preview.host}")
     String serverHost;
@@ -68,7 +66,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     public AppGenerateRetDTO appGenerate(Long appId, String appDoc) throws Exception{
         String systemPrompt = getSystemPrompt(String.valueOf(appId));
         String userPrompt = getUserPrompt(appDoc);
-        log.info(userPrompt);
 
         //1. 获取 LLM 生成的源代码
         String conversationId = String.valueOf(appId);
@@ -82,7 +79,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         //2. 根据源代码获取应用类型
         ModelParsedResult.ParsedResult parsedResult = ModelParsedResult.parse(rawContent);
         Map<String, String> files = parsedResult.getFiles();
-        String appType = determineAppType(files);
+        String appType = GeneratedAppWriter.determineAppType(files);
         int appNum = AppType.getTypeNum(appType);
 
         //3. 整体代码，放到 user-code/${appId} 之中，处理后把需要预览
@@ -119,32 +116,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 "【⽤⼾需求⽂档】",
                 appDoc,
                 "【输出要求】请严格按照系统提⽰的格式输出，不要添加多余解释。");
-    }
-
-    private static String determineAppType(Map<String, String> files) {
-        if (files == null || files.isEmpty()) {
-            return null;
-        }
-        // 规则1: 如果仅⽣成了⼀个⽂件并且⽂件后缀为.html，则应⽤类型为HTML
-        if (files.size() == 1) {
-            String singleFile = files.keySet().iterator().next();
-            if (singleFile.toLowerCase().endsWith(".html")) {
-                return AppType.HTML.getType();
-            }
-        }
-        // 规则2: 如果⽣成的⽂件同时包含.java⽂件和.vue⽂件，则应⽤类型为VUE_SPRING
-        boolean hasJavaFile = files.keySet().stream()
-                .anyMatch(path -> path.toLowerCase().endsWith(".java"));
-        boolean hasVueFile = files.keySet().stream()
-                .anyMatch(path -> path.toLowerCase().endsWith(".vue"));
-        if (hasJavaFile && hasVueFile) {
-            return AppType.VUE3_SPRING.getType();
-        }
-        // 规则3: 如果既不是HTML类型也不是VUE_SPRING类型，并且⽣成的⽂件中包含.vue⽂件，则
-        if (hasVueFile) {
-            return AppType.VUE3.getType();
-        }
-        return "error";
     }
 
     private String getSystemPrompt(String appId) {

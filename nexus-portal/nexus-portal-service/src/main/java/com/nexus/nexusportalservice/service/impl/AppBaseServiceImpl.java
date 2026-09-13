@@ -7,10 +7,14 @@ import com.nexus.nexuscommoncore.domain.dto.BasePageDTO;
 import com.nexus.nexuscommoncore.utils.BeanCopyUtil;
 import com.nexus.nexuscommondomain.domain.dto.LoginUserDTO;
 import com.nexus.nexuscommonsecurity.service.TokenService;
+import com.nexus.nexusportalservice.domain.dto.AppDTO;
+import com.nexus.nexusportalservice.domain.dto.ChatHistoryDTO;
 import com.nexus.nexusportalservice.domain.dto.DeployAppDTO;
 import com.nexus.nexusportalservice.domain.entity.App;
+import com.nexus.nexusportalservice.domain.entity.Memory;
 import com.nexus.nexusportalservice.domain.vo.AppVO;
 import com.nexus.nexusportalservice.mapper.AppMapper;
+import com.nexus.nexusportalservice.mapper.MemoryMapper;
 import com.nexus.nexusportalservice.service.IAppBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +28,8 @@ public class AppBaseServiceImpl implements IAppBaseService {
     private TokenService tokenService;
     @Autowired
     private AppMapper appMapper;
+    @Autowired
+    private MemoryMapper memoryMapper;
 
     @Override
     //获取 user 的所有应用
@@ -98,5 +104,32 @@ public class AppBaseServiceImpl implements IAppBaseService {
         }
         deployAppDTO.setSuccess(true);
         return deployAppDTO;
+    }
+
+    @Override
+    public AppDTO appDetail(String appId) {
+        AppDTO appDTO = new AppDTO();
+
+        //尝试从缓存中获取
+        App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
+                .eq(App::getId, appId)
+        );
+
+        if(app == null){
+            return appDTO;
+        }
+        BeanCopyUtil.copyProperties(app, appDTO);
+        return appDTO;
+    }
+
+    @Override
+    public List<ChatHistoryDTO> appHistory(String appId) {
+        Page<Memory> page = new Page<>(1, Long.MAX_VALUE);
+
+        Page<Memory> rets = memoryMapper.selectPage(page, new LambdaQueryWrapper<Memory>()
+                .eq(Memory::getAppId, appId)
+        );
+        List<Memory> apps = rets.getRecords();
+        return BeanCopyUtil.copyListProperties(apps, ChatHistoryDTO::new);
     }
 }

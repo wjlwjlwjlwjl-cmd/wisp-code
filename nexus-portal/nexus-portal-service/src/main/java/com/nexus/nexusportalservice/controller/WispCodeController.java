@@ -7,20 +7,21 @@ import com.nexus.nexuscommondomain.domain.vo.BasePageVO;
 import com.nexus.nexuscommondomain.exception.ServiceException;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateReqDTO;
 import com.nexus.nexusportalservice.domain.dto.DeployAppDTO;
-import com.nexus.nexusportalservice.domain.vo.AppVO;
-import com.nexus.nexusportalservice.domain.vo.DeployAppVO;
+import com.nexus.nexusportalservice.domain.vo.*;
 import com.nexus.nexusportalservice.service.impl.AppBaseServiceImpl;
+import com.nexus.nexusportalservice.service.impl.AppEditServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.nexus.nexuscommondomain.domain.R;
-import com.nexus.nexusportalservice.domain.vo.AppGenerateRetVO;
-import com.nexus.nexusportalservice.domain.vo.RequirementVO;
 import com.nexus.nexusportalservice.service.impl.AppGenerateServiceImpl;
 import com.nexus.nexusportalservice.service.impl.RequirementServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RequestMapping("/wisp")
 @RestController
@@ -30,11 +31,13 @@ public class WispCodeController {
     private final RequirementServiceImpl requirementServiceImpl;
     private final AppGenerateServiceImpl appGenerateServiceImpl;
     private final AppBaseServiceImpl appBaseService;
+    private final AppEditServiceImpl appEditService;
 
-    WispCodeController(RequirementServiceImpl requirementServiceImpl, AppGenerateServiceImpl appGenerateServiceImpl, AppBaseServiceImpl appBaseService) {
+    WispCodeController(RequirementServiceImpl requirementServiceImpl, AppGenerateServiceImpl appGenerateServiceImpl, AppBaseServiceImpl appBaseService, AppEditServiceImpl appEditService) {
         this.requirementServiceImpl = requirementServiceImpl;
         this.appGenerateServiceImpl = appGenerateServiceImpl;
         this.appBaseService = appBaseService;
+        this.appEditService = appEditService;
     }
 
     /**
@@ -112,6 +115,39 @@ public class WispCodeController {
     public R<DeployAppVO> deployAppCancel(@RequestHeader("Authorization") String token, @RequestParam(value="appId") String appId){
         DeployAppVO deployAppVO = appBaseService.appDeploy(token, appId, false).convert2VO();
         return R.ok(deployAppVO);
+    }
+
+    /**
+     * 获取应用信息
+     *
+     * @param appId 应用 Id
+     * @return 应用信息
+     */
+    @GetMapping("/app/detail")
+    public R<AppVO> appDetail(@RequestParam(value="appId") String appId){
+        return R.ok(appBaseService.appDetail(appId).convert2VO());
+    }
+
+    /**
+     *
+     * @param appId 应用 Id
+     * @return 应用历史，0 为 用户，1 为 ai
+     */
+    @GetMapping("/app/history")
+    public R<List<ChatHistoryVO>> appHistory(@RequestParam String appId){
+        return R.ok(BeanCopyUtil.copyListProperties(appBaseService.appHistory(appId), ChatHistoryVO::new));
+    }
+
+    /**
+     *
+     * @param appId appId
+     * @param newPrompt 修改提示词
+     * @return 修改后信息（同创建)
+     * @throws Exception Exception
+     */
+    @PostMapping("/app/edit")
+    public R<AppGenerateRetVO> appEdit(@RequestParam Long appId, @RequestParam String newPrompt) throws Exception{
+        return R.ok(appEditService.appEdit(appId, newPrompt).convertToVO());
     }
 
     private AppGenerateRetVO convert2VO(Long appId, OverAllState result) throws ServiceException {
