@@ -232,8 +232,20 @@
     }
     return out;
   }
-  function appTypeBadge(t) { return t ? '<span class="badge">' + escape(t) + "</span>" : ""; }
+  // Map backend appType (either enum name from generate APIs, or numeric code
+  // stored in app.app_type via AppType.getTypeNum: HTML=0, VUE3=1, VUE3_SPRING=2)
+  // to a friendly display label.
+  function appTypeLabel(t) {
+    if (t === null || t === undefined || t === "") return "—";
+    var s = String(t).trim().toUpperCase();
+    var byName = { "HTML": "HTML", "VUE3": "VUE", "VUE": "VUE", "VUE3_SPRING": "VUE_SPRING", "VUE_SPRING": "VUE_SPRING" };
+    if (byName[s]) return byName[s];
+    var byCode = { "0": "HTML", "1": "VUE", "2": "VUE_SPRING" };
+    if (byCode[s]) return byCode[s];
+    return String(t);
+  }
+  function appTypeBadge(t) { return t ? '<span class="badge">' + escape(appTypeLabel(t)) + "</span>" : ""; }
   function fmtUrl(u) { return u && /^https?:\/\//i.test(u) ? u : (u ? "http://" + u : ""); }
 
-  global.WispAPI = { api: api, auth: auth, toast: toast, nav: nav, escape: escape, appTypeBadge: appTypeBadge, fmtUrl: fmtUrl, SUCCESS_CODE: SUCCESS_CODE };
+  global.WispAPI = { api: api, auth: auth, toast: toast, nav: nav, escape: escape, appTypeBadge: appTypeBadge, appTypeLabel: appTypeLabel, fmtUrl: fmtUrl, SUCCESS_CODE: SUCCESS_CODE };
 })(window);

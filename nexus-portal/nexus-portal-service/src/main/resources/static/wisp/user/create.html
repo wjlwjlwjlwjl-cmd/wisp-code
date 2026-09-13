@@ -143,7 +143,7 @@
     document.getElementById('result-kv').innerHTML=
       '<div class="k">应用 ID</div><div class="v mono">#'+esc(state.appId)+'</div>'+
       '<div class="k">构建方式</div><div class="v">'+(mode==='agent'?'多 Agent':'普通')+'</div>'+
-      '<div class="k">应用类型</div><div class="v">'+esc(state.appType||'—')+'</div>'+
+      '<div class="k">应用类型</div><div class="v">'+esc(WispAPI.appTypeLabel(state.appType))+'</div>'+
       '<div class="k">预览链接</div><div class="v">'+(url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(state.previewUrl)}</a>`:'<span class="muted">无</span>')+'</div>';
     document.getElementById('preview').src = url || 'about:blank';
     document.getElementById('open-tab').href = url || '#';

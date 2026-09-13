@@ -27,16 +27,6 @@
       <button class="btn danger" onclick="WispAPI.auth.logout()">退出登录</button>
     </div>
   </div>
-
-  <div class="card">
-    <h3>访问令牌（JWT）</h3>
-    <p class="hint">登录后所有业务请求都在 <code>Authorization</code> 头携带此令牌，请勿外泄。</p>
-    <div class="row">
-      <input class="input mono" id="token" readonly type="password">
-      <button class="btn ghost sm" id="eye" onclick="toggleToken()" style="flex:0 0 auto">显示</button>
-      <button class="btn ghost sm" onclick="copyToken()" style="flex:0 0 auto">复制</button>
-    </div>
-  </div>
 </div>
 
 <script src="assets/api.js"></script>
@@ -47,7 +37,6 @@
   function hideAlert(){document.getElementById('alert').className='alert';}
   async function load(){
     hideAlert();
-    document.getElementById('token').value=Auth.token();
     try{
       const u=await A.getInfo();
       Auth.setUser(u);
@@ -64,8 +53,6 @@
       showAlert('获取用户信息失败：'+e.message);
     }
   }
-  function toggleToken(){ const i=document.getElementById('token'); const e=document.getElementById('eye'); if(i.type==='password'){i.type='text';e.textContent='隐藏';} else {i.type='password';e.textContent='显示';} }
-  function copyToken(){ const i=document.getElementById('token'); i.type='text'; i.select(); try{navigator.clipboard&&navigator.clipboard.writeText(i.value);}catch(e){} document.execCommand&&document.execCommand('copy'); WispAPI.toast('已复制到剪贴板','ok'); i.type='password'; }
   load();
 </script>
 </body>
