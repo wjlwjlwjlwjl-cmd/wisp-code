@@ -55,7 +55,7 @@
   function card(app){
     const url=WispAPI.fmtUrl(app.previewUrl);
     const visit=url?'<a class="btn ok sm" href="'+esc(url)+'" target="_blank" rel="noopener">访问</a>':'';
-    const owner=app.userId?'<span class="badge">owner '+esc(app.userId)+'</span>':'';
+    const owner=app.username?'<span class="badge">👤 '+esc(app.username)+'</span>':'';
     return '<div class="app-card">'+
       '<div class="name">'+esc(app.appName||('应用 #'+app.id))+'</div>'+
       '<div class="desc">'+esc(app.appDesc||'—')+'</div>'+

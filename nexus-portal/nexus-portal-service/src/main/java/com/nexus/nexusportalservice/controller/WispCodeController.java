@@ -101,7 +101,7 @@ public class WispCodeController {
     @GetMapping("/app/deploy")
     public R<DeployAppVO> deployApp(@RequestHeader("Authorization") String token, @RequestParam(value="appId") String appId){
         DeployAppVO deployAppVO = appBaseService.appDeploy(token, appId, true).convert2VO();
-        return R.ok(deployAppVO);
+        return R.ok(deployAppVO, "部署成功");
     }
 
     /**
@@ -114,7 +114,7 @@ public class WispCodeController {
     @GetMapping("/app/deploy/cancel")
     public R<DeployAppVO> deployAppCancel(@RequestHeader("Authorization") String token, @RequestParam(value="appId") String appId){
         DeployAppVO deployAppVO = appBaseService.appDeploy(token, appId, false).convert2VO();
-        return R.ok(deployAppVO);
+        return R.ok(deployAppVO, "取消部署成功");
     }
 
     /**

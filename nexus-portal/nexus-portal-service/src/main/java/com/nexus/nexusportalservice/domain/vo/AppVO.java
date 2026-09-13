@@ -6,6 +6,7 @@ import lombok.Data;
 public class AppVO {
     private Long id;
     private String userId;
+    private String username;
     private String appName;
     private String appDoc;
     private String appDesc;

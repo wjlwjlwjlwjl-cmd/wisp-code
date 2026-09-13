@@ -118,7 +118,7 @@
     try{
       const r= deployed ? await A.deployCancel(appId) : await A.deploy(appId);
       if(r && r.success===false){ showAlert(r.errMsg||'操作失败'); }
-      else{ deployed=!deployed; toastX((deployed?'部署成功':'已取消部署'),'ok'); loadDetail(); }
+      else{ deployed=!deployed; toastX((deployed?'部署成功':'取消部署成功'),'ok'); loadDetail(); }
     }catch(e){ if(e.needAuth){Auth.expired(e.message);return;} showAlert(e.message); }
     busy('btn-deploy',false);
   }

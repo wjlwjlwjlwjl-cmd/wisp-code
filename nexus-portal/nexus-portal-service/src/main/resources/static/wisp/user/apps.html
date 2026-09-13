@@ -77,7 +77,7 @@
       const badge=btn.closest('.app-card').querySelector('.meta .badge.on,.meta .badge.off');
       badge.className='badge '+(now?'on':'off'); badge.textContent=now?'已部署':'未部署';
       btn.className='btn sm '+(now?'danger':'ok'); btn.textContent=now?'取消部署':'部署'; btn.disabled=false;
-      WispAPI.toast(now?'部署成功':'已取消部署','ok');
+      WispAPI.toast(isDeployed?'取消部署成功':'部署成功','ok');
     }catch(e){ if(e.needAuth){Auth.expired(e.message);return;} WispAPI.toast(e.message,'err'); btn.disabled=false; btn.innerHTML=isDeployed?'取消部署':'部署'; }
   }
   load();

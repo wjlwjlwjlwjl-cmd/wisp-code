@@ -11,16 +11,22 @@ import com.nexus.nexusportalservice.domain.dto.AppDTO;
 import com.nexus.nexusportalservice.domain.dto.ChatHistoryDTO;
 import com.nexus.nexusportalservice.domain.dto.DeployAppDTO;
 import com.nexus.nexusportalservice.domain.entity.App;
+import com.nexus.nexusportalservice.domain.entity.EmailUser;
 import com.nexus.nexusportalservice.domain.entity.Memory;
 import com.nexus.nexusportalservice.domain.vo.AppVO;
 import com.nexus.nexusportalservice.mapper.AppMapper;
+import com.nexus.nexusportalservice.mapper.EmailUserMapper;
 import com.nexus.nexusportalservice.mapper.MemoryMapper;
 import com.nexus.nexusportalservice.service.IAppBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class AppBaseServiceImpl implements IAppBaseService {
@@ -30,6 +36,35 @@ public class AppBaseServiceImpl implements IAppBaseService {
     private AppMapper appMapper;
     @Autowired
     private MemoryMapper memoryMapper;
+    @Autowired
+    private EmailUserMapper emailUserMapper;
+
+    /**
+     * 根据 AppVO 列表中的 userId 批量回填用户名
+     */
+    private void fillUserNames(List<AppVO> appVOS) {
+        if (appVOS == null || appVOS.isEmpty()) {
+            return;
+        }
+        List<String> userIds = appVOS.stream()
+                .map(AppVO::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (userIds.isEmpty()) {
+            return;
+        }
+        List<EmailUser> users = emailUserMapper.selectList(
+                new LambdaQueryWrapper<EmailUser>().in(EmailUser::getUserId, userIds)
+        );
+        Map<String, String> id2name = new HashMap<>();
+        for (EmailUser user : users) {
+            id2name.put(user.getUserId(), user.getUsername());
+        }
+        for (AppVO appVO : appVOS) {
+            appVO.setUsername(id2name.get(appVO.getUserId()));
+        }
+    }
 
     @Override
     //获取 user 的所有应用
@@ -52,6 +87,7 @@ public class AppBaseServiceImpl implements IAppBaseService {
             BeanCopyUtil.copyProperties(app, appVO);
             appVOS.add(appVO);
         }
+        fillUserNames(appVOS);
         basePageDTO.setList(appVOS);
         basePageDTO.setCurrent((int) rets.getCurrent());
         basePageDTO.setPageSize((int) rets.getSize());
@@ -79,6 +115,7 @@ public class AppBaseServiceImpl implements IAppBaseService {
             BeanCopyUtil.copyProperties(app, appVO);
             appVOS.add(appVO);
         }
+        fillUserNames(appVOS);
         basePageDTO.setList(appVOS);
         basePageDTO.setCurrent((int) rets.getCurrent());
         basePageDTO.setPageSize((int) rets.getSize());
