@@ -35,7 +35,12 @@
       <div class="card">
         <h3>应用文档</h3>
         <p class="hint">用于构建的需求文档内容。</p>
-        <div class="doc-box" id="app-doc">—</div>
+        <div class="md-tabs">
+          <button class="active" id="doc-tab-render" onclick="showDoc('render')">渲染</button>
+          <button id="doc-tab-raw" onclick="showDoc('raw')">原文</button>
+        </div>
+        <div class="md-body" id="app-doc"></div>
+        <div class="doc-box" id="app-doc-raw" style="display:none">—</div>
         <div id="app-desc" class="muted" style="margin-top:10px;font-size:13px"></div>
       </div>
     </div>
@@ -58,13 +63,23 @@
   </div>
 </div>
 
+<script src="assets/markdown.js"></script>
 <script src="assets/api.js"></script>
 <script>
   const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
   if(!Auth.require()){} nav('apps');
   const appId=new URLSearchParams(location.search).get('appId');
   let deployed=false;
+  let rawDoc='';
   if(!appId){ document.getElementById('title').textContent='未指定应用'; }
+
+  function showDoc(mode){
+    const r=mode==='render';
+    document.getElementById('app-doc').style.display=r?'':'none';
+    document.getElementById('app-doc-raw').style.display=r?'none':'';
+    document.getElementById('doc-tab-render').classList.toggle('active',r);
+    document.getElementById('doc-tab-raw').classList.toggle('active',!r);
+  }
 
   function showAlert(m,t){const a=document.getElementById('alert');a.className='alert show '+(t||'err');a.textContent=m;window.scrollTo({top:0,behavior:'smooth'});}
   function hideAlert(){document.getElementById('alert').className='alert';}
@@ -85,7 +100,9 @@
       document.getElementById('preview-url').value=d.previewUrl||'';
       document.getElementById('open-tab').href=url||'#';
       document.getElementById('preview').src=url||'about:blank';
-      document.getElementById('app-doc').textContent=d.appDoc||'—';
+      rawDoc = d.appDoc || '';
+      document.getElementById('app-doc-raw').textContent = rawDoc || '—';
+      document.getElementById('app-doc').innerHTML = rawDoc ? WispMD.render(rawDoc) : '<span class="muted">—</span>';
       document.getElementById('app-desc').textContent=d.appDesc?('简介：'+d.appDesc):'';
       renderDeployBtn();
     }catch(e){ showAlert(e.message); }

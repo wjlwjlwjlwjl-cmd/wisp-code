@@ -33,9 +33,15 @@
   <!-- STEP 2 -->
   <div class="card" id="panel-2" style="display:none">
     <h3>② 确认应用文档并选择构建方式</h3>
-    <p class="hint">应用文档 <span class="badge" id="appid-badge">appId: —</span> 可在下方继续修改。</p>
-    <div class="field"><label>应用文档（可编辑）</label>
-      <textarea id="app-doc" style="min-height:220px"></textarea></div>
+    <p class="hint">应用文档 <span class="badge" id="appid-badge">appId: —</span> 可在“编辑”中修改，“预览”为 Markdown 渲染效果。</p>
+    <div class="field"><label>应用文档</label>
+      <div class="md-tabs">
+        <button id="doc-tab-edit" onclick="switchDocTab('edit')">✎ 编辑</button>
+        <button class="active" id="doc-tab-preview" onclick="switchDocTab('preview')">👁 预览</button>
+      </div>
+      <textarea id="app-doc" style="min-height:280px;display:none" oninput="renderDocPreview()"></textarea>
+      <div class="md-body" id="doc-preview" style="min-height:280px;max-height:none"></div>
+    </div>
     <div class="field"><label>构建方式</label>
       <div class="grid cols-2" style="margin-top:6px">
         <label class="card" style="padding:14px;cursor:pointer;margin:0;display:flex;gap:10px;align-items:flex-start">
@@ -70,11 +76,25 @@
   </div>
 </div>
 
+<script src="assets/markdown.js"></script>
 <script src="assets/api.js"></script>
 <script>
   const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
   if(!Auth.require()){} nav('create');
   let state={appId:null,previewUrl:null,appType:null};
+
+  function renderDocPreview(){
+    const md=document.getElementById('app-doc').value;
+    document.getElementById('doc-preview').innerHTML = md ? WispMD.render(md) : '<span class="muted">（暂无内容）</span>';
+  }
+  function switchDocTab(mode){
+    const edit=mode==='edit';
+    document.getElementById('app-doc').style.display=edit?'':'none';
+    document.getElementById('doc-preview').style.display=edit?'none':'';
+    document.getElementById('doc-tab-edit').classList.toggle('active',edit);
+    document.getElementById('doc-tab-preview').classList.toggle('active',!edit);
+    if(!edit) renderDocPreview();
+  }
 
   function showAlert(m,t){const a=document.getElementById('alert');a.className='alert show '+(t||'err');a.textContent=m;a.scrollIntoView({behavior:'smooth',block:'center'});}
   function hideAlert(){document.getElementById('alert').className='alert';}
@@ -97,6 +117,7 @@
       state.appId=vo.appId;
       document.getElementById('app-doc').value=vo.content||'';
       document.getElementById('appid-badge').textContent='appId: '+(vo.appId??'—');
+      renderDocPreview(); switchDocTab('preview');
       goStep(2);
     }catch(e){ showAlert(e.needAuth?'登录失效，请重新登录':('生成文档失败：'+e.message)); }
     busy('btn-gen-doc',false);
@@ -129,7 +150,7 @@
     document.getElementById('to-detail').href = 'app.html?appId='+encodeURIComponent(state.appId);
   }
 
-  function resetAll(){ state={appId:null,previewUrl:null,appType:null}; document.getElementById('req-input').value=''; document.getElementById('app-doc').value=''; document.getElementById('preview').src='about:blank'; goStep(1); }
+  function resetAll(){ state={appId:null,previewUrl:null,appType:null}; document.getElementById('req-input').value=''; document.getElementById('app-doc').value=''; document.getElementById('doc-preview').innerHTML=''; document.getElementById('preview').src='about:blank'; switchDocTab('preview'); goStep(1); }
 </script>
 </body>
 </html>
