@@ -3,12 +3,13 @@ package com.nexus.nexusportalservice.agent.controller;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.nexus.nexuscommondomain.domain.R;
 import com.nexus.nexuscommondomain.exception.ServiceException;
+import com.nexus.nexusportalservice.agent.domain.AgentAppGenerateReqDTO;
 import com.nexus.nexusportalservice.agent.node.MultiAgentWorkflow;
 import com.nexus.nexusportalservice.domain.vo.AppGenerateRetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -22,15 +23,14 @@ public class WispCodeAgentController {
 
     @PostMapping("/app/generate")
     public R<AppGenerateRetVO> agentAppGenerate(
-            @RequestParam(value="appId") String appId,
-            @RequestParam(value="appDoc") String appDoc
+            @RequestBody AgentAppGenerateReqDTO req
     ) throws Exception{
         Map<String, Object> initData = new HashMap<>();
-        initData.put("appId", appId);
-        initData.put("appDoc", appDoc);
+        initData.put("appId", req.getAppId());
+        initData.put("appDoc", req.getAppDoc());
         OverAllState overAllState = new OverAllState(initData);
         OverAllState result = workflow.execute(overAllState);
-        return R.ok(convert2TO(Long.valueOf(appId), result));
+        return R.ok(convert2TO(Long.valueOf(req.getAppId()), result));
     }
 
     private AppGenerateRetVO convert2TO(Long appId, OverAllState result) throws ServiceException{

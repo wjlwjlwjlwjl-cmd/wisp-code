@@ -129,15 +129,6 @@
     if (qs) url += (url.indexOf("?") >= 0 ? "&" : "?") + qs;
     return req(url, { method: "GET", headers: headers(!!withAuth) });
   }
-  // POST form-urlencoded (@RequestParam endpoints)
-  function postForm(path, params, withAuth) {
-    var url = API.base + path;
-    return req(url, {
-      method: "POST",
-      headers: (function () { var h = { "Content-Type": "application/x-www-form-urlencoded" }; var a = headers(!!withAuth); Object.keys(a).forEach(function (k) { h[k] = a[k]; }); return h; })(),
-      body: buildQuery(params || {})
-    });
-  }
   // POST json (@RequestBody endpoints)
   function postJson(path, body, withAuth) {
     var url = API.base + path;
@@ -174,11 +165,11 @@
       if (u) auth.setUser(u);
       return u;
     },
-    // requirement + generation
-    genRequirement: async function (input) { return handleR(await postForm("/requirement/generate", { input: input }, true)); },
-    genApp: async function (appId, appDoc) { return fixRetVO(handleR(await postForm("/app/generate", { appId: appId, appDoc: appDoc }, true))); },
-    genAppAgent: async function (appId, appDoc) { return fixRetVO(handleR(await postForm("/agent/app/generate", { appId: appId, appDoc: appDoc }, true))); },
-    editApp: async function (appId, newPrompt) { return fixRetVO(handleR(await postForm("/app/edit", { appId: appId, newPrompt: newPrompt }, true))); },
+    // requirement + generation (@RequestBody JSON)
+    genRequirement: async function (input) { return handleR(await postJson("/requirement/generate", { input: input }, true)); },
+    genApp: async function (appId, appDoc) { return fixRetVO(handleR(await postJson("/app/generate", { appId: appId, appDoc: appDoc }, true))); },
+    genAppAgent: async function (appId, appDoc) { return fixRetVO(handleR(await postJson("/agent/app/generate", { appId: String(appId), appDoc: appDoc }, true))); },
+    editApp: async function (appId, newPrompt) { return fixRetVO(handleR(await postJson("/app/edit", { appId: appId, newPrompt: newPrompt }, true))); },
     // listing
     listMine: async function (current, size) { return handleR(await get("/app/list/mine", { current: current, size: size }, true)); },
     listDeploy: async function (current, size) { return handleR(await get("/app/list/deploy", { current: current, size: size }, true)); },

@@ -5,7 +5,9 @@ import com.nexus.nexuscommoncore.domain.dto.BasePageDTO;
 import com.nexus.nexuscommoncore.utils.BeanCopyUtil;
 import com.nexus.nexuscommondomain.domain.vo.BasePageVO;
 import com.nexus.nexuscommondomain.exception.ServiceException;
+import com.nexus.nexusportalservice.domain.dto.AppEditReqDTO;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateReqDTO;
+import com.nexus.nexusportalservice.domain.dto.RequirementGenerateReqDTO;
 import com.nexus.nexusportalservice.domain.dto.DeployAppDTO;
 import com.nexus.nexusportalservice.domain.vo.*;
 import com.nexus.nexusportalservice.service.impl.AppBaseServiceImpl;
@@ -42,25 +44,23 @@ public class WispCodeController {
 
     /**
      * 
-     * @param input 用户需求
+     * @param req 用户需求(input)
      * @return  生成结果(需求文档)
      */
     @PostMapping("/requirement/generate")
-    public R<RequirementVO> generateRequirement(@RequestParam String input, @RequestHeader(value="Authorization") String token){
-        return R.ok(requirementServiceImpl.requirementGenerate(input, token).convertToVO());
+    public R<RequirementVO> generateRequirement(@RequestBody RequirementGenerateReqDTO req, @RequestHeader(value="Authorization") String token){
+        return R.ok(requirementServiceImpl.requirementGenerate(req.getInput(), token).convertToVO());
     }
 
     /**
      *
-     * @param appId 生成的文档对应的 appid
-     * @param appDoc 生成的文档
+     * @param req appId + appDoc（请求体）
      * @return appId，应用预览链接
      * @throws Exception
      */
     @PostMapping("/app/generate")
-    public R<AppGenerateRetVO> generateApp(@RequestParam(value="appId") Long appId,
-                                           @RequestParam(value="appDoc") String appDoc) throws Exception {
-        return R.ok(appGenerateServiceImpl.appGenerate(appId, appDoc).convertToVO());
+    public R<AppGenerateRetVO> generateApp(@RequestBody AppGenerateReqDTO req) throws Exception {
+        return R.ok(appGenerateServiceImpl.appGenerate(req.getAppId(), req.getAppDoc()).convertToVO());
     }
 
     /**
@@ -140,14 +140,13 @@ public class WispCodeController {
 
     /**
      *
-     * @param appId appId
-     * @param newPrompt 修改提示词
+     * @param req appId + newPrompt（请求体）
      * @return 修改后信息（同创建)
      * @throws Exception Exception
      */
     @PostMapping("/app/edit")
-    public R<AppGenerateRetVO> appEdit(@RequestParam Long appId, @RequestParam String newPrompt) throws Exception{
-        return R.ok(appEditService.appEdit(appId, newPrompt).convertToVO());
+    public R<AppGenerateRetVO> appEdit(@RequestBody AppEditReqDTO req) throws Exception{
+        return R.ok(appEditService.appEdit(req.getAppId(), req.getNewPrompt()).convertToVO());
     }
 
     private AppGenerateRetVO convert2VO(Long appId, OverAllState result) throws ServiceException {
