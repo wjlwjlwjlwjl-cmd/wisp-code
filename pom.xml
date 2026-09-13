@@ -17,9 +17,9 @@
     <modules>
         <module>nexus-gateway</module>
         <module>nexus-mstemplate</module>
+        <module>wispcode-gitee-mcp-server</module>
         <module>nexus-portal</module>
         <module>nexus-common</module>
-        <module>wispcode-gitee-mcp-server</module>
     </modules>
 
     <properties>
@@ -93,12 +93,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
             </dependency>
 
             <dependency>

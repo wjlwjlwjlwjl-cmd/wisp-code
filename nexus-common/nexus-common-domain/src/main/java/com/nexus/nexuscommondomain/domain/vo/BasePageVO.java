@@ -14,15 +14,20 @@ public class BasePageVO<T> {
     /**
      * 查询结果总数
      */
-    Integer totals;
+    private Integer totals;
 
     /**
      * 总页数
      */
-    Integer totalPages;
+    private Integer pageSize;
+
+    /**
+     * 当前页数
+     */
+    private Integer current;
 
     /**
      * 数据列表
      */
-    List<T> list;
+    private List<T> list;
 }

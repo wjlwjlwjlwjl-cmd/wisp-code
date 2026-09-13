@@ -101,7 +101,7 @@ public enum ResultCode {
     /**
      * 请求方法不支持！
      */
-    REQUEST_METNHOD_NOT_SUPPORTED                      (405000, "请求方法不支持"),
+    REQUEST_METHOD_NOT_SUPPORTED                      (405000, "请求方法不支持"),
 
     //---------------------5xx
 

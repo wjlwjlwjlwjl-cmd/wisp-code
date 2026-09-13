@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import com.nexus.nexusportalservice.domain.AppType;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,14 +36,13 @@ public class GeneratedAppWriter {
      * 将⽂件写⼊ user-code/${appId} ⽬录。
      * 
      * @param id         应⽤ ID
-     * @param files      ⽂件列表
+     * @param files      ⽂件列表（文件名，文件内容）
      * @param cleanFirst 是否先清理已存在的⽬录
      * @return 应⽤⽬录   user-code/${appId}
      */
     public static Path writeFiles(String id, Map<String, String> files, boolean cleanFirst) throws IOException {
         Path base = ensureUsercodeDir();
         Path appDir = base.resolve(id);
-        log.info("Generated app: " + appDir);
         // 如果需要清理且⽬录存在，先删除旧⽂件
         if (cleanFirst && Files.exists(appDir)) {
             log.info("清理旧代码⽬录: {}", appDir);
@@ -71,7 +71,7 @@ public class GeneratedAppWriter {
     /**
      * 递归删除⽬录
      */
-    private static void deleteDirectory(Path directory) throws IOException {
+    public static void deleteDirectory(Path directory) throws IOException {
         if (!Files.exists(directory)) {
             return;
         }
@@ -86,4 +86,31 @@ public class GeneratedAppWriter {
                     });
         }
     }
+
+    public static String determineAppType(Map<String, String> files) {
+        if (files == null || files.isEmpty()) {
+            return null;
+        }
+        // 规则1: 如果仅⽣成了⼀个⽂件并且⽂件后缀为.html，则应⽤类型为HTML
+        if (files.size() == 1) {
+            String singleFile = files.keySet().iterator().next();
+            if (singleFile.toLowerCase().endsWith(".html")) {
+                return AppType.HTML.getType();
+            }
+        }
+        // 规则2: 如果⽣成的⽂件同时包含.java⽂件和.vue⽂件，则应⽤类型为VUE_SPRING
+        boolean hasJavaFile = files.keySet().stream()
+                .anyMatch(path -> path.toLowerCase().endsWith(".java"));
+        boolean hasVueFile = files.keySet().stream()
+                .anyMatch(path -> path.toLowerCase().endsWith(".vue"));
+        if (hasJavaFile && hasVueFile) {
+            return AppType.VUE3_SPRING.getType();
+        }
+        // 规则3: 如果既不是HTML类型也不是VUE_SPRING类型，并且⽣成的⽂件中包含.vue⽂件，则
+        if (hasVueFile) {
+            return AppType.VUE3.getType();
+        }
+        return "error";
+    }
+
 }

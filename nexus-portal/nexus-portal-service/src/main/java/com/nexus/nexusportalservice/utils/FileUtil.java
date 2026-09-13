@@ -4,13 +4,19 @@ import com.nexus.nexuscommondomain.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 @Slf4j
 public final class FileUtil {
@@ -71,6 +77,7 @@ public final class FileUtil {
         }
     }
 
+    //将文件传入 ./tmp 目录下
     public static String saveFile(MultipartFile file, String fileName) throws ServiceException {
         if (file == null || file.isEmpty()) {
             throw new ServiceException("文件为空");
@@ -97,5 +104,27 @@ public final class FileUtil {
             return "";
         }
         return fileName.substring(fileName.lastIndexOf("."));
+    }
+
+    public static Map<String, String> readAllFiles(Path rootDir) throws IOException {
+        Map<String, String> files = new LinkedHashMap<>();
+
+        try (Stream<Path> stream = Files.walk(rootDir)) {
+            stream.filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        try {
+                            String relativePath = rootDir.relativize(path)
+                                    .toString()
+                                    .replace(File.separatorChar, '/');
+
+                            String content = Files.readString(path, StandardCharsets.UTF_8);
+                            files.put(relativePath, content);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+        }
+
+        return files;
     }
 }

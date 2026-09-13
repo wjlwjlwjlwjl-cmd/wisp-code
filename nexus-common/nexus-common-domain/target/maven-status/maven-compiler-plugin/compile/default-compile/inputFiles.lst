@@ -4,6 +4,8 @@ C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com
 C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\constants\SecurityConstants.java
 C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\constants\TokenConstants.java
 C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\domain\dto\BasePageReqDTO.java
+C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\domain\dto\LoginUserDTO.java
+C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\domain\dto\TokenDTO.java
 C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\domain\R.java
 C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\domain\ResultCode.java
 C:\Users\diinki\Git\wisp-code\nexus-common\nexus-common-domain\src\main\java\com\nexus\nexuscommondomain\domain\vo\BasePageVO.java

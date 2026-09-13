@@ -10,15 +10,13 @@ import com.nexus.nexuscommondomain.constants.CacheConstants;
 import com.nexus.nexuscommondomain.constants.SecurityConstants;
 import com.nexus.nexuscommondomain.constants.TokenConstants;
 import com.nexus.nexuscommonredis.service.RedisService;
-import com.nexus.nexuscommonsecurity.domain.dto.LoginUserDTO;
-import com.nexus.nexuscommonsecurity.domain.dto.TokenDTO;
+import com.nexus.nexuscommondomain.domain.dto.LoginUserDTO;
+import com.nexus.nexuscommondomain.domain.dto.TokenDTO;
 import com.nexus.nexuscommonsecurity.utils.JwtUtil;
 import com.nexus.nexuscommonsecurity.utils.SecurityUtil;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,16 +62,13 @@ public class TokenService {
      * @return token信息
      */
     public TokenDTO createToken(LoginUserDTO loginUserDTO) {
-        // 1 随机产生用户标识
-        String token = UUID.randomUUID().toString();
-        loginUserDTO.setToken(token);
+        // 1 在 Redis 中进行缓存，key: ACCESS_TOKEN+user_id，并自动设置有效期
         refreshToken(loginUserDTO);
         // 2 生成原始数据声明
         Map<String, Object> claimsMap = new HashMap<>();
-        claimsMap.put(SecurityConstants.USER_KEY, token);
         claimsMap.put(SecurityConstants.USER_ID, loginUserDTO.getUserId());
-        claimsMap.put(SecurityConstants.USERNAME, loginUserDTO.getUserName());
-        claimsMap.put(SecurityConstants.USER_FROM, loginUserDTO.getUserFrom());
+        claimsMap.put(SecurityConstants.EMAIL, loginUserDTO.getEmail());
+        claimsMap.put(SecurityConstants.USERNAME, loginUserDTO.getUsername());
         // 3 生成TokenDTO
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setAccessToken(JwtUtil.createToken(claimsMap));
@@ -92,11 +87,12 @@ public class TokenService {
         // 2 解析令牌获取用户信息
         try {
             if (StringUtils.isNotEmpty(token)) {
-                String userKey = JwtUtil.getUserKey(token);
-                user = redisService.getCacheObject(getTokenKey(userKey), LoginUserDTO.class);
+                String userId = JwtUtil.getUserId(token);
+                user = redisService.getCacheObject(getTokenKey(userId), LoginUserDTO.class);
                 return user;
             }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
         // 3 返回user
         return user;
@@ -113,38 +109,13 @@ public class TokenService {
     }
 
     /**
-     * 不传参数获取用户信息
-     * @return 用户信息
-     */
-    public LoginUserDTO getLoginUser() {
-        return getLoginUser(ServletUtil.getRequest());
-    }
-
-    /**
      * 根据令牌删除用户登录态
      * @param token 令牌
      */
     public void delLoginUser(String token) {
         if (StringUtils.isNotEmpty(token)) {
-            String useKey = JwtUtil.getUserKey(token);
-            redisService.deleteObject(getTokenKey(useKey));
-        }
-    }
-
-    /**
-     * 允许超管删除别人的登录状态
-     * @param userId 用户ID
-     * @param userFrom 用户来源
-     */
-    public void delLoginUser(Long userId, String userFrom) {
-        if (userId == null) return;
-        // 遍历redis里面的key删除
-        Collection<String> tokenKeys = redisService.keys(ACCESS_TOKEN + "*");
-        for (String tokenKey : tokenKeys) {
-            LoginUserDTO user = redisService.getCacheObject(tokenKey, LoginUserDTO.class);
-            if (user != null && user.getUserId().equals(userId) && user.getUserFrom().equals(userFrom)) {
-                redisService.deleteObject(tokenKey);
-            }
+            String userId = JwtUtil.getUserId(token);
+            redisService.deleteObject(getTokenKey(userId));
         }
     }
 
@@ -165,7 +136,7 @@ public class TokenService {
      * @param loginUserDTO 用户信息
      */
     public void setLoginUser(LoginUserDTO loginUserDTO) {
-        if (loginUserDTO != null && StringUtils.isNotEmpty(loginUserDTO.getToken())) {
+        if (loginUserDTO != null && StringUtils.isNotEmpty(loginUserDTO.getUserId())) {
             refreshToken(loginUserDTO);
         }
     }
@@ -178,17 +149,17 @@ public class TokenService {
         loginUserDTO.setLoginTime(System.currentTimeMillis());
         loginUserDTO.setExpireTime(loginUserDTO.getLoginTime() + EXPIRE_TIME * MILLIS_MINUTE);
         // 根据随机产生用户标识生成key
-        String userKey = getTokenKey(loginUserDTO.getToken());
+        String userId = getTokenKey(loginUserDTO.getUserId());
         // 生成loginUserDTO缓存
-        redisService.setCacheObject(userKey, loginUserDTO, EXPIRE_TIME, TimeUnit.MINUTES);
+        redisService.setCacheObject(userId, loginUserDTO, EXPIRE_TIME, TimeUnit.MINUTES);
     }
 
     /**
      * 获取token key的信息
-     * @param token token
+     * @param userId token
      * @return tokenKey
      */
-    public String getTokenKey(String token) {
-        return ACCESS_TOKEN + token;
+    public String getTokenKey(String userId) {
+        return ACCESS_TOKEN + userId;
     }
 }

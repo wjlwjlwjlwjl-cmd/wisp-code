@@ -19,6 +19,7 @@ public class ServiceException extends Exception{
      * @param resultCode
      */
     public ServiceException(ResultCode resultCode){
+        super(resultCode.getMsg());
         this.errCode = resultCode.getCode();
         this.errMsg = resultCode.getMsg();
     }
@@ -30,10 +31,12 @@ public class ServiceException extends Exception{
      * @param errMsg
      */
     public ServiceException(int errCode, String errMsg){
+        super(errMsg);
         this.errCode = errCode;
         this.errMsg = errMsg;
     }
     public ServiceException(String errMsg, int errCode){
+        super(errMsg);
         this.errCode = errCode;
         this.errMsg = errMsg;
     }
@@ -44,6 +47,7 @@ public class ServiceException extends Exception{
      * @param errMsg 错误信息
      */
     public ServiceException(String errMsg){
+        super(errMsg);
         this.errCode = ResultCode.ERROR.getCode();
         this.errMsg = errMsg;
     }

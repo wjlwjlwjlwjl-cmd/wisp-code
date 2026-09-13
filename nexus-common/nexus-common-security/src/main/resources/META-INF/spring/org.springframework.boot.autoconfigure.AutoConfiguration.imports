@@ -1,1 +1,2 @@
 com.nexus.nexuscommonsecurity.handler.GlobalExceptionHandler
+com.nexus.nexuscommonsecurity.service.TokenService

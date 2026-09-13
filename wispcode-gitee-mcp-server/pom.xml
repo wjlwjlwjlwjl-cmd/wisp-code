@@ -97,7 +97,7 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.45.0</version>
+                <version>0.48.0</version>
 
                 <configuration>
                     <!--指定远程服务器的Docker服务访问地址-->

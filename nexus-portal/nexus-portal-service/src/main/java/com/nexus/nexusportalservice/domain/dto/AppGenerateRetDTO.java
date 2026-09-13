@@ -9,7 +9,7 @@ import lombok.Data;
 public class AppGenerateRetDTO {
     private Long appId;         //appId
     private String previewUrl;  //预览 url
-    private Integer appTypeNum;     //应用类型
+    private String appType;     //应用类型
 
     public AppGenerateRetVO convertToVO(){
         AppGenerateRetVO appGenerateRetVO = new AppGenerateRetVO();

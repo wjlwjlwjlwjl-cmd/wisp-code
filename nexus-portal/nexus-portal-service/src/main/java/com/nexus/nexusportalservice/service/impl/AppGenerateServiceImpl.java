@@ -1,9 +1,7 @@
 package com.nexus.nexusportalservice.service.impl;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import com.github.dockerjava.api.DockerClient;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.nexus.nexuscommondomain.exception.ServiceException;
 import com.nexus.nexusportalservice.domain.AppType;
 import com.nexus.nexusportalservice.domain.ModelParsedResult;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateRetDTO;
@@ -28,6 +25,17 @@ import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.service.IAppGenerateService;
 
 import lombok.extern.slf4j.Slf4j;
+
+/**
+ * HTML
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\n你好页面\n\n## 2. 应用描述\n一个仅显示“你好”文本的极简HTML页面，无任何装饰元素。\n\n## 3. 应用核心功能\n3.1 显示“你好”文本内容。
+ *
+ * VUE
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\n最小 Vue 示例\n\n## 2. 应用描述\n一个最最简单、最最小的 Vue 项目，用于演示 Vue 应用的最小可运行结构。\n\n## 3. 应用核心功能\n\n### 3.1 显示静态文本\n在页面中展示一段固定的文本内容。\n\n### 3.2 点击按钮更新文本\n提供一个按钮，点击后更新页面中显示的文本内容。
+ *
+ * SPRING_VUE
+ * appDoc: # 应用需求文档\n\n## 1. 应用名称\nspring_vue 极简示例项目\n\n## 2. 应用描述\n一个最最简单、最最小的前后端分离示例项目。后端使用 Spring 提供接口，前端使用 Vue 展示数据，用于演示前后端基本通信流程。\n\n## 3. 应用核心功能\n\n### 3.1 后端接口\n- 提供一个 GET 接口，返回一条固定的文本消息。\n\n### 3.2 前端展示\n- 页面加载时调用后端接口，并将返回的消息显示在页面上。
+ */
 
 @Slf4j
 @Service
@@ -40,10 +48,8 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
 
     @Autowired
     DockerClient dockerClient;
-    @Autowired
-    ChatMemoryConfig chatMemoryConfig;
 
-    @Value("${app.host}")
+    @Value("${app.preview.host}")
     String serverHost;
     @Value("${app.preview.container-name}")
     String containerName;
@@ -57,43 +63,31 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     }
 
     @Override
-    public AppGenerateRetDTO appGenerate(Long appId, String appDoc) {
+    public AppGenerateRetDTO appGenerate(Long appId, String appDoc) throws Exception{
         String systemPrompt = getSystemPrompt(String.valueOf(appId));
         String userPrompt = getUserPrompt(appDoc);
-        log.info(userPrompt);
 
         //1. 获取 LLM 生成的源代码
         String conversationId = String.valueOf(appId);
         String rawContent = chatClient.prompt()
-                .system(systemPrompt)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
-                .user(userPrompt)
-                .call()
-                .content();
+            .system(systemPrompt)
+            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+            .user(userPrompt)
+            .call()
+            .content();
 
         //2. 根据源代码获取应用类型
         ModelParsedResult.ParsedResult parsedResult = ModelParsedResult.parse(rawContent);
         Map<String, String> files = parsedResult.getFiles();
-        String appType = determineAppType(files);
-        int appNum = -1;
-        try{
-            appNum = AppType.getTypeNum(appType);
-        }
-        catch(ServiceException e){
-            System.out.println(e.getStackTrace());
-        }
+        String appType = GeneratedAppWriter.determineAppType(files);
+        int appNum = AppType.getTypeNum(appType);
 
         //3. 整体代码，放到 user-code/${appId} 之中，处理后把需要预览
         //   将生成的预览内容，放到 user-preview 目录，在我们打包的docker容器中，就是 /workspace/portal
         //   同时，我们将这个目录挂载到 docker 主机，userapp-preview 容器，也挂在docker主机相同目录
         //   这样 nginx 容器就可以直接拿到内容进行展示了
-        try{
-            Path appPath = GeneratedAppWriter.writeFiles(appId, files);
-            handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
-        }
-        catch(Exception e){
-            System.out.println(e.getStackTrace());
-        }
+        Path appPath = GeneratedAppWriter.writeFiles(appId, files);
+        handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
         String previewUrl = "http://" + serverHost + ":80" + "/preview/" + appId + "/#";
@@ -106,12 +100,12 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 .eq(App::getId, appId)
                 .set(App::getPreviewUrl, previewUrl));
 
-        //5. Gitee MCP todo
-        giteeServiceImpl.commit(appId, parsedResult.getFiles());
+        //5. Gitee MCP，上传代码到 wispcode-gitee-repo 仓库，如果已经存在，那么就删除原有的内容
+        giteeServiceImpl.commit(String.valueOf(appId), appPath, appType, files);
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();
         appGenerateRetDTO.setAppId(appId);
-        appGenerateRetDTO.setAppTypeNum(appNum);
+        appGenerateRetDTO.setAppType(appType);
         appGenerateRetDTO.setPreviewUrl(previewUrl);
 
         return appGenerateRetDTO;
@@ -122,32 +116,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 "【⽤⼾需求⽂档】",
                 appDoc,
                 "【输出要求】请严格按照系统提⽰的格式输出，不要添加多余解释。");
-    }
-
-    private static String determineAppType(Map<String, String> files) {
-        if (files == null || files.isEmpty()) {
-            return null;
-        }
-        // 规则1: 如果仅⽣成了⼀个⽂件并且⽂件后缀为.html，则应⽤类型为HTML
-        if (files.size() == 1) {
-            String singleFile = files.keySet().iterator().next();
-            if (singleFile.toLowerCase().endsWith(".html")) {
-                return AppType.HTML.getType();
-            }
-        }
-        // 规则2: 如果⽣成的⽂件同时包含.java⽂件和.vue⽂件，则应⽤类型为VUE_SPRING
-        boolean hasJavaFile = files.keySet().stream()
-                .anyMatch(path -> path.toLowerCase().endsWith(".java"));
-        boolean hasVueFile = files.keySet().stream()
-                .anyMatch(path -> path.toLowerCase().endsWith(".vue"));
-        if (hasJavaFile && hasVueFile) {
-            return AppType.VUE3_SPRING.getType();
-        }
-        // 规则3: 如果既不是HTML类型也不是VUE_SPRING类型，并且⽣成的⽂件中包含.vue⽂件，则
-        if (hasVueFile) {
-            return AppType.VUE3.getType();
-        }
-        return "error";
     }
 
     private String getSystemPrompt(String appId) {
@@ -230,16 +198,3 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
     }
 }
 
-
-/**
- * HTML
- * appDoc: # 应用需求文档\n\n## 1. 应用名称\n你好页面\n\n## 2. 应用描述\n一个仅显示“你好”文本的极简HTML页面，无任何装饰元素。\n\n## 3. 应用核心功能\n3.1 显示“你好”文本内容。
- *
- * VUE
- * appDoc: # 应用需求文档\n\n## 1. 应用名称\n最小 Vue 示例\n\n## 2. 应用描述\n一个最最简单、最最小的 Vue 项目，用于演示 Vue 应用的最小可运行结构。\n\n## 3. 应用核心功能\n\n### 3.1 显示静态文本\n在页面中展示一段固定的文本内容。\n\n### 3.2 点击按钮更新文本\n提供一个按钮，点击后更新页面中显示的文本内容。
- *
- * SPRING_VUE
- * appDoc: # 应用需求文档\n\n## 1. 应用名称\nspring_vue 极简示例项目\n\n## 2. 应用描述\n一个最最简单、最最小的前后端分离示例项目。后端使用 Spring 提供接口，前端使用 Vue 展示数据，用于演示前后端基本通信流程。\n\n## 3. 应用核心功能\n\n### 3.1 后端接口\n- 提供一个 GET 接口，返回一条固定的文本消息。\n\n### 3.2 前端展示\n- 页面加载时调用后端接口，并将返回的消息显示在页面上。
- */
-
-//云计算与虚拟化技术
