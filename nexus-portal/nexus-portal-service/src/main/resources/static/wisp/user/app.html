@@ -95,7 +95,7 @@
       document.getElementById('app-meta').innerHTML=
         '<span class="badge">#'+esc(d.id)+'</span>'+WispAPI.appTypeBadge(d.appType)+
         '<span class="badge '+(deployed?'on':'off')+'">'+(deployed?'已部署':'未部署')+'</span>'+
-        (d.userId?'<span class="badge">owner: '+esc(d.userId)+'</span>':'');
+        (d.username?'<span class="badge">👤 '+esc(d.username)+'</span>':'');
       const url=WispAPI.fmtUrl(d.previewUrl);
       document.getElementById('preview-url').value=d.previewUrl||'';
       document.getElementById('open-tab').href=url||'#';

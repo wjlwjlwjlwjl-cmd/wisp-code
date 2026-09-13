@@ -156,6 +156,13 @@ public class AppBaseServiceImpl implements IAppBaseService {
             return appDTO;
         }
         BeanCopyUtil.copyProperties(app, appDTO);
+        // 回填 owner 用户名（前端用用户名表示身份，不展示 userId）
+        EmailUser owner = emailUserMapper.selectOne(
+                new LambdaQueryWrapper<EmailUser>().eq(EmailUser::getUserId, app.getUserId())
+        );
+        if (owner != null) {
+            appDTO.setUsername(owner.getUsername());
+        }
         return appDTO;
     }
 

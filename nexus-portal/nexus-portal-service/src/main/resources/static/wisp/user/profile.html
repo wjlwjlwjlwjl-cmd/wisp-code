@@ -10,7 +10,6 @@
 <div id="nav-mount"></div>
 <div class="wrap">
   <div class="page-title">个人中心</div>
-  <p class="page-sub">由 JWT 令牌自动解析出的当前登录用户信息。</p>
   <div id="alert" class="alert"></div>
 
   <div class="card">
@@ -45,7 +44,6 @@
       document.getElementById('p-email').textContent=u.email||'—';
       document.getElementById('avatar').textContent=name.slice(0,1).toUpperCase();
       document.getElementById('kv').innerHTML=
-        '<div class="k">用户 ID</div><div class="v mono">'+esc(u.userId||'—')+'</div>'+
         '<div class="k">用户名</div><div class="v">'+esc(u.username||'—')+'</div>'+
         '<div class="k">邮箱</div><div class="v">'+esc(u.email||'—')+'</div>';
     }catch(e){

@@ -110,6 +110,13 @@ public class GeneratedAppWriter {
         if (hasVueFile) {
             return AppType.VUE3.getType();
         }
+        // 规则4: 含 .html ⽂件，但既没有 .vue 也没有 .java → 视为静态 HTML 应⽤
+        // （LLM 偶发把 HTML 拆成 index.html + css/ + js/ 多个⽂件，预览 nginx 静态⽬录可正常访问）
+        boolean hasHtmlFile = files.keySet().stream()
+                .anyMatch(path -> path.toLowerCase().endsWith(".html"));
+        if (hasHtmlFile && !hasJavaFile && !hasVueFile) {
+            return AppType.HTML.getType();
+        }
         return "error";
     }
 

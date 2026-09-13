@@ -7,6 +7,7 @@ import lombok.Data;
 public class AppDTO {
     private Long id;
     private String userId;
+    private String username;
     private String appName;
     private String appDoc;
     private String appDesc;
@@ -19,6 +20,7 @@ public class AppDTO {
         appVO.setAppDesc(this.appDesc);
         appVO.setId(this.id);
         appVO.setUserId(this.userId);
+        appVO.setUsername(this.username);
         appVO.setAppName(this.appName);
         appVO.setAppDoc(this.appDoc);
         appVO.setPreviewUrl(this.previewUrl);
