@@ -151,6 +151,11 @@
   }
 
   var api = {
+    // GATEWAY POLICY: AuthFilter only whitelists /wisp/user/**. Every other
+    // /wisp/** call (app/detail, app/history, app/list/*, app/deploy*, generate,
+    // edit ...) MUST carry the Authorization header or the gateway returns 401.
+    // Only login/register/send_code omit it; get_info is whitelisted but its
+    // controller reads the header itself, so we still send it.
     // user
     sendCode: async function (email) { return handleR(await get("/user/send_code", { email: email }, false)); },
     register: async function (p) { return handleR(await postJson("/user/register", p, false)); },
@@ -173,8 +178,8 @@
     // listing
     listMine: async function (current, size) { return handleR(await get("/app/list/mine", { current: current, size: size }, true)); },
     listDeploy: async function (current, size) { return handleR(await get("/app/list/deploy", { current: current, size: size }, true)); },
-    detail: async function (appId) { return handleR(await get("/app/detail", { appId: appId }, false)); },
-    history: async function (appId) { return handleR(await get("/app/history", { appId: appId }, false)); },
+    detail: async function (appId) { return handleR(await get("/app/detail", { appId: appId }, true)); },
+    history: async function (appId) { return handleR(await get("/app/history", { appId: appId }, true)); },
     deploy: async function (appId) { return handleR(await get("/app/deploy", { appId: appId }, true)); },
     deployCancel: async function (appId) { return handleR(await get("/app/deploy/cancel", { appId: appId }, true)); }
   };
