@@ -41,6 +41,6 @@ public class WispCodeAgentController {
         }
         String appType = result.value("appType", String.class).orElse(null);
         String previewUrl = result.value("previewUrl", String.class).orElse(null);
-        return new AppGenerateRetVO(appId, appType, previewUrl);
+        return new AppGenerateRetVO(appId, previewUrl, appType);
     }
 }

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>已部署应用 · WispCode</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div class="wrap wide">
+  <div class="page-title">已部署应用</div>
+  <p class="page-sub">全站当前已部署、可公开访问的应用（不分用户）。点击卡片查看应用详情（只读）。</p>
+  <div id="alert" class="alert"></div>
+  <div class="card" style="padding:14px 18px">
+    <div class="row" style="align-items:center">
+      <span class="muted" id="total-label">—</span>
+      <div style="flex:1"></div>
+      <button class="btn ghost sm" id="prev" onclick="turn(-1)">‹ 上一页</button>
+      <span class="badge" id="page-label">1 / 1</span>
+      <button class="btn ghost sm" id="next" onclick="turn(1)">下一页 ›</button>
+    </div>
+  </div>
+  <div id="list" class="app-grid" style="margin-top:18px"><div class="muted loading-inline" style="grid-column:1/-1"><span class="spinner"></span> 加载中…</div></div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+  const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
+  if(!Auth.require()){} nav('deployed');
+  let current=1; const size=9; let totals=0;
+  function showAlert(m,t){const a=document.getElementById('alert');a.className='alert show '+(t||'err');a.textContent=m;}
+  function hideAlert(){document.getElementById('alert').className='alert';}
+  function pageCount(){ return Math.max(1, Math.ceil((totals||0)/size)); }
+  function turn(d){ const p=Math.min(pageCount(),Math.max(1,current+d)); if(p!==current){current=p;load();} }
+
+  async function load(){
+    hideAlert();
+    document.getElementById('list').innerHTML='<div class="muted loading-inline" style="grid-column:1/-1"><span class="spinner"></span> 加载中…</div>';
+    try{
+      const page=await A.listDeploy(current,size);
+      const list=(page&&page.list)||[]; totals=page&&page.totals||0; current=page&&page.current||current;
+      document.getElementById('total-label').textContent='共 '+totals+' 个已部署应用';
+      document.getElementById('page-label').textContent=current+' / '+pageCount();
+      document.getElementById('prev').disabled=current<=1;
+      document.getElementById('next').disabled=current>=pageCount();
+      const el=document.getElementById('list');
+      if(!list.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1">暂无已部署应用</div>'; return; }
+      el.innerHTML=list.map(card).join('');
+    }catch(e){
+      if(e.needAuth){Auth.expired(e.message);return;}
+      document.getElementById('list').innerHTML='<div class="alert err show" style="grid-column:1/-1">'+esc(e.message)+'</div>';
+    }
+  }
+  function card(app){
+    const url=WispAPI.fmtUrl(app.previewUrl);
+    const visit=url?'<a class="btn ok sm" href="'+esc(url)+'" target="_blank" rel="noopener">访问</a>':'';
+    const owner=app.userId?'<span class="badge">owner '+esc(app.userId)+'</span>':'';
+    return '<div class="app-card">'+
+      '<div class="name">'+esc(app.appName||('应用 #'+app.id))+'</div>'+
+      '<div class="desc">'+esc(app.appDesc||'—')+'</div>'+
+      '<div class="meta"><span class="badge">#'+esc(app.id)+'</span>'+WispAPI.appTypeBadge(app.appType)+
+        '<span class="badge on">已部署</span>'+owner+'</div>'+
+      '<div class="actions"><a class="btn sm" href="app.html?appId='+app.id+'">打开</a>'+visit+'</div></div>';
+  }
+  load();
+</script>
+</body>
+</html>

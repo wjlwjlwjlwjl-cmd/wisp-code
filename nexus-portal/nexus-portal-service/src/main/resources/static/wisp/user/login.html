@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登录 · WispCode</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="brand"><span class="logo">⚡</span> WispCode</div>
+      <div class="muted" style="font-size:13px;margin-top:6px">一键应用生成平台</div></div>
+
+    <div class="tabs">
+      <button id="tab-login" class="active" onclick="switchTab('login')">登录</button>
+      <button id="tab-register" onclick="switchTab('register')">注册</button>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- LOGIN -->
+    <form id="form-login" onsubmit="return doLogin(event)">
+      <div class="field"><label>邮箱</label>
+        <input class="input" type="email" id="l-email" required autocomplete="username" placeholder="you@example.com"></div>
+      <div class="field"><label>密码</label>
+        <input class="input" type="password" id="l-pass" required autocomplete="current-password" placeholder="••••••••"></div>
+      <button class="btn block" type="submit" id="l-btn">登 录</button>
+    </form>
+
+    <!-- REGISTER -->
+    <form id="form-register" style="display:none" onsubmit="return doRegister(event)">
+      <div class="field"><label>邮箱</label>
+        <input class="input" type="email" id="r-email" required placeholder="you@example.com"></div>
+      <div class="field"><label>用户名</label>
+        <input class="input" type="text" id="r-username" required placeholder="你的昵称"></div>
+      <div class="field"><label>密码</label>
+        <input class="input" type="password" id="r-pass" required minlength="6" placeholder="至少 6 位"></div>
+      <div class="field"><label>邮箱验证码</label>
+        <div class="row">
+          <input class="input" type="text" id="r-code" required placeholder="6 位验证码">
+          <button type="button" class="btn ghost" id="r-send" onclick="sendCode()">发送验证码</button>
+        </div></div>
+      <button class="btn block" type="submit" id="r-btn">注 册</button>
+    </form>
+
+    <div class="foot">登录 / 注册后即可创建并部署你的应用</div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+  const A = WispAPI.api, Auth = WispAPI.auth, toast = WispAPI.toast;
+  function switchTab(t){
+    document.getElementById('form-login').style.display = t==='login'?'':'none';
+    document.getElementById('form-register').style.display = t==='register'?'':'none';
+    document.getElementById('tab-login').classList.toggle('active', t==='login');
+    document.getElementById('tab-register').classList.toggle('active', t==='register');
+    hideAlert();
+  }
+  function showAlert(msg,type){ const a=document.getElementById('alert'); a.className='alert show '+(type||'err'); a.textContent=msg; }
+  function hideAlert(){ const a=document.getElementById('alert'); a.className='alert'; }
+  function busy(id,on){ const b=document.getElementById(id); if(on){b.dataset.t=b.textContent;b.innerHTML='<span class="spinner"></span> 处理中';b.disabled=true;} else if(b.dataset.t){b.textContent=b.dataset.t;b.disabled=false;} }
+
+  async function sendCode(){
+    hideAlert();
+    const email=document.getElementById('r-email').value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showAlert('请输入正确的邮箱'); return; }
+    const btn=document.getElementById('r-send'); btn.disabled=true;
+    try{
+      const ok=await A.sendCode(email);
+      if(ok===false){ showAlert('验证码发送失败，请稍后再试'); }
+      else{ toast('验证码已发送至邮箱','ok'); startCd(btn); }
+    }catch(e){ showAlert(e.message); btn.disabled=false; }
+  }
+  function startCd(btn){ let s=60; btn.textContent=s+'s'; const t=setInterval(()=>{ s--; btn.textContent=s+'s'; if(s<=0){clearInterval(t);btn.textContent='重新发送';} },1000); }
+
+  async function doLogin(ev){
+    ev.preventDefault(); hideAlert(); busy('l-btn',true);
+    try{
+      await A.login(document.getElementById('l-email').value.trim(), document.getElementById('l-pass').value);
+      toast('登录成功','ok');
+      const rp=new URLSearchParams(location.search).get('redirect');
+      setTimeout(()=>location.href = rp ? rp : 'index.html', 400);
+    }catch(e){ showAlert(e.message); busy('l-btn',false); }
+    return false;
+  }
+  async function doRegister(ev){
+    ev.preventDefault(); hideAlert(); busy('r-btn',true);
+    try{
+      const r=await A.register({
+        email:document.getElementById('r-email').value.trim(),
+        username:document.getElementById('r-username').value.trim(),
+        password:document.getElementById('r-pass').value,
+        code:document.getElementById('r-code').value.trim()
+      });
+      if(r && r.success===false){ showAlert(r.errMsg||'注册失败'); }
+      else{ toast('注册成功，请登录','ok'); switchTab('login'); document.getElementById('l-email').value=document.getElementById('r-email').value; }
+    }catch(e){ showAlert(e.message); }
+    busy('r-btn',false);
+    return false;
+  }
+  if(Auth.isLogged() && !new URLSearchParams(location.search).get('force')){ location.href='index.html'; }
+  (function showReason(){
+    var r=Auth.reason();
+    if(r){ showAlert(r, /退出/.test(r)?'info':'err'); }
+  })();
+</script>
+</body>
+</html>

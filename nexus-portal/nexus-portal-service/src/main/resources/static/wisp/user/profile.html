@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>个人中心 · WispCode</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div class="wrap">
+  <div class="page-title">个人中心</div>
+  <p class="page-sub">由 JWT 令牌自动解析出的当前登录用户信息。</p>
+  <div id="alert" class="alert"></div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="avatar" id="avatar" style="width:56px;height:56px;font-size:22px;border-radius:16px">?</div>
+      <div><h3 id="p-name" style="margin:0">加载中…</h3><div class="muted" id="p-email">—</div></div>
+    </div>
+    <hr class="sep">
+    <div class="kv" id="kv"></div>
+    <hr class="sep">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost" onclick="load()">↻ 刷新</button>
+      <a class="btn" href="apps.html">我的应用</a>
+      <button class="btn danger" onclick="WispAPI.auth.logout()">退出登录</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>访问令牌（JWT）</h3>
+    <p class="hint">登录后所有业务请求都在 <code>Authorization</code> 头携带此令牌，请勿外泄。</p>
+    <div class="row">
+      <input class="input mono" id="token" readonly type="password">
+      <button class="btn ghost sm" id="eye" onclick="toggleToken()" style="flex:0 0 auto">显示</button>
+      <button class="btn ghost sm" onclick="copyToken()" style="flex:0 0 auto">复制</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+  const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
+  if(!Auth.require()){} nav('profile');
+  function showAlert(m,t){const a=document.getElementById('alert');a.className='alert show '+(t||'err');a.textContent=m;}
+  function hideAlert(){document.getElementById('alert').className='alert';}
+  async function load(){
+    hideAlert();
+    document.getElementById('token').value=Auth.token();
+    try{
+      const u=await A.getInfo();
+      Auth.setUser(u);
+      const name=u.username||u.email||'用户';
+      document.getElementById('p-name').textContent=name;
+      document.getElementById('p-email').textContent=u.email||'—';
+      document.getElementById('avatar').textContent=name.slice(0,1).toUpperCase();
+      document.getElementById('kv').innerHTML=
+        '<div class="k">用户 ID</div><div class="v mono">'+esc(u.userId||'—')+'</div>'+
+        '<div class="k">用户名</div><div class="v">'+esc(u.username||'—')+'</div>'+
+        '<div class="k">邮箱</div><div class="v">'+esc(u.email||'—')+'</div>';
+    }catch(e){
+      if(e.needAuth){Auth.expired(e.message);return;}
+      showAlert('获取用户信息失败：'+e.message);
+    }
+  }
+  function toggleToken(){ const i=document.getElementById('token'); const e=document.getElementById('eye'); if(i.type==='password'){i.type='text';e.textContent='隐藏';} else {i.type='password';e.textContent='显示';} }
+  function copyToken(){ const i=document.getElementById('token'); i.type='text'; i.select(); try{navigator.clipboard&&navigator.clipboard.writeText(i.value);}catch(e){} document.execCommand&&document.execCommand('copy'); WispAPI.toast('已复制到剪贴板','ok'); i.type='password'; }
+  load();
+</script>
+</body>
+</html>

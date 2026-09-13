@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>生成应用 · WispCode</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div class="wrap">
+  <div class="page-title">生成应用</div>
+  <p class="page-sub">描述你的需求 → 生成应用文档 → 选择构建方式生成可预览的应用。</p>
+
+  <div class="steps" id="steps">
+    <div class="step active" data-s="1"><span class="dot">1</span> 需求文档</div>
+    <div class="step" data-s="2"><span class="dot">2</span> 生成代码</div>
+    <div class="step" data-s="3"><span class="dot">3</span> 构建结果</div>
+  </div>
+
+  <div id="alert" class="alert"></div>
+
+  <!-- STEP 1 -->
+  <div class="card" id="panel-1">
+    <h3>① 描述你的应用需求</h3>
+    <p class="hint">用自然语言描述，AI 会生成结构化应用文档（可编辑）。</p>
+    <div class="field">
+      <textarea id="req-input" placeholder="例如：做一个待办事项应用，支持添加、勾选完成、按日期分类和删除，界面简洁现代。"></textarea>
+    </div>
+    <button class="btn" id="btn-gen-doc" onclick="genDoc()">✦ 生成应用文档</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="panel-2" style="display:none">
+    <h3>② 确认应用文档并选择构建方式</h3>
+    <p class="hint">应用文档 <span class="badge" id="appid-badge">appId: —</span> 可在下方继续修改。</p>
+    <div class="field"><label>应用文档（可编辑）</label>
+      <textarea id="app-doc" style="min-height:220px"></textarea></div>
+    <div class="field"><label>构建方式</label>
+      <div class="grid cols-2" style="margin-top:6px">
+        <label class="card" style="padding:14px;cursor:pointer;margin:0;display:flex;gap:10px;align-items:flex-start">
+          <input type="radio" name="mode" value="normal" checked style="margin-top:4px;width:auto">
+          <span><b>普通构建</b><br><span class="muted" style="font-size:13px">单流程生成，速度快</span></span>
+        </label>
+        <label class="card" style="padding:14px;cursor:pointer;margin:0;display:flex;gap:10px;align-items:flex-start">
+          <input type="radio" name="mode" value="agent" style="margin-top:4px;width:auto">
+          <span><b>多 Agent 构建</b><br><span class="muted" style="font-size:13px">多智能体协作，质量更高</span></span>
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn ghost" onclick="backTo(1)">← 上一步</button>
+      <button class="btn" id="btn-gen-app" onclick="genApp()">🚀 开始生成应用</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="panel-3" style="display:none">
+    <h3>③ 构建完成 🎉</h3>
+    <p class="hint">应用已生成，可预览、迭代修改或部署。</p>
+    <div class="kv" id="result-kv"></div>
+    <hr class="sep">
+    <label>预览</label>
+    <iframe id="preview" class="preview-frame" src="about:blank"></iframe>
+    <div class="row" style="margin-top:16px;flex-wrap:wrap">
+      <a class="btn ghost" id="open-tab" href="#" target="_blank" rel="noopener">↗ 新窗口打开</a>
+      <a class="btn" id="to-detail" href="#">进入应用（修改/部署）</a>
+      <button class="btn ghost" onclick="resetAll()">＋ 再创建一个</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+  const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
+  if(!Auth.require()){} nav('create');
+  let state={appId:null,previewUrl:null,appType:null};
+
+  function showAlert(m,t){const a=document.getElementById('alert');a.className='alert show '+(t||'err');a.textContent=m;a.scrollIntoView({behavior:'smooth',block:'center'});}
+  function hideAlert(){document.getElementById('alert').className='alert';}
+  function goStep(n){
+    [1,2,3].forEach(i=>{ document.getElementById('panel-'+i).style.display = i===n?'':'none'; });
+    document.querySelectorAll('#steps .step').forEach(s=>{
+      const v=+s.dataset.s; s.classList.toggle('active',v===n); s.classList.toggle('done',v<n);
+    });
+    hideAlert(); window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function backTo(n){goStep(n);}
+  function busy(id,on){const b=document.getElementById(id);if(on){b.dataset.t=b.innerHTML;b.insertAdjacentHTML('beforeend',' <span class="spinner"></span>');b.disabled=true;}else{if(b.dataset.t)b.innerHTML=b.dataset.t;b.disabled=false;}}
+
+  async function genDoc(){
+    const input=document.getElementById('req-input').value.trim();
+    if(!input){showAlert('请先描述你的需求');return;}
+    busy('btn-gen-doc',true);
+    try{
+      const vo=await A.genRequirement(input); // {appId, content}
+      state.appId=vo.appId;
+      document.getElementById('app-doc').value=vo.content||'';
+      document.getElementById('appid-badge').textContent='appId: '+(vo.appId??'—');
+      goStep(2);
+    }catch(e){ showAlert(e.needAuth?'登录失效，请重新登录':('生成文档失败：'+e.message)); }
+    busy('btn-gen-doc',false);
+  }
+
+  async function genApp(){
+    const appDoc=document.getElementById('app-doc').value.trim();
+    if(!appDoc){showAlert('应用文档不能为空');return;}
+    if(!state.appId){showAlert('缺少 appId，请回到第一步重新生成文档');return;}
+    const mode=document.querySelector('input[name=mode]:checked').value;
+    busy('btn-gen-app',true);
+    try{
+      const ret = mode==='agent' ? await A.genAppAgent(state.appId,appDoc) : await A.genApp(state.appId,appDoc);
+      state.appId=ret.appId??state.appId; state.previewUrl=ret.previewUrl; state.appType=ret.appType;
+      renderResult(mode);
+      goStep(3);
+    }catch(e){ showAlert(e.needAuth?'登录失效，请重新登录':('生成应用失败：'+e.message)); }
+    busy('btn-gen-app',false);
+  }
+
+  function renderResult(mode){
+    const url=WispAPI.fmtUrl(state.previewUrl);
+    document.getElementById('result-kv').innerHTML=
+      '<div class="k">应用 ID</div><div class="v mono">#'+esc(state.appId)+'</div>'+
+      '<div class="k">构建方式</div><div class="v">'+(mode==='agent'?'多 Agent':'普通')+'</div>'+
+      '<div class="k">应用类型</div><div class="v">'+esc(state.appType||'—')+'</div>'+
+      '<div class="k">预览链接</div><div class="v">'+(url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(state.previewUrl)}</a>`:'<span class="muted">无</span>')+'</div>';
+    document.getElementById('preview').src = url || 'about:blank';
+    document.getElementById('open-tab').href = url || '#';
+    document.getElementById('to-detail').href = 'app.html?appId='+encodeURIComponent(state.appId);
+  }
+
+  function resetAll(){ state={appId:null,previewUrl:null,appType:null}; document.getElementById('req-input').value=''; document.getElementById('app-doc').value=''; document.getElementById('preview').src='about:blank'; goStep(1); }
+</script>
+</body>
+</html>

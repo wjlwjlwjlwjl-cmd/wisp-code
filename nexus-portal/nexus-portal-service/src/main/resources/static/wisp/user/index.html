@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>概览 · WispCode</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div id="nav-mount"></div>
+<div class="wrap">
+  <div class="page-title" id="hi">欢迎回来 👋</div>
+  <p class="page-sub">WispCode 把你的自然语言需求，一键变成可预览、可部署的应用。</p>
+
+  <div class="card">
+    <h3>如何使用</h3>
+    <p class="hint">四步生成一个应用，生成后即可预览并部署上线。</p>
+    <div class="steps">
+      <div class="step"><span class="dot">1</span> 描述需求，生成应用文档</div>
+      <div class="step"><span class="dot">2</span> 普通 / 多 Agent 生成代码</div>
+      <div class="step"><span class="dot">3</span> 预览结果，自然语言迭代</div>
+      <div class="step"><span class="dot">4</span> 一键部署 / 取消部署</div>
+    </div>
+    <a class="btn" href="create.html">＋ 开始生成应用</a>
+    <a class="btn ghost" href="apps.html">查看我的应用</a>
+  </div>
+
+  <div class="grid cols-3" style="margin-top:18px">
+    <div class="card"><h3>📝 需求文档</h3><p class="hint" style="margin:0">输入一句话需求，AI 自动生成结构化应用文档，你可再编辑。</p></div>
+    <div class="card"><h3>🤖 多 Agent 构建</h3><p class="hint" style="margin:0">选择普通或 Multi-Agent 工作流生成代码，获得在线预览链接。</p></div>
+    <div class="card"><h3>🚀 一键部署</h3><p class="hint" style="margin:0">随时部署或下线你的应用，并在应用广场查看他人已部署应用。</p></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div><h3 style="margin:0">我的应用</h3><p class="hint" style="margin:4px 0 0">最近的应用</p></div>
+      <a class="btn ghost sm" href="apps.html">全部 →</a>
+    </div>
+    <hr class="sep">
+    <div id="recent" class="app-grid"><div class="muted loading-inline"><span class="spinner"></span> 加载中…</div></div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+  const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
+  if(!Auth.require()){ /* redirected */ }
+  nav('home');
+  (async()=>{
+    const u=Auth.user(); if(u){ document.getElementById('hi').textContent='欢迎回来，'+(u.username||u.email)+' 👋'; }
+    try{ const info=await A.getInfo(); Auth.setUser(info); document.getElementById('hi').textContent='欢迎回来，'+(info.username||info.email)+' 👋'; }catch(e){ if(e.needAuth){Auth.expired(e.message);return;} }
+    try{
+      const page=await A.listMine(1,6);
+      const el=document.getElementById('recent');
+      const list=(page&&page.list)||[];
+      if(!list.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1">还没有应用，去 <a href="create.html">生成第一个</a> 吧</div>'; return; }
+      el.innerHTML=list.map(app=>{
+        const open=app.previewUrl?`<a class="btn ghost sm" href="${WispAPI.fmtUrl(app.previewUrl)}" target="_blank">预览</a>`:'';
+        return `<div class="app-card"><div class="name">${esc(app.appName||('应用 #'+app.id))}</div>
+          <div class="desc">${esc(app.appDesc||'—')}</div>
+          <div class="meta"><span class="badge">#${app.id}</span>${WispAPI.appTypeBadge(app.appType)}<span class="badge ${app.deploy?'on':'off'}">${app.deploy?'已部署':'未部署'}</span></div>
+          <div class="actions"><a class="btn sm" href="app.html?appId=${app.id}">打开</a>${open}</div></div>`;
+      }).join('');
+    }catch(e){ document.getElementById('recent').innerHTML='<div class="alert err show" style="grid-column:1/-1">'+esc(e.message)+'</div>'; }
+  })();
+</script>
+</body>
+</html>
