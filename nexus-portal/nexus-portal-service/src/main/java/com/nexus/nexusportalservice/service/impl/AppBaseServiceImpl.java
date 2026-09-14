@@ -119,7 +119,9 @@ public class AppBaseServiceImpl implements IAppBaseService {
         basePageDTO.setList(appVOS);
         basePageDTO.setCurrent((int) rets.getCurrent());
         basePageDTO.setPageSize((int) rets.getSize());
-        basePageDTO.setTotals(appMapper.getMyAppNum(userId));
+        // 已部署总数 = 本次分页查询条件（deploy=true）匹配的记录总数，跨全站用户；
+        // 旧实现误用 getMyAppNum(userId) → 显示的是"当前登录用户的应用数"，与列表内容不符。
+        basePageDTO.setTotals((int) rets.getTotal());
 
         return basePageDTO;
     }

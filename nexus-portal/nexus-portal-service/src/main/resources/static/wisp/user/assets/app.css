@@ -91,6 +91,9 @@ textarea{resize:vertical;min-height:120px;line-height:1.6}
 
 /* app cards */
 .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.app-grid.cols4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.app-grid.cols4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.app-grid.cols4{grid-template-columns:1fr}}
 .app-card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px}
 .app-card .name{font-weight:700;font-size:16px;word-break:break-all}
 .app-card .desc{color:var(--muted);font-size:13px;min-height:34px;overflow:hidden}

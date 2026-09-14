@@ -24,14 +24,14 @@
       <button class="btn ghost sm" id="next" onclick="turn(1)">下一页 ›</button>
     </div>
   </div>
-  <div id="list" class="app-grid" style="margin-top:18px"><div class="muted loading-inline" style="grid-column:1/-1"><span class="spinner"></span> 加载中…</div></div>
+  <div id="list" class="app-grid cols4" style="margin-top:18px"><div class="muted loading-inline" style="grid-column:1/-1"><span class="spinner"></span> 加载中…</div></div>
 </div>
 
 <script src="assets/api.js"></script>
 <script>
   const A=WispAPI.api,Auth=WispAPI.auth,nav=WispAPI.nav,esc=WispAPI.escape;
   if(!Auth.require()){} nav('apps');
-  let current=1; const size=9; let totals=0;
+  let current=1; const size=8; let totals=0;
   function showAlert(m,t){const a=document.getElementById('alert');a.className='alert show '+(t||'err');a.textContent=m;}
   function hideAlert(){document.getElementById('alert').className='alert';}
   function pageCount(){ return Math.max(1, Math.ceil((totals||0)/size)); }
