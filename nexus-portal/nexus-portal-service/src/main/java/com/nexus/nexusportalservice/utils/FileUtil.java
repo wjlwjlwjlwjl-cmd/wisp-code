@@ -7,7 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -112,19 +115,78 @@ public final class FileUtil {
         try (Stream<Path> stream = Files.walk(rootDir)) {
             stream.filter(Files::isRegularFile)
                     .forEach(path -> {
-                        try {
-                            String relativePath = rootDir.relativize(path)
-                                    .toString()
-                                    .replace(File.separatorChar, '/');
-
-                            String content = Files.readString(path, StandardCharsets.UTF_8);
-                            files.put(relativePath, content);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
+                        String relativePath = rootDir.relativize(path)
+                                .toString()
+                                .replace(File.separatorChar, '/');
+                        // 跳过构建产物 / 依赖目录与无意义文件，避免读二进制崩溃、避免撑爆提示词
+                        if (shouldSkipPath(relativePath)) {
+                            return;
                         }
+                        byte[] bytes;
+                        try {
+                            bytes = Files.readAllBytes(path);
+                        } catch (IOException e) {
+                            log.warn("readAllFiles 跳过无法读取的文件: {}", relativePath);
+                            return;
+                        }
+                        // 二进制文件（含 NUL）跳过
+                        if (isBinary(bytes)) {
+                            log.debug("readAllFiles 跳过二进制文件: {}", relativePath);
+                            return;
+                        }
+                        // 严格 UTF-8 解码，非 UTF-8 文本跳过而不是抛异常
+                        String content;
+                        try {
+                            content = StandardCharsets.UTF_8.newDecoder()
+                                    .onMalformedInput(CodingErrorAction.REPORT)
+                                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                                    .decode(ByteBuffer.wrap(bytes));
+                        } catch (CharacterCodingException e) {
+                            log.warn("readAllFiles 跳过非 UTF-8 文本文件: {}", relativePath);
+                            return;
+                        }
+                        files.put(relativePath, content);
                     });
         }
 
         return files;
+    }
+
+    // 构建产物 / 依赖 / IDE / 锁文件等目录名（任意层级出现即整目录跳过）
+    private static final Set<String> SKIP_DIR_NAMES = Set.of(
+            "node_modules", "dist", "target", "build", "out",
+            ".git", ".idea", ".vscode", ".mvn", ".gradle",
+            "coverage", ".next", ".nuxt", ".cache", ".pnpm-store"
+    );
+
+    // 需要跳过的具体文件名（文本但无编辑价值 / 系统文件）
+    private static final Set<String> SKIP_FILE_NAMES = Set.of(
+            "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
+            ".DS_Store", "npm-debug.log"
+    );
+
+    private static boolean shouldSkipPath(String relativePath) {
+        String[] segments = relativePath.split("/");
+        for (int i = 0; i < segments.length; i++) {
+            String seg = segments[i];
+            if (SKIP_DIR_NAMES.contains(seg)) {
+                return true;
+            }
+            // 末段为文件时，额外按文件名过滤
+            if (i == segments.length - 1 && SKIP_FILE_NAMES.contains(seg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isBinary(byte[] bytes) {
+        int limit = Math.min(bytes.length, 8000);
+        for (int i = 0; i < limit; i++) {
+            if (bytes[i] == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }
