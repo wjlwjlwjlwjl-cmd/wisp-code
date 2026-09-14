@@ -3,10 +3,11 @@ package com.nexus.nexusportalservice.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.nexus.nexusportalservice.config.GiteeProperties;
 import com.nexus.nexusportalservice.service.IGiteeService;
 import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,28 +29,22 @@ import java.util.Map;
 /**
  * Gitee 代码仓库服务：直接通过 Gitee v5 Contents REST API 完成提交 / 拉取 / 删除，
  * 不再依赖 MCP Server 与大模型复述代码，避免大模型产出的 JSON 被截断 / 转义错误。
- * 仓库归属信息来自 Nacos 配置：
+ * 配置来自 Nacos（前缀 gitee，宽松绑定，见 {@link GiteeProperties}）：
  *   gitee.user-code.owner / gitee.user-code.repo / gitee.user-code.branch
- *   gitee.apiBaseUrl (默认 https://gitee.com/api/v5/) / gitee.accessToken
+ *   gitee.apiBaseUrl (默认 https://gitee.com/api/v5/) / gitee.access-token
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GiteeServiceImpl implements IGiteeService {
 
-    @Value("${gitee.user-code.owner}")
-    private String userAppCodeOwner;
+    private final GiteeProperties giteeProperties;
 
-    @Value("${gitee.user-code.repo}")
-    private String userAppCodeRepo;
-
-    @Value("${gitee.user-code.branch}")
-    private String userAppCodeBranch;
-
-    @Value("${gitee.apiBaseUrl:https://gitee.com/api/v5/}")
-    private String apiBaseUrl;
-
-    @Value("${gitee.accessToken:}")
-    private String accessToken;
+    // 每次通过 bean 读取，保证 Nacos 热刷新后拿到最新值
+    private String owner() { return giteeProperties.getUserCode().getOwner(); }
+    private String repo() { return giteeProperties.getUserCode().getRepo(); }
+    private String branch() { return giteeProperties.getUserCode().getBranch(); }
+    private String token() { return giteeProperties.getAccessToken(); }
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -79,7 +74,7 @@ public class GiteeServiceImpl implements IGiteeService {
             Path filePath = appPath.resolve(rel).toAbsolutePath().normalize();
             String fileContent = Files.readString(filePath, StandardCharsets.UTF_8);
             String repoPath = appId + "/" + rel;
-            writeFile(userAppCodeOwner, userAppCodeRepo, repoPath, fileContent, userAppCodeBranch, message);
+            writeFile(owner(), repo(), repoPath, fileContent, branch(), message);
             ok++;
         }
         log.info("gitee commit success: appId={}, files={}", appId, ok);
@@ -95,7 +90,7 @@ public class GiteeServiceImpl implements IGiteeService {
         Files.createDirectories(localPath);
         cleanDirectory(localPath);
         int[] counter = {0};
-        downloadDirectory(userAppCodeOwner, userAppCodeRepo, userAppCodeBranch, String.valueOf(appId), localPath, counter);
+        downloadDirectory(owner(), repo(), branch(), String.valueOf(appId), localPath, counter);
         log.info("gitee pull success: appId={}, files={}, dir={}", appId, counter[0], localPath);
     }
 
@@ -110,7 +105,7 @@ public class GiteeServiceImpl implements IGiteeService {
                 return;
             }
             ArrayList<String> resps = new ArrayList<>();
-            deleteFileRecursive(userAppCodeOwner, userAppCodeRepo, userAppCodeBranch, appId,
+            deleteFileRecursive(owner(), repo(), branch(), appId,
                     "删除应用代码 appId=" + appId, resps);
             log.info("gitee delete success: appId={}, ops={}", appId, resps.size());
         } catch (Exception e) {
@@ -124,13 +119,17 @@ public class GiteeServiceImpl implements IGiteeService {
     // ------------------------------------------------------------------
 
     private void requireToken() {
-        if (accessToken == null || accessToken.isBlank()) {
+        if (token() == null || token().isBlank()) {
             throw new IllegalStateException("gitee.accessToken 未配置，请在 Nacos 中配置 gitee.accessToken");
         }
     }
 
     private String baseUrl() {
-        return apiBaseUrl.endsWith("/") ? apiBaseUrl : apiBaseUrl + "/";
+        String base = giteeProperties.getApiBaseUrl();
+        if (base == null || base.isBlank()) {
+            base = "https://gitee.com/api/v5/";
+        }
+        return base.endsWith("/") ? base : base + "/";
     }
 
     private String normalizePath(String path) {
@@ -159,13 +158,13 @@ public class GiteeServiceImpl implements IGiteeService {
 
     private String contentsUrl(String owner, String repo, String path) {
         return baseUrl() + "repos/" + encodePath(owner) + "/" + encodePath(repo)
-                + "/contents/" + encodePath(path) + "?access_token=" + encodeParam(accessToken);
+                + "/contents/" + encodePath(path) + "?access_token=" + encodeParam(token());
     }
 
     private String contentsUrlWithRef(String owner, String repo, String path, String branch) {
         return baseUrl() + "repos/" + encodePath(owner) + "/" + encodePath(repo)
                 + "/contents/" + encodePath(path)
-                + "?ref=" + encodeParam(branch) + "&access_token=" + encodeParam(accessToken);
+                + "?ref=" + encodeParam(branch) + "&access_token=" + encodeParam(token());
     }
 
     private HttpResponse<String> httpGet(String url) throws IOException, InterruptedException {
@@ -270,7 +269,7 @@ public class GiteeServiceImpl implements IGiteeService {
                               String message, String sha) throws IOException, InterruptedException {
         String url = baseUrl() + "repos/" + encodePath(owner) + "/" + encodePath(repo)
                 + "/contents/" + encodePath(path)
-                + "?access_token=" + encodeParam(accessToken)
+                + "?access_token=" + encodeParam(token())
                 + "&branch=" + encodeParam(branch)
                 + "&message=" + encodeParam(message)
                 + "&sha=" + encodeParam(sha);
