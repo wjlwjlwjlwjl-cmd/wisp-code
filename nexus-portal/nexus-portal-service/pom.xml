@@ -235,11 +235,6 @@
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
                             <run>
-                                <ports>
-                                    <port>
-                                        8080:8080
-                                    </port>
-                                </ports>
                                 <volumes>
                                     <bind>
                                         <volume>/home/diinki/wisp-code/deploy/test/data/wispcodedata/userapp/user-code:/workspace/user-code</volume>-->

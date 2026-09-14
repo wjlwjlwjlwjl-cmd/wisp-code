@@ -137,10 +137,10 @@ public final class FileUtil {
                         // 严格 UTF-8 解码，非 UTF-8 文本跳过而不是抛异常
                         String content;
                         try {
-                            content = StandardCharsets.UTF_8.newDecoder()
+                            content = String.valueOf(StandardCharsets.UTF_8.newDecoder()
                                     .onMalformedInput(CodingErrorAction.REPORT)
                                     .onUnmappableCharacter(CodingErrorAction.REPORT)
-                                    .decode(ByteBuffer.wrap(bytes));
+                                    .decode(ByteBuffer.wrap(bytes)));
                         } catch (CharacterCodingException e) {
                             log.warn("readAllFiles 跳过非 UTF-8 文本文件: {}", relativePath);
                             return;

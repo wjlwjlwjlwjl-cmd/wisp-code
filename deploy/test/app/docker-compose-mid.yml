@@ -228,5 +228,20 @@ services:
       --max-concurrent-requests 2
       --auto-truncate
 
+  wispcode-vscode:
+    container_name: wispcode-vscode
+    image: codercom/code-server:4.99.0-39
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../data/wispcodedata/userapp/user-code/user-code:/home/workspace
+    working_dir: /home/workspace
+    environment:
+      - PWD=/home/workspace
+    command: --auth none --bind-addr 0.0.0.0:8080
+    restart: always
+    networks:
+      - frameworkjava_network
+
 networks:
   frameworkjava_network:
