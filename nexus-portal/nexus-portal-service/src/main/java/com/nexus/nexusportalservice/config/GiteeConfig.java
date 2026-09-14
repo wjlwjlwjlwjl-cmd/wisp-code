@@ -1,4 +1,4 @@
-package com.wjl.config;
+package com.nexus.nexusportalservice.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -1,16 +1,12 @@
-package com.wjl.service;
+package com.nexus.nexusportalservice.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wjl.config.GiteeConfig;
-import com.wjl.domain.FileDTO;
-import lombok.RequiredArgsConstructor;
+import com.nexus.nexusportalservice.config.GiteeConfig;
+import com.nexus.nexusportalservice.domain.dto.FileDTO;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,12 +18,9 @@ import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-@RequiredArgsConstructor
-public class GiteeService {
+public class GiteeUtil {
     @Autowired
     private GiteeConfig giteeConfig;
 
@@ -35,16 +28,15 @@ public class GiteeService {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     // https://gitee.com/api/v5/repos/{owner}/{repo}/contents/{path}
-    @Tool(description = "批量提交文件")
     public String commitFile (
-            @ToolParam(description = "仓库拥有者") String owner,
-            @ToolParam(description = "仓库名称") String repo,
-            @ToolParam(description = "提交消息") String message,
-            @ToolParam(description = "提交分支") String branch,
-            @ToolParam(description = "待推送的文件列表")List<FileDTO> files
-            )throws Exception{
+            String owner,
+            String repo,
+            String message,
+            String branch,
+            List<FileDTO> files
+    )throws Exception{
         if(owner.isBlank() || repo.isBlank() || message.isBlank() ||
-            branch.isBlank() || files.isEmpty()){
+                branch.isBlank() || files.isEmpty()){
             return "";
         }
         log.info("commiting files, owner: {}, repo: {}, message: {}, branch: {}, file's num: {}", owner, repo, message, branch, files.size());
@@ -59,13 +51,12 @@ public class GiteeService {
     }
 
     //将下载下来的文件存放在 /workspace 的 wispcode-data/${appId} 下
-    @Tool(description = "从 wispcode-gitee-repo 更新、拉取远端文件到本地")
     public String pullUserAppCode(
-            @ToolParam(description = "仓库拥有者") String owner,
-            @ToolParam(description = "仓库名称") String repo,
-            @ToolParam(description = "仓库分支") String branch,
-            @ToolParam(description = "应用 id，对应仓库中的目录") String appId,
-            @ToolParam(description = "本地目标目录，用于存放远端代码") String targetDir
+            String owner,
+            String repo,
+            String branch,
+            String appId,
+            String targetDir
     ) throws Exception{
         if(owner.isBlank() || repo.isBlank() || appId.isBlank() ||
                 branch.isBlank() || targetDir.isBlank()){
@@ -86,13 +77,12 @@ public class GiteeService {
         return String.format("download {} files to {}", atomicInteger, localPath);
     }
 
-    @Tool(description = "递归删除 wispcode-gitee-repo 中的某个目录")
     public String deleteDirectory(
-            @ToolParam(description = "仓库拥有者") String owner,
-            @ToolParam(description = "仓库名称") String repo,
-            @ToolParam(description = "仓库分支") String branch,
-            @ToolParam(description = "要删除的仓库路径") String dirPath,
-            @ToolParam(description = "删除说明信息") String message
+            String owner,
+            String repo,
+            String branch,
+            String dirPath,
+            String message
     )throws Exception{
         if(owner.isBlank() || repo.isBlank() || dirPath.isBlank() ||
                 branch.isBlank() || message.isBlank()){
