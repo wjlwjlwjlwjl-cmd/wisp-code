@@ -124,6 +124,11 @@ public class AppEditServiceImpl implements IAppEditService {
                 "3. VUE3_SPRING：Vue3 + Vite + Spring Boot。",
                 "必须根据现有项目代码判断应用类型，不得随意改变应用类型。",
                 "VUE3_SPRING 中，前端 API 必须使用 /" + appId + "/api 前缀，后端 Controller 必须以 /api 开头。",
+                "### VUE3/VUE3_SPRING 前端 index.html 强制约束（CRITICAL）",
+                "1. index.html 只能是「极简壳」：<head> 内仅 charset/viewport/title；<body> 内只允许 `<div id=\"app\"></div>` 与 `<script type=\"module\" src=\"/src/main.js\"></script>`。",
+                "2. 严禁在 index.html 中写内联 `<script type=\"module\">`、import 任何 .vue/.js、createApp(...)、或直接使用 @click/v-if/{{ }} 等 Vue 指令。",
+                "3. 所有页面结构/样式/交互一律在 src/**/*.vue、src/**/*.css 中修改；src/main.js 只负责 createApp(App).mount('#app')。",
+                "4. 若原 index.html 违反上述约束，修改时必须顺手把它改回合规形态。",
 
                 "### 输出格式约束 (CRITICAL)",
                 "你必须严格按照以下格式输出，解析器依赖此格式：",
