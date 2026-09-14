@@ -7,6 +7,7 @@ import com.nexus.nexusportalservice.domain.dto.FileDTO;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
+@Component
 public class GiteeUtil {
     @Autowired
     private GiteeConfig giteeConfig;
