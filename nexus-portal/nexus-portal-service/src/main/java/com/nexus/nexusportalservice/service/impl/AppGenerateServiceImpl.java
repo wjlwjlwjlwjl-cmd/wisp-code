@@ -100,8 +100,13 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 .eq(App::getId, appId)
                 .set(App::getPreviewUrl, previewUrl));
 
-        //5. Gitee MCP，上传代码到 wispcode-gitee-repo 仓库，如果已经存在，那么就删除原有的内容
-        giteeServiceImpl.commit(String.valueOf(appId), appPath, appType, files);
+        //5. 上传代码到 wispcode-gitee-repo 仓库（直接调用 Gitee API）。
+        //   非致命：应用已生成入库、预览就绪，Gitee 备份失败只记录日志，不让整体请求 500。
+        try {
+            giteeServiceImpl.commit(String.valueOf(appId), appPath, appType, files);
+        } catch (Exception e) {
+            log.warn("Gitee commit 失败（已忽略，应用已生成成功）：appId={}, err={}", appId, e.getMessage());
+        }
 
         AppGenerateRetDTO appGenerateRetDTO = new AppGenerateRetDTO();
         appGenerateRetDTO.setAppId(appId);

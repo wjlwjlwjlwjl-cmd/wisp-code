@@ -33,6 +33,27 @@ public class GeneratedAppWriter {
     }
 
     /**
+     * 归⼀化⽂件路径：去除模型可能多写的 `${appId}/` 前缀（避免目录嵌套重复）。
+     * 例：stripAppIdPrefix("10000041", "10000041/index.html") -> "index.html"
+     */
+    public static String stripAppIdPrefix(String appId, String path) {
+        if (path == null) {
+            return "";
+        }
+        String p = path;
+        while (p.startsWith("/")) {
+            p = p.substring(1);
+        }
+        if (appId != null && !appId.isBlank()) {
+            String prefix = appId + "/";
+            if (p.startsWith(prefix)) {
+                p = p.substring(prefix.length());
+            }
+        }
+        return p;
+    }
+
+    /**
      * 将⽂件写⼊ user-code/${appId} ⽬录。
      * 
      * @param id         应⽤ ID
@@ -52,7 +73,7 @@ public class GeneratedAppWriter {
             Files.createDirectories(appDir);
         }
         for (Map.Entry<String, String> e : files.entrySet()) {
-            String rel = e.getKey();
+            String rel = stripAppIdPrefix(id, e.getKey());
             Path target = appDir.resolve(rel).normalize();
             if (!target.startsWith(appDir)) {
                 // prevent path traversal
