@@ -63,6 +63,16 @@ public class WispCodeController {
         return R.ok(appGenerateServiceImpl.appGenerate(req.getAppId(), req.getAppDoc()).convertToVO());
     }
 
+    @GetMapping("/app/vs")
+    public R<String> getVscodeUrl(@RequestHeader(value="Authorization") String token, @RequestParam(value="appId") Long appId){
+        return R.ok(appEditService.vscodeAppEdit(token, appId));
+    }
+
+    @GetMapping("/app/vs/confirm")
+    public R<Boolean> confirmVscodeEdit(@RequestParam(value="Authrization") String token, @RequestParam(value="appId")String appId){
+        return R.ok(appEditService.confirmVscodeEdit(token, appId));
+    }
+
     /**
      *
      * @param token JwtToken + 查询页数

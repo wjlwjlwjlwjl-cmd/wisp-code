@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nexus.nexuscommoncore.domain.dto.BasePageDTO;
 import com.nexus.nexuscommoncore.utils.BeanCopyUtil;
+import com.nexus.nexuscommondomain.constants.TokenConstants;
 import com.nexus.nexuscommondomain.domain.dto.LoginUserDTO;
+import com.nexus.nexuscommonredis.service.RedisService;
 import com.nexus.nexuscommonsecurity.service.TokenService;
 import com.nexus.nexusportalservice.domain.dto.AppDTO;
 import com.nexus.nexusportalservice.domain.dto.ChatHistoryDTO;
@@ -38,6 +40,8 @@ public class AppBaseServiceImpl implements IAppBaseService {
     private MemoryMapper memoryMapper;
     @Autowired
     private EmailUserMapper emailUserMapper;
+    @Autowired
+    private RedisService redisService;
 
     /**
      * 根据 AppVO 列表中的 userId 批量回填用户名
@@ -101,9 +105,6 @@ public class AppBaseServiceImpl implements IAppBaseService {
         BasePageDTO<AppVO> basePageDTO = new BasePageDTO<>();
         List<AppVO> appVOS = new ArrayList<>();
 
-        LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
-        String userId = loginUserDTO.getUserId();
-
         Page<App> page = new Page<>(current, pageSize);
         Page<App> rets = appMapper.selectPage(page, new LambdaQueryWrapper<App>()
                 .eq(App::getDeploy, true)
@@ -119,8 +120,6 @@ public class AppBaseServiceImpl implements IAppBaseService {
         basePageDTO.setList(appVOS);
         basePageDTO.setCurrent((int) rets.getCurrent());
         basePageDTO.setPageSize((int) rets.getSize());
-        // 已部署总数 = 本次分页查询条件（deploy=true）匹配的记录总数，跨全站用户；
-        // 旧实现误用 getMyAppNum(userId) → 显示的是"当前登录用户的应用数"，与列表内容不符。
         basePageDTO.setTotals((int) rets.getTotal());
 
         return basePageDTO;
@@ -130,17 +129,16 @@ public class AppBaseServiceImpl implements IAppBaseService {
     public DeployAppDTO appDeploy(String token, String appId, Boolean deploy) {
         DeployAppDTO deployAppDTO = new DeployAppDTO();
         String userId = tokenService.getLoginUser(token).getUserId();
-        LambdaUpdateWrapper<App> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper
-                .eq(App::getId, appId)
-                .eq(App::getUserId, userId)
-                .set(App::getDeploy, deploy);
-        int cnt = appMapper.update(lambdaUpdateWrapper);
-        if(cnt == 0){
+
+        if(!redisService.hasKey(TokenConstants.LOGIN_TOKEN_KEY + userId)){
             deployAppDTO.setSuccess(false);
             deployAppDTO.setErrMsg("部署失败，检查 userId 及 appId");
             return deployAppDTO;
         }
+        appMapper.update(new LambdaUpdateWrapper<App>()
+                .eq(App::getId, appId)
+                .set(App::getDeploy, deploy)
+        );
         deployAppDTO.setSuccess(true);
         return deployAppDTO;
     }
@@ -149,7 +147,6 @@ public class AppBaseServiceImpl implements IAppBaseService {
     public AppDTO appDetail(String appId) {
         AppDTO appDTO = new AppDTO();
 
-        //尝试从缓存中获取
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
                 .eq(App::getId, appId)
         );

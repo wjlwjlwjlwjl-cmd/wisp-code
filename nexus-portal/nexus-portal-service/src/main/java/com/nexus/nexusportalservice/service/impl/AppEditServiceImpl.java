@@ -1,10 +1,18 @@
 package com.nexus.nexusportalservice.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.AuthCmd;
+import com.nexus.nexuscommondomain.constants.SecurityConstants;
+import com.nexus.nexuscommondomain.constants.TokenConstants;
+import com.nexus.nexuscommondomain.domain.dto.LoginUserDTO;
+import com.nexus.nexuscommonredis.service.RedisService;
+import com.nexus.nexuscommonsecurity.service.TokenService;
 import com.nexus.nexusportalservice.domain.AppType;
 import com.nexus.nexusportalservice.domain.ModelParsedResult;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateRetDTO;
+import com.nexus.nexusportalservice.domain.dto.FileDTO;
 import com.nexus.nexusportalservice.domain.entity.App;
 import com.nexus.nexusportalservice.enums.PreviewDeployPath;
 import com.nexus.nexusportalservice.mapper.AppMapper;
@@ -12,6 +20,7 @@ import com.nexus.nexusportalservice.service.IAppEditService;
 import com.nexus.nexusportalservice.utils.AppBuildUtil;
 import com.nexus.nexusportalservice.utils.FileUtil;
 import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
+import com.nexus.nexusportalservice.utils.GiteeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -21,6 +30,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -32,12 +43,30 @@ public class AppEditServiceImpl implements IAppEditService {
     private final AppMapper appMapper;
 
     @Autowired
-    DockerClient dockerClient;
+    private DockerClient dockerClient;
+    @Autowired
+    private TokenService tokenService;
+    @Autowired
+    private GiteeUtil giteeUtil;
+    @Autowired
+    private RedisService redisService;
 
     @Value("${app.preview.host}")
-    String serverHost;
+    private String serverHost;
     @Value("${app.preview.container-name}")
-    String containerName;
+    private String containerName;
+    @Value("${code.host}")
+    private String codeHost;
+    @Value("${code.port}")
+    private String codePort;
+    @Value("${gitee.user-code.owner}")
+    private String giteeOwner;
+    @Value("${gitee.user-code.repo}")
+    private String giteeRepo;
+    @Value("${gitee.user-code.branch}")
+    private String giteeBranch;
+
+    private final String vscodeUrlTemplate = "http://%s:%s/?folder=/home/workspace/%s";
 
     public AppEditServiceImpl(ChatClient chatClient, GiteeServiceImpl giteeServiceImpl,
                                   LocalFileStorageImpl localFileStorageImpl, AppMapper appMapper) {
@@ -105,6 +134,73 @@ public class AppEditServiceImpl implements IAppEditService {
         appGenerateRetDTO.setPreviewUrl(previewUrl);
 
         return appGenerateRetDTO;
+    }
+
+    @Override
+    public String vscodeAppEdit(String token, Long appId) {
+        LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
+        String userId = loginUserDTO.getUserId();
+        /*App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
+                .eq(App::getUserId, userId)
+                .eq(App::getId, appId)
+        );
+        if(app == null){
+            log.warn("用户{}没有编辑权限", userId);
+            return null; //没有编辑权限
+        }*/
+        if(!redisService.hasKey(TokenConstants.LOGIN_TOKEN_KEY + userId)){
+            log.warn("用户{}没有编辑权限", userId);
+            return null; //没有编辑权限
+        }
+
+        String currentPath = System.getProperty("user.dir");
+        Path appPath = Path.of(currentPath).resolve("user-code").resolve(String.valueOf(appId));
+        if(!appPath.toFile().exists()){
+            //不存在，从 gitee 拉取代码到本地
+            try{
+                giteeUtil.pullUserAppCode(giteeOwner, giteeRepo, giteeBranch, String.valueOf(appId), appPath.toString());
+            }
+            catch(Exception e){
+                log.warn(e.getMessage());
+            }
+        }
+        //本地存在，直接返回连接即可
+        String vscodeUrl = String.format(vscodeUrlTemplate, codeHost, codePort, appId);
+        log.info("{} 的vscode预览链接 {}", appId, vscodeUrl);
+
+        return vscodeUrl;
+    }
+
+    @Override
+    public Boolean confirmVscodeEdit(String token, String appId) {
+        LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
+        String userId = loginUserDTO.getUserId();
+        if(!redisService.hasKey(TokenConstants.LOGIN_TOKEN_KEY + userId)){
+            log.warn("用户{}没有编辑权限", userId);
+            return null; //没有编辑权限
+        }
+        String currentPath = System.getProperty("user.dir");
+        Path appPath = Path.of(currentPath).resolve("user-code").resolve(appId);
+        try{
+            Map<String, String> files = FileUtil.readAllFiles(appPath);
+
+            List<FileDTO> fileDTOs = new ArrayList<>();
+            for (Map.Entry<String, String> entry : files.entrySet()) {
+                // 去除模型可能多写的 ${appId}/ 前缀，仓库内路径只保留一层目录
+                String rel = GeneratedAppWriter.stripAppIdPrefix(appId, entry.getKey());
+                FileDTO fileDTO = new FileDTO();
+                fileDTO.setFilePath(appId + "/" + rel);
+                fileDTO.setFileContent(entry.getValue());
+                fileDTOs.add(fileDTO);
+            }
+
+            String message = String.format("VSCode 手动编辑更新：%d", appId);
+            giteeUtil.commitFile(giteeOwner, giteeRepo, message, giteeBranch, fileDTOs);
+        }
+        catch(Exception e){
+            log.warn(e.getMessage());
+        }
+        return true;
     }
 
     private String getSystemPrompt(Long appId) {

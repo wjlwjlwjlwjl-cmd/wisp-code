@@ -75,7 +75,6 @@ public class GiteeUtil {
         AtomicInteger atomicInteger = new AtomicInteger();
         downloadDirectory(owner, repo, branch, appId, localPath, atomicInteger);
 
-        log.info("============= download complete =============");
         return String.format("download {} files to {}", atomicInteger, localPath);
     }
 
