@@ -234,7 +234,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ../data/wispcodedata/userapp/user-code/user-code:/home/workspace
+      - ../data/wispcodedata/userapp/user-code:/home/workspace
     working_dir: /home/workspace
     environment:
       - PWD=/home/workspace

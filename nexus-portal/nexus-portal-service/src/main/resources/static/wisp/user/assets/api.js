@@ -181,7 +181,9 @@
     detail: async function (appId) { return handleR(await get("/app/detail", { appId: appId }, true)); },
     history: async function (appId) { return handleR(await get("/app/history", { appId: appId }, true)); },
     deploy: async function (appId) { return handleR(await get("/app/deploy", { appId: appId }, true)); },
-    deployCancel: async function (appId) { return handleR(await get("/app/deploy/cancel", { appId: appId }, true)); }
+    deployCancel: async function (appId) { return handleR(await get("/app/deploy/cancel", { appId: appId }, true)); },
+    // code-server ⻚⾯端代码预览：成功返回 URL 字符串，⽆权限时后端返回空
+    vsUrl: async function (appId) { return handleR(await get("/app/vs", { appId: appId }, true)); }
   };
 
   // ---- UI helpers --------------------------------------------------------
