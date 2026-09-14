@@ -1,3 +1,5 @@
+server:
+  port: 18081
 spring:
   application:
     name: wisp-code
