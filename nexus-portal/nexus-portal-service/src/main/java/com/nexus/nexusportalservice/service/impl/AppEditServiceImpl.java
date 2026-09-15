@@ -12,15 +12,13 @@ import com.nexus.nexuscommonsecurity.service.TokenService;
 import com.nexus.nexusportalservice.domain.AppType;
 import com.nexus.nexusportalservice.domain.ModelParsedResult;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateRetDTO;
+import com.nexus.nexusportalservice.domain.dto.CodeContainerDTO;
 import com.nexus.nexusportalservice.domain.dto.FileDTO;
 import com.nexus.nexusportalservice.domain.entity.App;
 import com.nexus.nexusportalservice.enums.PreviewDeployPath;
 import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.service.IAppEditService;
-import com.nexus.nexusportalservice.utils.AppBuildUtil;
-import com.nexus.nexusportalservice.utils.FileUtil;
-import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
-import com.nexus.nexusportalservice.utils.GiteeUtil;
+import com.nexus.nexusportalservice.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -49,6 +47,8 @@ public class AppEditServiceImpl implements IAppEditService {
     @Autowired
     private GiteeUtil giteeUtil;
     @Autowired
+    private ContainerUtil containerUtil;
+    @Autowired
     private RedisService redisService;
 
     @Value("${app.preview.host}")
@@ -57,8 +57,6 @@ public class AppEditServiceImpl implements IAppEditService {
     private String containerName;
     @Value("${code.host}")
     private String codeHost;
-    @Value("${code.port}")
-    private String codePort;
     @Value("${gitee.user-code.owner}")
     private String giteeOwner;
     @Value("${gitee.user-code.repo}")
@@ -66,7 +64,9 @@ public class AppEditServiceImpl implements IAppEditService {
     @Value("${gitee.user-code.branch}")
     private String giteeBranch;
 
-    private final String vscodeUrlTemplate = "http://%s:%s/?folder=/home/workspace/%s";
+    private static final String vscodeUrlTemplate = "http://%s:%s/?folder=/home/workspace/%s";
+    private static final String containerDirPrefix = "/home/workspace/";
+    private static final String hostDirPrefix = "/home/diinki/wisp-code/deploy/test/data/wispcodedata/userapp/user-code/";
 
     public AppEditServiceImpl(ChatClient chatClient, GiteeServiceImpl giteeServiceImpl,
                                   LocalFileStorageImpl localFileStorageImpl, AppMapper appMapper) {
@@ -136,18 +136,18 @@ public class AppEditServiceImpl implements IAppEditService {
         return appGenerateRetDTO;
     }
 
+    /**
+     * 启动一个单独的 vscode 容器绑定 appId 的目录
+     *
+     * @param token JWT Token
+     * @param appId 应用 id
+     * @return 预览链接
+     */
     @Override
     public String vscodeAppEdit(String token, Long appId) {
         LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
         String userId = loginUserDTO.getUserId();
-        /*App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
-                .eq(App::getUserId, userId)
-                .eq(App::getId, appId)
-        );
-        if(app == null){
-            log.warn("用户{}没有编辑权限", userId);
-            return null; //没有编辑权限
-        }*/
+
         if(!redisService.hasKey(TokenConstants.LOGIN_TOKEN_KEY + userId)){
             log.warn("用户{}没有编辑权限", userId);
             return null; //没有编辑权限
@@ -164,6 +164,25 @@ public class AppEditServiceImpl implements IAppEditService {
                 log.warn(e.getMessage());
             }
         }
+        //创建一个 code-server 容器
+        CodeContainerDTO codeContainerDTO = containerUtil.createCodeServer(hostDirPrefix + appId, containerDirPrefix + appId);
+
+        System.out.printf("========= %s =========", appPath);
+        if(codeContainerDTO == null){
+            return null; //没能创建容器
+        }
+        int codePort = codeContainerDTO.getHostLocalPort();
+        if(codePort == -1){
+            return null;
+        }
+
+        String containerId = codeContainerDTO.getContainId();
+        if(redisService.hasKey(userId)){
+            String oldContainerId = redisService.getCacheObject(userId, String.class);
+            containerUtil.stopAndRemoveContainer(oldContainerId);
+        }
+        redisService.setCacheObject(userId, containerId);
+
         //本地存在，直接返回连接即可
         String vscodeUrl = String.format(vscodeUrlTemplate, codeHost, codePort, appId);
         log.info("{} 的vscode预览链接 {}", appId, vscodeUrl);
@@ -175,6 +194,11 @@ public class AppEditServiceImpl implements IAppEditService {
     public Boolean confirmVscodeEdit(String token, String appId) {
         LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
         String userId = loginUserDTO.getUserId();
+
+        if(redisService.hasKey(userId)){
+            containerUtil.stopAndRemoveContainer(redisService.getCacheObject(appId, String.class));
+        }
+
         if(!redisService.hasKey(TokenConstants.LOGIN_TOKEN_KEY + userId)){
             log.warn("用户{}没有编辑权限", userId);
             return null; //没有编辑权限
@@ -200,8 +224,6 @@ public class AppEditServiceImpl implements IAppEditService {
             }
 
             String message = String.format("VSCode 手动编辑更新：%s", appId);
-            log.info("gitee commit 入参: owner={}, repo={}, branch={}, message={}, files={}",
-                    giteeOwner, giteeRepo, giteeBranch, message, fileDTOs.size());
             String resp = giteeUtil.commitFile(giteeOwner, giteeRepo, message, giteeBranch, fileDTOs);
             log.info("gitee commit 返回: {}", resp);
         }
