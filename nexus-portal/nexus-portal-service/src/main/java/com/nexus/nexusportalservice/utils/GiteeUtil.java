@@ -145,13 +145,13 @@ public class GiteeUtil {
             }
         }
         catch(IOException e){
-            System.out.println(e.getStackTrace());
+            log.error("Gitee 删除目录失败: {}", dirPath, e);
         }
     }
 
     private String deleteFile(String owner, String repo, String branch, String dirPath, String message, String sha) throws Exception{
         String url = giteeConfig.getApiBaseUrl() + "repos/" + owner + "/" + repo + "/contents/" + dirPath + "?access_token=" + giteeConfig.getAccessToken() + "&message=" + message + "&sha=" + sha;
-        log.info("url: {}", url);
+        log.debug("gitee delete file: {}", dirPath);
         Request request = new Request.Builder()
                 .url(url)
                 .delete()
@@ -167,48 +167,48 @@ public class GiteeUtil {
 
     private String writeFile(String owner, String repo, String filePath, String fileContent, String branch, String message) throws IOException{
         String url = buildUrl(owner, repo, filePath);
-
-        //先看文件是否存在，如果不存在，新建，否则更新
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-        Response response = okHttpClient.newCall(request).execute();
-        JsonNode node = objectMapper.readTree(response.body().string());
         String encodedContent = encodeToBase64(fileContent);
-        String sha = node.path("sha").asText();
 
-        System.out.println("writefile sha: " + sha);
-
-        if(sha.isBlank()){
-            //文件不存在，新建
-            String bodyJson = objectMapper.createObjectNode()
-                    .put("content", encodedContent)
-                    .put("branch", branch)
-                    .put("message", message)
-                    .toString();
-            log.info("requesting:\n{}\n", url);
-            request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(bodyJson, MediaType.parse("application/json")))
-                    .build();
-            response = okHttpClient.newCall(request).execute();
-            return response.body().string();
+        //先看文件是否存在，如果不存在，新建，否则更新（GET 用 try-with-resources，404 视为不存在）
+        String sha = "";
+        Request getRequest = new Request.Builder().url(url).get().build();
+        try (Response getResp = okHttpClient.newCall(getRequest).execute()) {
+            String body = getResp.body() != null ? getResp.body().string() : "";
+            if (getResp.isSuccessful()) {
+                try {
+                    JsonNode node = objectMapper.readTree(body);
+                    sha = node.path("sha").asText("");
+                } catch (Exception ignore) { }
+            }
+            log.debug("writeFile exists-check: {} code={} sha={}", filePath, getResp.code(), sha);
         }
-        else{
-            log.info("文件存在，更新");
-            String bodyJson = objectMapper.createObjectNode()
-                    .put("message", message)
-                    .put("sha", sha)
-                    .put("content", encodedContent)
-                    .toString();
-            log.info("requesting:\n{}\n", url);
-            request = new Request.Builder()
-                    .url(url)
-                    .put(RequestBody.create(bodyJson, MediaType.parse("application/json")))
-                    .build();
-            response = okHttpClient.newCall(request).execute();
-            return response.body().string();
+
+        boolean exists = sha != null && !sha.isBlank();
+        String method = exists ? "PUT" : "POST";
+        String bodyJson = exists
+                ? objectMapper.createObjectNode()
+                        .put("message", message)
+                        .put("sha", sha)
+                        .put("content", encodedContent)
+                        .toString()
+                : objectMapper.createObjectNode()
+                        .put("content", encodedContent)
+                        .put("branch", branch)
+                        .put("message", message)
+                        .toString();
+
+        log.info("gitee {} file: {}", method, filePath);
+        Request writeRequest = new Request.Builder()
+                .url(url)
+                .method(method, RequestBody.create(bodyJson, MediaType.parse("application/json")))
+                .build();
+        try (Response writeResp = okHttpClient.newCall(writeRequest).execute()) {
+            String respBody = writeResp.body() != null ? writeResp.body().string() : "";
+            if (!writeResp.isSuccessful()) {
+                // 之前不校验状态码：Gitee 返回 401/403/400 会被当正常结果返回，导致「看似成功实则没上传」
+                throw new IOException("Gitee 写入失败 [" + filePath + "] HTTP " + writeResp.code() + " -> " + respBody);
+            }
+            return respBody;
         }
     }
 
