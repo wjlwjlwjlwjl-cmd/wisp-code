@@ -183,7 +183,9 @@
     deploy: async function (appId) { return handleR(await get("/app/deploy", { appId: appId }, true)); },
     deployCancel: async function (appId) { return handleR(await get("/app/deploy/cancel", { appId: appId }, true)); },
     // code-server ⻚⾯端代码预览：成功返回 URL 字符串，⽆权限时后端返回空
-    vsUrl: async function (appId) { return handleR(await get("/app/vs", { appId: appId }, true)); }
+    vsUrl: async function (appId) { return handleR(await get("/app/vs", { appId: appId }, true)); },
+    // 确认 vscode 在线编辑的改动（回传/落库），返回 Boolean
+    vsConfirm: async function (appId) { return handleR(await get("/app/vs/confirm", { appId: appId }, true)); }
   };
 
   // ---- UI helpers --------------------------------------------------------
