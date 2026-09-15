@@ -200,16 +200,12 @@ public class AppEditServiceImpl implements IAppEditService {
             }
 
             String message = String.format("VSCode 手动编辑更新：%d", appId);
-            try{
-                String resp = giteeUtil.commitFile(giteeOwner, giteeRepo, message, giteeBranch, fileDTOs);
-                log.info(resp);
-            }
-            catch(Exception e){
-                log.warn(e.getMessage());
-            }
+            System.out.println(giteeOwner + " " +giteeRepo + " " + message + " " + giteeBranch);
+            String resp = giteeUtil.commitFile(giteeOwner, giteeRepo, message, giteeBranch, fileDTOs);
+            log.info(resp);
         }
         catch(Exception e){
-            log.warn(e.getMessage());
+            System.out.println(e.getStackTrace());
         }
         return true;
     }
