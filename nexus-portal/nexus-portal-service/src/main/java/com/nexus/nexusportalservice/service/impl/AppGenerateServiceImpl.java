@@ -87,7 +87,7 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
         //   同时，我们将这个目录挂载到 docker 主机，userapp-preview 容器，也挂在docker主机相同目录
         //   这样 nginx 容器就可以直接拿到内容进行展示了
         Path appPath = GeneratedAppWriter.writeFiles(appId, files);
-        handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
+        AppBuildUtil.handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath(), dockerClient, containerName);
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
         String previewUrl = "http://" + serverHost + ":80" + "/preview/" + appId + "/#";
@@ -180,30 +180,6 @@ public class AppGenerateServiceImpl implements IAppGenerateService {
                 "```",
                 " - `<relative_path>`: ⽂件的相对路径（如 `index.html`,`frontend/src/App.vue`,`backend/src/main/resources/application.properties`）。",
                 " - `<complete_file_content>`: **完整**的⽂件内容，**绝对禁⽌**省略、使⽤占位符或 `// ...`。");
-    }
-
-    private void handleApp(Long appId, Path appPath, int appNum, String previewDeployPath){
-        if(appNum == 0){
-            try{
-                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
-                FileUtil.copyDirectory(appPath, targetFile);
-            }
-            catch(IOException e){
-                System.out.println(e.getStackTrace());
-            }
-        }
-        else if(appNum == 1){
-            AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
-        }
-        else if(appNum == 2){
-            //部署前端
-            Path appFrontendPath = appPath.resolve("frontend");
-            AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
-
-            //部署后端
-            Path springBootDir = appPath.resolve("backend");
-            AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
-        }
     }
 }
 

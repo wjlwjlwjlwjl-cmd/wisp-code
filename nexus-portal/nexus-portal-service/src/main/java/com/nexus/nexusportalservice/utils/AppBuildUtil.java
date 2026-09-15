@@ -3,6 +3,7 @@ package com.nexus.nexusportalservice.utils;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectExecResponse;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.core.DockerContextMetaFile;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,8 +19,31 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class AppBuildUtil {
+    public static void handleApp(Long appId, Path appPath, int appNum, String previewDeployPath, DockerClient dockerClient, String containerName){
+        if(appNum == 0){
+            try{
+                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
+                FileUtil.copyDirectory(appPath, targetFile);
+            }
+            catch(IOException e){
+                System.out.println(e.getMessage());
+            }
+        }
+        else if(appNum == 1){
+            AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
+        }
+        else if(appNum == 2){
+            //部署前端
+            Path appFrontendPath = appPath.resolve("frontend");
+            AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
 
-    public static void buildVuePro(Long appId, Path nodeProjectDir, String previewDeployPath) {
+            //部署后端
+            Path springBootDir = appPath.resolve("backend");
+            AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
+        }
+    }
+
+    private static void buildVuePro(Long appId, Path nodeProjectDir, String previewDeployPath) {
         try {
             runProcess(List.of("npm", "install"), nodeProjectDir);
             runProcess(List.of("npm", "run", "build"), nodeProjectDir);
@@ -31,7 +55,7 @@ public class AppBuildUtil {
         }
     }
 
-    public static void buildSpringBoot(Long appId, Path springRootDir, DockerClient dockerClient, String previewDeployPath, String containerName) {
+    private static void buildSpringBoot(Long appId, Path springRootDir, DockerClient dockerClient, String previewDeployPath, String containerName) {
         try {
             runProcess(List.of("mvn", "clean", "package", "-DskipTests"), springRootDir);
             Path targetDir = springRootDir.resolve("target");

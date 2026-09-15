@@ -107,7 +107,7 @@ public class AppEditServiceImpl implements IAppEditService {
         //   这样 nginx 容器就可以直接拿到内容进行展示了
         GeneratedAppWriter.deleteDirectory(codePath);
         Path appPath = GeneratedAppWriter.writeFiles(appId, files);
-        handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath());
+        AppBuildUtil.handleApp(appId, appPath, appNum, PreviewDeployPath.PREVIEW.getPath(), dockerClient, containerName);
 
         //previewUrl: appId/#（为了符合 Vue3 前端工程哈希路由模式，纯前端没有后端）
         String previewUrl = "http://" + serverHost + ":80" + "/preview/" + appId + "/#";
@@ -181,8 +181,13 @@ public class AppEditServiceImpl implements IAppEditService {
         }
         String currentPath = System.getProperty("user.dir");
         Path appPath = Path.of(currentPath).resolve("user-code").resolve(appId);
+
         try{
+            //将 user-code/${appId} 中的内容重新部署到预览容器（目录挂载）
             Map<String, String> files = FileUtil.readAllFiles(appPath);
+            String appType = GeneratedAppWriter.determineAppType(files);
+            int appNum = AppType.getTypeNum(appType);
+            AppBuildUtil.handleApp(Long.valueOf(appId), appPath, appNum, PreviewDeployPath.DEPLOY.getPath(), dockerClient, containerName);
 
             List<FileDTO> fileDTOs = new ArrayList<>();
             for (Map.Entry<String, String> entry : files.entrySet()) {
@@ -257,29 +262,5 @@ public class AppEditServiceImpl implements IAppEditService {
         }
 
         return prompt.toString();
-    }
-
-    private void handleApp(Long appId, Path appPath, int appNum, String previewDeployPath){
-        if(appNum == 0){
-            try{
-                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
-                FileUtil.copyDirectory(appPath, targetFile);
-            }
-            catch(IOException e){
-                System.out.println(e.getStackTrace());
-            }
-        }
-        else if(appNum == 1){
-            AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
-        }
-        else if(appNum == 2){
-            //部署前端
-            Path appFrontendPath = appPath.resolve("frontend");
-            AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
-
-            //部署后端
-            Path springBootDir = appPath.resolve("backend");
-            AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
-        }
     }
 }

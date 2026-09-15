@@ -11,6 +11,7 @@ import com.nexus.nexusportalservice.enums.PreviewDeployPath;
 import com.nexus.nexusportalservice.mapper.AppMapper;
 import com.nexus.nexusportalservice.utils.AppBuildUtil;
 import com.nexus.nexusportalservice.utils.FileUtil;
+import com.nexus.nexusportalservice.utils.GeneratedAppWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.HashedMap;
 
@@ -60,7 +61,7 @@ public class BuildPreviewAgent implements NodeAction {
         log.info("appId: {}, appPath: {}, appType: {}, previewUrl: {}", appId, appPath, appType, previewUrl);
 
         try{
-            handleApp(Long.valueOf(appId), appPath, appType, PreviewDeployPath.PREVIEW.getPath());
+            AppBuildUtil.handleApp(Long.valueOf(appId), appPath, AppType.getTypeNum(appType), PreviewDeployPath.PREVIEW.getPath(), dockerClient, containerName);
 
             //2. 更新数据库中预览 Url
             appMapper.update(new LambdaUpdateWrapper<App>()
@@ -83,31 +84,6 @@ public class BuildPreviewAgent implements NodeAction {
             System.out.println(e.getMessage());
         }
         return ret;
-    }
-
-    private void handleApp(Long appId, Path appPath, String appType, String previewDeployPath) throws ServiceException {
-        Integer appNum = AppType.getTypeNum(appType);
-        if(appNum == 0){
-            try{
-                Path targetFile = FileUtil.ensureAppDir(appId, "user-preview").resolve("dist");
-                FileUtil.copyDirectory(appPath, targetFile);
-            }
-            catch(IOException e){
-                System.out.println(e.getStackTrace());
-            }
-        }
-        else if(appNum == 1){
-            AppBuildUtil.buildVuePro(appId, appPath, previewDeployPath);
-        }
-        else if(appNum == 2){
-            //部署前端
-            Path appFrontendPath = appPath.resolve("frontend");
-            AppBuildUtil.buildVuePro(appId, appFrontendPath, previewDeployPath);
-
-            //部署后端
-            Path springBootDir = appPath.resolve("backend");
-            AppBuildUtil.buildSpringBoot(appId, springBootDir, dockerClient, previewDeployPath, containerName);
-        }
     }
 
     private static String determineAppType(Map<String, String> files) {

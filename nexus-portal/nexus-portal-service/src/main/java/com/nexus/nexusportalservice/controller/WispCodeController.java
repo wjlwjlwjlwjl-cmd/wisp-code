@@ -69,7 +69,7 @@ public class WispCodeController {
     }
 
     @GetMapping("/app/vs/confirm")
-    public R<Boolean> confirmVscodeEdit(@RequestParam(value="Authrization") String token, @RequestParam(value="appId")String appId){
+    public R<Boolean> confirmVscodeEdit(@RequestHeader(value="Authorization") String token, @RequestParam(value="appId")String appId){
         return R.ok(appEditService.confirmVscodeEdit(token, appId));
     }
 
