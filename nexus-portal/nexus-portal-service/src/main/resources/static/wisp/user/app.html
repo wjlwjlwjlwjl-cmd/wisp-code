@@ -22,7 +22,7 @@
             <div id="app-meta" class="meta" style="margin-top:8px"></div></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <button class="btn ghost" id="btn-vs" onclick="openVsCode()">VSCode 代码预览</button>
-            <button class="btn" id="btn-confirm" onclick="doVsConfirm()" disabled>确认更改</button>
+            <button class="btn" id="btn-confirm" onclick="doVsConfirm()">确认更改</button>
             <button class="btn ok" id="btn-deploy" onclick="toggleDeploy()">部署</button>
           </div>
         </div>
@@ -133,13 +133,8 @@
     busy('btn-vs',true);
     try{
       const url=await A.vsUrl(appId);
-      if(url){
-        window.open(url,'_blank','noopener');
-        // 只有成功拿到链接，才允许「确认更改」
-        document.getElementById('btn-confirm').disabled=false;
-      } else {
-        WispAPI.toast('您无权限修改','err');
-      }
+      if(url){ window.open(url,'_blank','noopener'); }
+      else{ WispAPI.toast('您无权限修改','err'); }
     }catch(e){
       if(e.needAuth){Auth.expired(e.message);busy('btn-vs',false);return;}
       WispAPI.toast('您无权限修改','err');
@@ -147,20 +142,20 @@
     busy('btn-vs',false);
   }
 
+  let lastVsConfirm=0; // 「确认更改」上次点击时间戳，用于 10s 冷却
   async function doVsConfirm(){
     Auth.require();
-    const btn=document.getElementById('btn-confirm');
-    if(btn.disabled) return;
-    busy('btn-confirm',true);
+    const now=Date.now();
+    if(now-lastVsConfirm<10000){ WispAPI.toast('操作过于频繁，请 10 秒后再试','err'); return; }
+    lastVsConfirm=now;
     try{
       const ok=await A.vsConfirm(appId);
       if(ok===false){ WispAPI.toast('确认更改失败','err'); }
       else{ WispAPI.toast('已确认更改','ok'); loadDetail(); loadHistory(); }
     }catch(e){
-      if(e.needAuth){Auth.expired(e.message);busy('btn-confirm',false);return;}
+      if(e.needAuth){Auth.expired(e.message);return;}
       WispAPI.toast('确认更改失败：'+e.message,'err');
     }
-    busy('btn-confirm',false);
   }
 
   function reloadPreview(){ const u=document.getElementById('preview').src; document.getElementById('preview').src='about:blank'; setTimeout(()=>document.getElementById('preview').src=u,80); }
