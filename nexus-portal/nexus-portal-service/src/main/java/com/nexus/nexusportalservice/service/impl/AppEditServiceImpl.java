@@ -199,7 +199,7 @@ public class AppEditServiceImpl implements IAppEditService {
                 fileDTOs.add(fileDTO);
             }
 
-            String message = String.format("VSCode 手动编辑更新：%d", appId);
+            String message = String.format("VSCode 手动编辑更新：%s", appId);
             log.info("gitee commit 入参: owner={}, repo={}, branch={}, message={}, files={}",
                     giteeOwner, giteeRepo, giteeBranch, message, fileDTOs.size());
             String resp = giteeUtil.commitFile(giteeOwner, giteeRepo, message, giteeBranch, fileDTOs);
