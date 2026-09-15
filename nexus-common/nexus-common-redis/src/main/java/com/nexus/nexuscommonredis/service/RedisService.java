@@ -1,5 +1,6 @@
 package com.nexus.nexuscommonredis.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -8,13 +9,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.Set;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
@@ -86,6 +86,37 @@ public class RedisService {
      */
     public Collection<String> keys(final String patteString){
         return redisTemplate.keys(patteString);
+    }
+
+    /**
+     * 渐进式遍历
+     *
+     * @param pattern 匹配规则
+     * @param count 一次遍历的数量
+     * @param consumer 对遍历结果的处理方法
+     */
+    public void scan(final String pattern, final int count, final Consumer<String> consumer){
+        if(consumer == null){
+            return;
+        }
+
+        ScanOptions options = ScanOptions.scanOptions()
+                .count(count)
+                .match(pattern)
+                .build();
+
+        redisTemplate.execute((RedisCallback<Void>) connection -> {
+            try(Cursor<byte[]> cursor = connection.keyCommands().scan(options)){
+                while(cursor.hasNext()){
+                    String key = new String(cursor.next(), StandardCharsets.UTF_8);
+                    consumer.accept(key);
+                }
+            }
+            catch(Exception e){
+                System.out.println(e.getMessage());
+            }
+            return null;
+        });
     }
 
     /**

@@ -1,14 +1,13 @@
 package com.nexus.nexusportalservice.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.AuthCmd;
-import com.nexus.nexuscommondomain.constants.SecurityConstants;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.nexus.nexuscommondomain.constants.TokenConstants;
 import com.nexus.nexuscommondomain.domain.dto.LoginUserDTO;
 import com.nexus.nexuscommonredis.service.RedisService;
 import com.nexus.nexuscommonsecurity.service.TokenService;
+import com.nexus.nexusportalservice.constants.ContainerConstants;
 import com.nexus.nexusportalservice.domain.AppType;
 import com.nexus.nexusportalservice.domain.ModelParsedResult;
 import com.nexus.nexusportalservice.domain.dto.AppGenerateRetDTO;
@@ -167,7 +166,6 @@ public class AppEditServiceImpl implements IAppEditService {
         //创建一个 code-server 容器
         CodeContainerDTO codeContainerDTO = containerUtil.createCodeServer(hostDirPrefix + appId, containerDirPrefix + appId);
 
-        System.out.printf("========= %s =========", appPath);
         if(codeContainerDTO == null){
             return null; //没能创建容器
         }
@@ -176,14 +174,21 @@ public class AppEditServiceImpl implements IAppEditService {
             return null;
         }
 
+        //containerPrefix + userId => containerId
+        String containerPrefix = ContainerConstants.CONTAINER_PREFIX;
         String containerId = codeContainerDTO.getContainId();
-        if(redisService.hasKey(userId)){
-            String oldContainerId = redisService.getCacheObject(userId, String.class);
-            containerUtil.stopAndRemoveContainer(oldContainerId);
-        }
-        redisService.setCacheObject(userId, containerId);
+        String containerKey = containerPrefix + userId;
+        log.info("创建 containerKey: {}，对应的 containerId: {}", containerKey, containerId);
 
-        //本地存在，直接返回连接即可
+        if(redisService.hasKey(containerKey)){
+            String oldContainerId = redisService.getCacheObject(containerKey, String.class);
+            try{
+                containerUtil.stopAndRemoveContainer(oldContainerId);
+            }
+            catch(NotFoundException ignore){}
+        }
+        redisService.setCacheObject(containerKey, containerId);
+
         String vscodeUrl = String.format(vscodeUrlTemplate, codeHost, codePort, appId);
         log.info("{} 的vscode预览链接 {}", appId, vscodeUrl);
 
@@ -195,8 +200,13 @@ public class AppEditServiceImpl implements IAppEditService {
         LoginUserDTO loginUserDTO = tokenService.getLoginUser(token);
         String userId = loginUserDTO.getUserId();
 
-        if(redisService.hasKey(userId)){
-            containerUtil.stopAndRemoveContainer(redisService.getCacheObject(appId, String.class));
+        String containerKey = ContainerConstants.CONTAINER_PREFIX + userId;
+        if(redisService.hasKey(containerKey)){
+            try{
+                containerUtil.stopAndRemoveContainer(redisService.getCacheObject(containerKey, String.class));
+            }
+            catch(NotFoundException ignored){}
+            redisService.deleteObject(containerKey);
         }
 
         if(!redisService.hasKey(TokenConstants.LOGIN_TOKEN_KEY + userId)){

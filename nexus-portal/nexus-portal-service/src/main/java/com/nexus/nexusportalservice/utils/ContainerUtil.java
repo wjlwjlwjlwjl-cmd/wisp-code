@@ -2,6 +2,7 @@ package com.nexus.nexusportalservice.utils;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import com.nexus.nexusportalservice.domain.dto.CodeContainerDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Random;
 
 @Slf4j
@@ -39,6 +39,16 @@ public class ContainerUtil {
         return -1;
     }
 
+    public Boolean containerExists(String containerId){
+        try{
+            dockerClient.inspectContainerCmd(containerId).exec();
+            return true;
+        }
+        catch(NotFoundException e){
+            return false;
+        }
+    }
+
     /**
      * 创建 code‑server 容器，返回宿主机端口
      *
@@ -65,9 +75,10 @@ public class ContainerUtil {
                 HostConfig hostConfig = new HostConfig()
                         .withBinds(bindMount)
                         .withPortBindings(portBinding)
+                        .withAutoRemove(true)
                         .withRestartPolicy(RestartPolicy.noRestart());
 
-                CreateContainerResponse resp = dockerClient.createContainerCmd("codercom/code-server:4.99.0-39")
+                CreateContainerResponse resp = dockerClient.createContainerCmd("codercom/code-server:4.137.0")
                         .withName("code-server-" + System.currentTimeMillis())
                         .withUser("root")
                         // 把HostConfig传入
@@ -75,7 +86,11 @@ public class ContainerUtil {
                         .withExposedPorts(ExposedPort.tcp(8080))
                         .withWorkingDir(containerDir)
                         .withEnv("PWD=" + containerDir)
-                        .withCmd("--auth", "none", "--bind-addr", "0.0.0.0:8080")
+                        .withCmd(
+                                "--auth", "none",
+                                "--bind-addr", "0.0.0.0:8080",
+                                "--idle-timeout-seconds", "600" //空闲600秒后直接退出，容器销毁
+                        )
                         .exec();
 
                 containerId = resp.getId();

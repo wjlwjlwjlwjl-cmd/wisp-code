@@ -1,6 +1,5 @@
 package com.nexus.nexuscommonmessage.config;
 
-import com.nexus.nexuscommonmessage.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -11,20 +10,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
-/*
-email:
-    host: smtp.qq.com
-    port: 587
-    username: 1393265226@qq.com
-    password: bxmscpqzgairghje
-    connection-timeout: 10000
-    timeout: 10000
-    write-timeout: 10000
-    subject: login-code
- */
-
 @Slf4j
-@AutoConfiguration
+@Configuration
 public class EmailConfig {
     @Value("${email.host:smtp.qq.com}")
     String emailHost;
@@ -46,10 +33,6 @@ public class EmailConfig {
 
     @Value("${email.write-timeout:10000}")
     int writeTimeout;
-
-    public EmailConfig(){
-        System.out.println("================== Constructing EmailConfig ===================");
-    }
 
     @Bean
     public JavaMailSender getBean(){
