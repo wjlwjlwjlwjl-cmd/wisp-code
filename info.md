@@ -38,3 +38,7 @@
 ### 8. QQ 邮箱授权码
 
 * bxmscpqzgairghje
+
+### 9. code server 
+
+* sudo chown -R 1000:1000 ../data/wispcodedata/userapp/user-code，更改目录权限，让 code server 有写挂载目录的权限
