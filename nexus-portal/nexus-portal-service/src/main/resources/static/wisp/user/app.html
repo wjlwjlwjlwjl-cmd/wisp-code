@@ -13,40 +13,36 @@
   <p class="page-sub"><a href="apps.html">← 我的应用</a></p>
   <div id="alert" class="alert"></div>
 
-  <div class="grid cols-2">
-    <!-- left -->
-    <div>
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-          <div><h3 id="app-name" style="margin:0">加载中…</h3>
-            <div id="app-meta" class="meta" style="margin-top:8px"></div></div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="btn ghost" id="btn-vs" onclick="openVsCode()">VSCode 代码预览</button>
-            <button class="btn" id="btn-confirm" onclick="doVsConfirm()">确认更改</button>
-            <button class="btn ok" id="btn-deploy" onclick="toggleDeploy()">部署</button>
-          </div>
-        </div>
-        <hr class="sep">
-        <label>预览</label>
-        <div class="row" style="margin-bottom:10px">
-          <input class="input mono" id="preview-url" readonly placeholder="暂无预览链接">
-          <a class="btn ghost sm" id="open-tab" href="#" target="_blank" rel="noopener" style="flex:0 0 auto">↗</a>
-          <button class="btn ghost sm" onclick="reloadPreview()" style="flex:0 0 auto">刷新</button>
-        </div>
-        <iframe id="preview" class="preview-frame" src="about:blank"></iframe>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div><h3 id="app-name" style="margin:0">加载中…</h3>
+        <div id="app-meta" class="meta" style="margin-top:8px"></div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn ghost" id="btn-vs" onclick="openVsCode()">VSCode 代码预览</button>
+        <button class="btn" id="btn-confirm" onclick="doVsConfirm()">确认更改</button>
+        <button class="btn ok" id="btn-deploy" onclick="toggleDeploy()">部署</button>
       </div>
+    </div>
+    <hr class="sep">
+    <label>预览链接</label>
+    <div class="row">
+      <input class="input mono" id="preview-url" readonly placeholder="暂无预览链接">
+      <a class="btn ghost sm" id="open-tab" href="#" target="_blank" rel="noopener" style="flex:0 0 auto">↗ 新标签打开</a>
+    </div>
+  </div>
 
-      <div class="card">
-        <h3>应用文档</h3>
-        <p class="hint">用于构建的需求文档内容。</p>
-        <div class="md-tabs">
-          <button class="active" id="doc-tab-render" onclick="showDoc('render')">渲染</button>
-          <button id="doc-tab-raw" onclick="showDoc('raw')">原文</button>
-        </div>
-        <div class="md-body" id="app-doc"></div>
-        <div class="doc-box" id="app-doc-raw" style="display:none">—</div>
-        <div id="app-desc" class="muted" style="margin-top:10px;font-size:13px"></div>
+  <div class="grid cols-2" style="margin-top:18px">
+    <!-- left: 应用文档 -->
+    <div class="card">
+      <h3>应用文档</h3>
+      <p class="hint">用于构建的需求文档内容。</p>
+      <div class="md-tabs">
+        <button class="active" id="doc-tab-render" onclick="showDoc('render')">渲染</button>
+        <button id="doc-tab-raw" onclick="showDoc('raw')">原文</button>
       </div>
+      <div class="md-body" id="app-doc"></div>
+      <div class="doc-box" id="app-doc-raw" style="display:none">—</div>
+      <div id="app-desc" class="muted" style="margin-top:10px;font-size:13px"></div>
     </div>
 
     <!-- right: chat history + natural language edit -->
@@ -103,7 +99,6 @@
       const url=WispAPI.fmtUrl(d.previewUrl);
       document.getElementById('preview-url').value=d.previewUrl||'';
       document.getElementById('open-tab').href=url||'#';
-      document.getElementById('preview').src=url||'about:blank';
       rawDoc = d.appDoc || '';
       document.getElementById('app-doc-raw').textContent = rawDoc || '—';
       document.getElementById('app-doc').innerHTML = rawDoc ? WispMD.render(rawDoc) : '<span class="muted">—</span>';
@@ -148,17 +143,17 @@
     const now=Date.now();
     if(now-lastVsConfirm<10000){ WispAPI.toast('操作过于频繁，请 10 秒后再试','err'); return; }
     lastVsConfirm=now;
+    busy('btn-confirm',true);
     try{
       const ok=await A.vsConfirm(appId);
       if(ok===false){ WispAPI.toast('确认更改失败','err'); }
       else{ WispAPI.toast('已确认更改','ok'); loadDetail(); loadHistory(); }
     }catch(e){
-      if(e.needAuth){Auth.expired(e.message);return;}
+      if(e.needAuth){Auth.expired(e.message);busy('btn-confirm',false);return;}
       WispAPI.toast('确认更改失败：'+e.message,'err');
     }
+    busy('btn-confirm',false);
   }
-
-  function reloadPreview(){ const u=document.getElementById('preview').src; document.getElementById('preview').src='about:blank'; setTimeout(()=>document.getElementById('preview').src=u,80); }
 
   async function loadHistory(){
     try{
@@ -181,7 +176,7 @@
     try{
       const ret=await A.editApp(appId,p);
       const url=WispAPI.fmtUrl(ret.previewUrl);
-      if(ret.previewUrl){document.getElementById('preview-url').value=ret.previewUrl;document.getElementById('open-tab').href=url;document.getElementById('preview').src=url;}
+      if(ret.previewUrl){document.getElementById('preview-url').value=ret.previewUrl;document.getElementById('open-tab').href=url;}
       if(ret.appType){/* refresh meta softly */}
       document.getElementById('edit-prompt').value='';
       WispAPI.toast('修改完成，已更新预览','ok');
