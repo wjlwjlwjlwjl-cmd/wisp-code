@@ -27,7 +27,7 @@ INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,sr
     name: wispcode
   ai:
     dashscope:
-      api-key: sk-ws-H.EXXXDXR.CNEx.MEUCIGn5txvR-qjf8BS1FiUXwbmgxCymG85RuFkdL8VG3lgWAiEA-lKZEU6g7_ZZA5Vx9vIZ367a7HnIj-Z9BHWIMuFzjSw
+      api-key: {paste your api-key here}
       chat:
         options:
           model: deepseek-v4-pro-0813
@@ -74,7 +74,7 @@ gitee:
     branch: master
     owner: wangs-joyful-home
   api-base-url: https://gitee.com/api/v5/
-  access-token: f3044cf9989512905d2e14d7b061be4d
+  access-token: {paste your gitee access-token here}
 
 code:
   host: 192.168.160.133
@@ -83,7 +83,7 @@ code:
     name: wispcode
   ai:
     dashscope:
-      api-key: sk-ws-H.EXXXDXR.CNEx.MEUCIGn5txvR-qjf8BS1FiUXwbmgxCymG85RuFkdL8VG3lgWAiEA-lKZEU6g7_ZZA5Vx9vIZ367a7HnIj-Z9BHWIMuFzjSw
+      api-key: {paste your api-key here}
       chat:
         options:
           model: deepseek-v4-pro-0813
@@ -130,7 +130,7 @@ gitee:
     branch: master
     owner: wangs-joyful-home
   api-base-url: https://gitee.com/api/v5/
-  access-token: f3044cf9989512905d2e14d7b061be4d
+  access-token: {paste your gitee access-token here}
 
 code:
   host: 192.168.160.133
