@@ -32,9 +32,9 @@ INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,sr
         options:
           model: deepseek-v4-pro-0813
           temperature: 0.7
-    # -------- TEI bge‑m3 embedding --------
+    # -------- embedding --------
     openai:
-      base-url: http://192.168.160.131:8090/v1
+      base-url: http://192.168.160.133:8090/v1
       api-key: dummy-tei
       chat:
         enabled: false
@@ -43,7 +43,7 @@ INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,sr
       milvus:
         enabled: true
         client:
-          host: 192.168.160.131
+          host: 192.168.160.133
           port: 19530
         collection-name: RAG
         embedding-dimension: 1024
@@ -59,9 +59,9 @@ management:
 app:
   preview:
     container-name: wispcode-userapp-preview
-    host: 192.168.160.131
+    host: 192.168.160.133
 docker:
-  host: tcp://192.168.160.131:2376
+  host: tcp://192.168.160.133:2376
   cert: /workspace/cert
 chat:
   memory:
@@ -77,7 +77,7 @@ gitee:
   access-token: f3044cf9989512905d2e14d7b061be4d
 
 code:
-  host: 192.168.160.131
+  host: 192.168.160.133
   port: 8080',md5('spring:
   application:
     name: wispcode
@@ -88,9 +88,9 @@ code:
         options:
           model: deepseek-v4-pro-0813
           temperature: 0.7
-    # -------- TEI bge‑m3 embedding --------
+    # -------- embedding --------
     openai:
-      base-url: http://192.168.160.131:8090/v1
+      base-url: http://192.168.160.133:8090/v1
       api-key: dummy-tei
       chat:
         enabled: false
@@ -99,7 +99,7 @@ code:
       milvus:
         enabled: true
         client:
-          host: 192.168.160.131
+          host: 192.168.160.133
           port: 19530
         collection-name: RAG
         embedding-dimension: 1024
@@ -115,9 +115,9 @@ management:
 app:
   preview:
     container-name: wispcode-userapp-preview
-    host: 192.168.160.131
+    host: 192.168.160.133
 docker:
-  host: tcp://192.168.160.131:2376
+  host: tcp://192.168.160.133:2376
   cert: /workspace/cert
 chat:
   memory:
@@ -133,7 +133,7 @@ gitee:
   access-token: f3044cf9989512905d2e14d7b061be4d
 
 code:
-  host: 192.168.160.131
+  host: 192.168.160.133
   port: 8080'),now(),now(),'nacos','112.46.64.96','wisp-code configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,''),
 
 ('share-common-test.yaml','DEFAULT_GROUP','feign:
@@ -196,7 +196,7 @@ code:
 
 ('share-mysql-test.yaml','DEFAULT_GROUP','spring:
   datasource:
-    url: jdbc:mysql://192.168.160.131:3306/wispcode?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+    url: jdbc:mysql://192.168.160.133:3306/wispcode?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: bitedev
     password: bite@123
@@ -216,7 +216,7 @@ mybatis-plus:
     configuration:
       log-impl: org.apache.ibatis.logging.stdout.StdOutImpl',md5('spring:
   datasource:
-    url: jdbc:mysql://192.168.160.131:3306/wispcode?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+    url: jdbc:mysql://192.168.160.133:3306/wispcode?useSSL=false&autoReconnect=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: bitedev
     password: bite@123

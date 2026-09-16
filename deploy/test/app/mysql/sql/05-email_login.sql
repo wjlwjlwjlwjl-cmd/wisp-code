@@ -1,9 +1,10 @@
-USE wispcode;
-CREATE TABLE IF NOT EXISTS email_user(
-                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
-                `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户 id',
-                `email` VARCHAR(60) NOT NULL COMMENT '用户邮箱',
-                `password` VARCHAR(30) NOT NULL COMMENT '用户密码',
-                PRIMARY KEY (`id`),
-                KEY `idx_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户邮箱账号表';
+CREATE TABLE `email_user` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(60) DEFAULT NULL,
+  `username` varchar(30) DEFAULT NULL,
+  `email` varchar(60) NOT NULL,
+  `password` varchar(30) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
