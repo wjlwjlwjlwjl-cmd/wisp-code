@@ -176,7 +176,7 @@ services:
     environment:
       - HF_HUB_ENABLE_HF_TRANSFER=1
     command: >
-      --model-id BAAI/bge-m3
+      --model-id /data
       --dtype float32
       --pooling mean
       --max-batch-tokens 4096
