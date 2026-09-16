@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS wispcode default character set utf8mb4 collate utf
 USE wispcode;
 CREATE TABLE `app` (
                        `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '应用主键ID',
-                       `user_id` bigint NOT NULL COMMENT '所属用户主键ID',
+                       `user_id` varchar(100) NOT NULL COMMENT '所属用户主键ID',
                        `app_name` varchar(100) DEFAULT NULL COMMENT '应用名称',
                        `app_desc` text DEFAULT NULL COMMENT '应用描述',
                        `app_doc` text DEFAULT NULL COMMENT '应用需求文档',
