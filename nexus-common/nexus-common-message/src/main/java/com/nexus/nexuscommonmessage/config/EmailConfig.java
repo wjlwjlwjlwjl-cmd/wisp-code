@@ -19,10 +19,10 @@ public class EmailConfig {
     @Value("${email.port:587}")
     Integer emailPort;
 
-    @Value("${email.username:1393265226@qq.com}")
+    @Value("${email.username}")
     String userName;
 
-    @Value("${email.password:bxmscpqzgairghje}")
+    @Value("${email.password}")
     String password;
 
     @Value("${email.connection-timeout:10000}")

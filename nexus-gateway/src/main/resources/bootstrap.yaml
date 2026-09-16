@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: bite-gateway
+    name: nexus-gateway
   profiles:
     active: ${RUN_ENV}
   main:

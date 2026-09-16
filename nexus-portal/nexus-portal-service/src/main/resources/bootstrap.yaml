@@ -30,3 +30,5 @@ spring:
             refresh: true
           - data-id: share-wispcode-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
             refresh: true
+          - data-id: share-email-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            refresh: true

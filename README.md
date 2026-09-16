@@ -22,7 +22,7 @@
 ## 二、部署
 ### 2.1 部署代码
 
-在本地目录中批量替换 IP，之后通过 `scp` 或者其他方式上传到服务器
+nginx 配置，将 `nginx/conf/nginx.conf` 中的 IP 更新
 
 `clone` 本仓库到 `/home/diinki/` 目录下，找到 `deploy/test/app/docker-compose-mid.yml`，通过下面的命令进行容器编排
 
@@ -35,7 +35,7 @@ $ docker compose -p nexus-stack -f docker-compose-mid.yml up -d
 * `Redis`，映射主机 5379 端口，默认认证密码：`bite@123`，容器名：`frameworkjava-redis`
 * `MySQL`，映射主机 3306 端口，默认用户：`bitedev`，密码：`bite@123` （MYSQL_ROOT_PASSWORD=bite@123）
 * `Nacos`，映射主机 8848、9848 端口，默认用户 `nacos`，密码 `bite@123`
-* `Milvus`，向量数据库。默认用户 `root`，默认密码 `minioadmin`，WebUI 访问 `http://localhost:9091/webui`，或者通过 Attu 客户端。创建数据库 `wispcode_db`，创建 Collection `RAG`（对应表）
+* `Milvus`，向量数据库。默认用户 `root`，默认密码 `minioadmin`，WebUI 访问 `http://localhost:9091/webui`，或者通过 Attu 客户端。创建数据库 `wispcode_db`，创建 Collection `RAG`（对应表），设置向量维度为 1024
 * `bge-m3-embedding`，因为网络环境原因，直接从 HuggingFace 获取嵌入模型不稳定，所以通过 model_downlaod.py 下载，容器编排自动完成挂载，容器位置位于 `/data`
 * `wispcode-userapp-preview`，预览容器，包含 nginx + JDK
 
@@ -50,6 +50,7 @@ $ docker compose -p nexus-stack -f docker-compose-mid.yml up -d
 
 * `share-wispcode-test.yaml`，更改 API-KEY，以及嵌入模型服务器、向量数据库、预览容器、docker 服务器、code-server 容器的 IP 地址，Gitee Access-Token
 * `share-mysql-test.yaml`，更改 MySQL 服务器 IP，数据库名称不需更改
+* `share-email-test.yaml`，更改邮箱、smtp 密码
 
 ### 2.4 后端服务配置更改
 
@@ -61,3 +62,21 @@ $ docker compose -p nexus-stack -f docker-compose-mid.yml up -d
 
 同样在根 pom.xml 中更新 Nacos Server IP
 
+#### 2.5 Docker 远程访问证书
+
+1. 运行 deploy/app/config/cert 下的 cert.sh（root权限，并且修改 SERVER 地址；同时，建议使用 file 查看是否含有 Windows 换行符，如果有，使用 dos2unix 修改）  
+  
+    生成如下文件    
+    `ca-key.pem`： CA密钥  
+    `ca.pem`：CA证书  
+    `cert.pem`： 客户端证书  
+    `extfile.cnf`： 客户端证书扩展配置文件  
+    `key.pem`： 客户端密钥  
+    `server-cert.pem`： 服务端证书  
+    `server-key.pem`： 服务端密钥  
+  
+2. 其中，`ca.pem`、`server-cert.pem`、`server-key.pem` 放到 `/etc/docker`；将 `ca.pem`、`cert.pem`、`key.pem` 放到 `wisp-code/deploy/test/app/config/cert` 目录下（`cert.sh` 同级目录）  
+  
+    将 `/lib/systemd/system/docker.service` 中的相应部分替换  
+    `ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2376 --tlsverify=true --tlscacert=/etc/docker/ca.pem --tlscert=/etc/docker/server-cert.pem --tlskey=/etc/docker/server-key.pem -H fd:// --containerd=/run/containerd/containerd.sock`
+    随后重启 docker 服务（`daemon-reload`，`restart`）  
