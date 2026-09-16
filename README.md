@@ -12,3 +12,8 @@ $ docker compose -p nexus-stack -f docker-compose-mid.yml up -d
 
 * `Redis`，映射主机 5379 端口，默认认证密码：`bite@123`，容器名：`frameworkjava-redis`
 * `MySQL`，映射主机 3306 端口，默认用户：`bitedev`，密码：`bite@123` （MYSQL_ROOT_PASSWORD=bite@123）
+
+### 2.2 准备后续所需镜像
+
+1. `codercom/code-server:4.137.0`，用于后续为用户提供网页端 Code 代码修改
+2. 制作容器，主要后端服务容器需要提供 jdk、npm、mvn，没有现成的镜像，手动制作（虽然也上传了 DockerHub，但是考虑网络环境，选取自行制作。直接仓库拉取：`docker pull wangjialelele/jdk21-mvn-npm:v1.0`

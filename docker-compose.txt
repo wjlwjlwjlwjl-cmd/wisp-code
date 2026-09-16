@@ -1,0 +1,70 @@
+diinki@wisp-code-deploy-test:~/wisp-code/deploy/test/app$ docker compose -p nexus-stack -f docker-compose-mid.yml up -d
+[+] Running 65/78
+ ✔ minio Pulled                                                                                                   80.9s
+ ✔ frameworkjava-redis Pulled                                                                                     82.4s
+ ✔ wispcode-web Pulled                                                                                            87.1s
+ ✔ frameworkjava-mysql Pulled                                                                                    142.3s
+ ✔ bge-m3-embedding Pulled                                                                                       106.8s
+ ! wispcode-userapp-preview Warning unknown: failed to resolve reference "docker....                              28.9s
+ ✔ standalone Pulled                                                                                             186.6s
+ ✔ frameworkjava-nacos Pulled                                                                                    162.0s
+
+WARN[0186] Docker Compose is configured to build using Bake, but buildx isn't installed
+[+] Building 93.7s (8/8) FINISHED                                                                        docker:default
+ => [wispcode-userapp-preview internal] load build definition from dockerfile                                      0.0s
+ => => transferring dockerfile: 654B                                                                               0.0s
+ => [wispcode-userapp-preview internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-jammy          25.7s
+ => [wispcode-userapp-preview internal] load .dockerignore                                                         0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [wispcode-userapp-preview 1/3] FROM docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:8878012b286ef00032  32.2s
+ => => resolve docker.io/library/eclipse-temurin:21-jdk-jammy@sha256:8878012b286ef00032346bfbdd55b10e9f5bf923430e  0.0s
+ => => sha256:0a6ed5e3635a2fdb01d17f4f47f03f3330b459de15b5e433230f6f3e795a8c83 2.46kB / 2.46kB                     6.3s
+ => => sha256:647c4fdd0afee77bc3f609bd028c097169c15770240f10db661fbfc52360ed2f 159B / 159B                         7.5s
+ => => sha256:113fe8093e7a61eaae5b882269494db58ed677cb72cc754c9868e958126b4bea 158.12MB / 158.12MB                28.3s
+ => => sha256:391fe65083f218fcade46ffb846ece5d559c6c1700151b53e9f176794a6474dd 20.66MB / 20.66MB                  10.2s
+ => => sha256:20c3783cc497b5b0df1fc5f92bd64c3d2fbb24057c88692c8fda205b6ea8a2f2 29.75MB / 29.75MB                  17.0s
+ => => extracting sha256:20c3783cc497b5b0df1fc5f92bd64c3d2fbb24057c88692c8fda205b6ea8a2f2                          2.5s
+ => => extracting sha256:391fe65083f218fcade46ffb846ece5d559c6c1700151b53e9f176794a6474dd                          2.4s
+ => => extracting sha256:113fe8093e7a61eaae5b882269494db58ed677cb72cc754c9868e958126b4bea                          3.7s
+ => => extracting sha256:647c4fdd0afee77bc3f609bd028c097169c15770240f10db661fbfc52360ed2f                          0.0s
+ => => extracting sha256:0a6ed5e3635a2fdb01d17f4f47f03f3330b459de15b5e433230f6f3e795a8c83                          0.0s
+ => [wispcode-userapp-preview 2/3] WORKDIR /workspace                                                              1.2s
+ => [wispcode-userapp-preview 3/3] RUN apt-get update &&     apt-get install -y --no-install-recommends       ng  29.9s
+ => [wispcode-userapp-preview] exporting to image                                                                  4.4s
+ => => exporting layers                                                                                            3.4s
+ => => exporting manifest sha256:6ae0121f361357b899332183c0bad1fe8681156f13eb313dc52c1dfa9ee48e9d                  0.0s
+ => => exporting config sha256:465ace28644835610e19b99d1fe880ed03181693c1ff412f30b044de052f4109                    0.0s
+ => => exporting attestation manifest sha256:c30feddfb16b7a2b79fc7cf0f6f7affdbff6ed5cf5c166e6c4e23964d692d013      0.0s
+ => => exporting manifest list sha256:e6eac6af10a7cb8d2dfe3221e5dd059916adb50fee7e4b2e18a7085ed625e696             0.0s
+ => => naming to docker.io/wispcode/userapp:latest                                                                 0.0s
+ => => unpacking to docker.io/wispcode/userapp:latest                                                              0.9s
+ => [wispcode-userapp-preview] resolving provenance for metadata file                                              0.0s
+[+] Running 12/12
+ ✔ wispcode-userapp-preview                   Built                                                                0.0s
+ ✔ Network nexus-stack_frameworkjava_network  Created                                                              0.1s
+ ✔ Network nexus-stack_default                Created                                                              0.1s
+ ✔ Container wispcode-userapp-preview         Started                                                              6.3s
+ ✔ Container wispcode-web                     Started                                                              5.7s
+ ✔ Container frameworkjava-mysql              Healthy                                                             28.2s
+ ✔ Container wispcode-milvus-minio            Started                                                              4.2s
+ ✔ Container frameworkjava-redis              Started                                                              4.0s
+ ✔ Container wispcode-milvus-etcd             Started                                                              6.3s
+ ✔ Container nexus-stack-bge-m3-embedding-1   Started                                                              5.9s
+ ✔ Container frameworkjava-nacos              Started                                                             28.5s
+ ✔ Container wispcode-milvus-standalone       Started                                                              7.4s
+
+ diinki@wisp-code-deploy-test:~/wisp-code/deploy/test/app$ docker pull codercom/code-server:4.137.0
+ 4.137.0: Pulling from codercom/code-server
+ 4f4fb700ef54: Pull complete
+ 27ee9a825048: Pull complete
+ 8ac3636711b5: Pull complete
+ d842148c42be: Pull complete
+ 1ae2b0a0dd59: Pull complete
+ 1b2355142ded: Pull complete
+ 8f0c644fafeb: Pull complete
+ 2ee23862c490: Pull complete
+ 44136fa355b3: Download complete
+ 50822a143576: Download complete
+ Digest: sha256:57ac684d44deb6fa94317b3e8f3e128dd7fb897fffd95b4efcd16f56ce607971
+ Status: Downloaded newer image for codercom/code-server:4.137.0
+ docker.io/codercom/code-server:4.137.0
