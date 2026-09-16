@@ -2,6 +2,7 @@ package com.nexus.nexusportalservice.utils;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectExecResponse;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DockerContextMetaFile;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
@@ -126,7 +127,19 @@ public class AppBuildUtil {
                     .exec()
                     .getId();
 
-            dockerClient.execStartCmd(execId).start();
+            dockerClient.execStartCmd(execId).exec(new ExecStartResultCallback() {
+                @Override
+                public void onError(Throwable throwable) {
+                    if (throwable instanceof NotFoundException) {
+                        log.warn("容器已不存在，jar 包启动终止，容器名={}, appId={}, 错误: {}",
+                                containerName, appId, throwable.getMessage());
+                    } else {
+                        log.error("jar 包启动失败，容器名={}, appId={}, 错误: {}",
+                                containerName, appId, throwable.getMessage(), throwable);
+                    }
+                    super.onError(throwable);
+                }
+            });
 
             log.info("已在容器 {} 中启动 jar 包: {}，端口: {}", containerName, jarPathInContainer, port);
 
@@ -136,6 +149,9 @@ public class AppBuildUtil {
                 updateNginxConfig(containerId, appId, port, dockerClient);
             }
 
+        } catch (NotFoundException e) {
+            log.warn("容器已不存在，跳过 jar 包执行，容器名={}, appId={}, jar={}, 错误: {}",
+                    containerName, appId, jarFileName, e.getMessage());
         } catch (Exception e) {
             log.error("在容器中执行 jar 包失败，容器名={}, appId={}, jar={}, 错误: {}",
                     containerName, appId, jarFileName, e.getMessage(), e);
@@ -164,6 +180,9 @@ public class AppBuildUtil {
             execInContainer(containerId, updateCommand, "更新 nginx 配置", dockerClient);
             execInContainer(containerId, reloadCommand, "重载 nginx", dockerClient);
             log.info("容器 {} 的 nginx 配置已更新并重载，appId={}, port={}", containerId, appId, port);
+        } catch (NotFoundException e) {
+            log.warn("容器已不存在，跳过 nginx 配置更新，appId={}, port={}, containerId={}, 错误: {}",
+                    appId, port, containerId, e.getMessage());
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             log.error("更新 nginx 配置时线程被中断，appId={}, port={}", appId, port, ie);

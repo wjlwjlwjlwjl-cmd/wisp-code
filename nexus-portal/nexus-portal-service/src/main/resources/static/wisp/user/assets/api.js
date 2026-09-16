@@ -68,6 +68,22 @@
     }
   };
 
+  // ---- theme (dark default / light, colors only) --------------------------
+  var THEME_KEY = "wisp_theme";
+  var theme = {
+    get: function () { try { return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark"; } catch (e) { return "dark"; } },
+    apply: function (t) { document.documentElement.setAttribute("data-theme", t); },
+    label: function () { return theme.get() === "dark" ? "浅色" : "深色"; },
+    sync: function () { var b = document.getElementById("theme-toggle"); if (b) b.textContent = theme.label(); },
+    toggle: function () {
+      var t = theme.get() === "dark" ? "light" : "dark";
+      try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+      theme.apply(t);
+      theme.sync();
+    }
+  };
+  theme.apply(theme.get());
+
   // ---- low level fetch ---------------------------------------------------
   function buildQuery(obj) {
     var parts = [];
@@ -215,6 +231,7 @@
         return '<a class="' + (l[2] === active ? "active" : "") + '" href="' + l[0] + '">' + l[1] + "</a>";
       }).join("") + "</div>" +
       '<div class="spacer"></div>';
+    html += '<button id="theme-toggle" class="btn ghost sm theme-toggle" title="切换深色/浅色主题" onclick="WispAPI.theme.toggle()">' + theme.label() + '</button>';
     if (logged) {
       var name = (u && (u.username || u.email)) || "已登录";
       html += '<div class="user-chip"><span class="avatar">' + name.slice(0, 1).toUpperCase() + '</span>' +
@@ -251,5 +268,5 @@
   function appTypeBadge(t) { return t ? '<span class="badge">' + escape(appTypeLabel(t)) + "</span>" : ""; }
   function fmtUrl(u) { return u && /^https?:\/\//i.test(u) ? u : (u ? "http://" + u : ""); }
 
-  global.WispAPI = { api: api, auth: auth, toast: toast, nav: nav, escape: escape, appTypeBadge: appTypeBadge, appTypeLabel: appTypeLabel, fmtUrl: fmtUrl, SUCCESS_CODE: SUCCESS_CODE };
+  global.WispAPI = { api: api, auth: auth, theme: theme, toast: toast, nav: nav, escape: escape, appTypeBadge: appTypeBadge, appTypeLabel: appTypeLabel, fmtUrl: fmtUrl, SUCCESS_CODE: SUCCESS_CODE };
 })(window);
