@@ -9,7 +9,7 @@
   // are same-origin (no CORS) when opened via the gateway.
   // Override on a page with: <script>window.WISP_API_BASE="http://host:port"</script>
   var API = {
-    base: (global.WISP_API_BASE != null ? global.WISP_API_BASE : "http://192.168.160.131:18080") + "/wisp"
+    base: (global.WISP_API_BASE != null ? global.WISP_API_BASE : "") + "/wisp"
   };
   var SUCCESS_CODE = 200000; // ResultCode.SUCCESS
 
