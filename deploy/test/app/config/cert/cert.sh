@@ -3,12 +3,12 @@
 #vi /lib/systemd/system/docker.service
 #--tlsverify --tlscacert=/etc/docker/ca.pem --tlscert=/etc/docker/server-cert.pem --tlskey=/etc/docker/server-key.pem
 
-SERVER="192.168.160.131" # 这里使用的是 wsl 的内网IP，可能会变化
+SERVER="192.168.160.133" # 这里使用的是 wsl 的内网IP，可能会变化
 PASSWORD="123456"
 COUNTRY="CN"
 STATE="ShanXi"
 CITY="XiAn"
-ORGANIZATION="bitejiuyeke"
+ORGANIZATION="wispcode"
 ORGANIZATIONAL_UNIT="Dev"
 EMAIL="123@139.com"
 
