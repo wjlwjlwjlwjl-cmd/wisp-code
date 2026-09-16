@@ -1,3 +1,4 @@
+USE wispcode;
 CREATE TABLE `email_user` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` varchar(60) DEFAULT NULL,
