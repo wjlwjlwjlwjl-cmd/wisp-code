@@ -3,7 +3,7 @@ deploy/test/data/
 .idea
 */target
 */*/target
-env.sh
 preview
 deploy/test/app/hf_model_cache/
 wispcode-gitee
+.obsidian

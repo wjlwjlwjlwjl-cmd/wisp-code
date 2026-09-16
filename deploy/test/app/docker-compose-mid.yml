@@ -6,11 +6,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      # 数据挂载
       - ../data/frameworkjavadata/mysql/data:/var/lib/mysql
-      # 配置挂载
-      # - ./mysql/sql:/opt/sql
-      # - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./mysql/sql:/docker-entrypoint-initdb.d
     command: [
       'mysqld',
@@ -94,29 +90,6 @@ services:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
-      retries: 10
-  frameworkjava-rabbitmq:
-    image: rabbitmq:3.12.6-management
-    container_name: frameworkjava-rabbitmq
-    restart: always
-    hostname: frameworkjava-rabbitmq
-    environment:
-      # 用户名
-      RABBITMQ_DEFAULT_USER: admin
-      # 密码
-      RABBITMQ_DEFAULT_PASS: bite@123
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - ../data/frameworkjavadata/rabbitmq/log:/var/log/rabbitmq
-      - ../data/frameworkjavadata/rabbitmq/data:/var/lib/rabbitmq
-    networks:
-      - frameworkjava_network
-    healthcheck:
-      test: [ "CMD", "rabbitmqctl", "status" ]
-      interval: 10s
-      timeout: 10s
       retries: 10
 
   wispcode-userapp-preview:
@@ -227,21 +200,6 @@ services:
       --max-client-batch-size 4
       --max-concurrent-requests 2
       --auto-truncate
-
-  wispcode-vscode:
-    container_name: wispcode-vscode
-    image: codercom/code-server:4.99.0-39
-    ports:
-      - "8080:8080"
-    volumes:
-      - ../data/wispcodedata/userapp/user-code:/home/workspace
-    working_dir: /home/workspace
-    environment:
-      - PWD=/home/workspace
-    command: --auth none --bind-addr 0.0.0.0:8080
-    restart: always
-    networks:
-      - frameworkjava_network
 
 networks:
   frameworkjava_network:

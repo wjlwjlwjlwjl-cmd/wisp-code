@@ -26,18 +26,8 @@ INSERT INTO config_info (data_id,group_id,content,md5,gmt_create,gmt_modified,sr
   application:
     name: wispcode
   ai:
-    mcp:
-      client:
-        type: async
-        request-timeout: 60s
-        toolcallback:
-          enabled: true
-        sse:
-          connections:
-            mcp-server1:
-              url: http://192.168.160.131:19090
     dashscope:
-      api-key: {paste your dashscope api-key here}
+      api-key: sk-ws-H.EXXXDXR.CNEx.MEUCIGn5txvR-qjf8BS1FiUXwbmgxCymG85RuFkdL8VG3lgWAiEA-lKZEU6g7_ZZA5Vx9vIZ367a7HnIj-Z9BHWIMuFzjSw
       chat:
         options:
           model: deepseek-v4-pro-0813
@@ -82,22 +72,18 @@ gitee:
   user-code:
     repo: wispcode-gitee-repo
     branch: master
-    owner: wangs-joyful-home',md5('spring:
+    owner: wangs-joyful-home
+  api-base-url: https://gitee.com/api/v5/
+  access-token: f3044cf9989512905d2e14d7b061be4d
+
+code:
+  host: 192.168.160.131
+  port: 8080',md5('spring:
   application:
     name: wispcode
   ai:
-    mcp:
-      client:
-        type: async
-        request-timeout: 60s
-        toolcallback:
-          enabled: true
-        sse:
-          connections:
-            mcp-server1:
-              url: http://192.168.160.131:19090
     dashscope:
-      api-key: {paste your dashscope api-key here}
+      api-key: sk-ws-H.EXXXDXR.CNEx.MEUCIGn5txvR-qjf8BS1FiUXwbmgxCymG85RuFkdL8VG3lgWAiEA-lKZEU6g7_ZZA5Vx9vIZ367a7HnIj-Z9BHWIMuFzjSw
       chat:
         options:
           model: deepseek-v4-pro-0813
@@ -142,7 +128,13 @@ gitee:
   user-code:
     repo: wispcode-gitee-repo
     branch: master
-    owner: wangs-joyful-home'),now(),now(),'nacos','112.46.64.96','wisp-code configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,''),
+    owner: wangs-joyful-home
+  api-base-url: https://gitee.com/api/v5/
+  access-token: f3044cf9989512905d2e14d7b061be4d
+
+code:
+  host: 192.168.160.131
+  port: 8080'),now(),now(),'nacos','112.46.64.96','wisp-code configuration','frameworkjava-test',NULL,NULL,NULL,'yaml',NULL,''),
 
 ('share-common-test.yaml','DEFAULT_GROUP','feign:
   okhttp:
@@ -175,34 +167,6 @@ gitee:
     response:
       enabled: true
 '),now(),now(),'nacos','112.46.64.96','common configuration','frameworkjava-test','','','','yaml','',''),
-
-('share-gitee-mcp-server-test.yaml','DEFAULT_GROUP','server:
-  port: 19090
-spring:
-  application:
-    name: gitee-mcp
-  ai:
-    mcp:
-      server:
-        name: wispcode-gitee-mcp-server
-        version: 1.0.0
-        type: async
-gitee:
-  api-base-url: https://gitee.com/api/v5/
-  access-token: {paste your Gitee access-token here}',md5('server:
-  port: 19090
-spring:
-  application:
-    name: gitee-mcp
-  ai:
-    mcp:
-      server:
-        name: wispcode-gitee-mcp-server
-        version: 1.0.0
-        type: async
-gitee:
-  api-base-url: https://gitee.com/api/v5/
-  access-token: {paste your Gitee access-token here}'),now(),now(),'nacos','112.46.64.96','common configuration','frameworkjava-test','','','','yaml','',''),
 
 ('share-redis-test.yaml','DEFAULT_GROUP','spring:
   cache:
