@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>个人中心 · WispCode</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('wisp_theme')==='light'?'light':'dark'}catch(e){}</script>
+<link rel="icon" href="favicon.ico">
 <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
@@ -13,17 +15,17 @@
   <div id="alert" class="alert"></div>
 
   <div class="card">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div class="avatar" id="avatar" style="width:56px;height:56px;font-size:22px;border-radius:16px">?</div>
-      <div><h3 id="p-name" style="margin:0">加载中…</h3><div class="muted" id="p-email">—</div></div>
+    <div class="profile-id">
+      <div class="avatar lg" id="avatar">?</div>
+      <div><h3 id="p-name">加载中…</h3><div class="muted" id="p-email">—</div></div>
     </div>
     <hr class="sep">
     <div class="kv" id="kv"></div>
     <hr class="sep">
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn ghost" onclick="load()">↻ 刷新</button>
-      <a class="btn" href="apps.html">我的应用</a>
-      <button class="btn danger" onclick="WispAPI.auth.logout()">退出登录</button>
+    <div class="profile-actions">
+      <button class="btn ghost" onclick="load()"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>刷新</button>
+      <a class="btn" href="apps.html"><svg class="ic" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>我的应用</a>
+      <button class="btn danger" onclick="WispAPI.auth.logout()"><svg class="ic" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>退出登录</button>
     </div>
   </div>
 </div>

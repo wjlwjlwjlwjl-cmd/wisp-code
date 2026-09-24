@@ -4,13 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>登录 · WispCode</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('wisp_theme')==='light'?'light':'dark'}catch(e){}</script>
+<link rel="icon" href="favicon.ico">
 <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
 <div class="auth-wrap">
   <div class="auth-card">
     <div class="auth-logo"><div class="brand"><span class="logo">⚡</span> WispCode</div>
-      <div class="muted" style="font-size:13px;margin-top:6px">一键应用生成平台</div></div>
+      <div class="auth-sub">一键应用生成平台</div></div>
 
     <div class="tabs">
       <button id="tab-login" class="active" onclick="switchTab('login')">登录</button>

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T03:55:47Z",
+  "title": "Design System: WispCode User Portal",
+  "extensions": {
+    "colorMeta": {
+      "brand": { "role": "primary", "displayName": "Signal Gold", "canonical": "#ffa116", "tonalRamp": ["#4a2e00", "#6b4300", "#8f5a00", "#b37300", "#d68c00", "#ffa116", "#ffbe55", "#ffd999"] },
+      "ok": { "role": "secondary", "displayName": "Accepted Teal", "canonical": "#00b8a3", "tonalRamp": ["#00332d", "#004d44", "#006b5e", "#00897b", "#00a68f", "#00b8a3", "#33d4bf", "#7fe6d8"] },
+      "err": { "role": "tertiary", "displayName": "Judge Red", "canonical": "#d93a40", "tonalRamp": ["#4a0d10", "#6e1418", "#932025", "#b52a30", "#d93a40", "#e86166", "#f28b8f", "#fab9bb"] },
+      "link": { "role": "accent", "displayName": "Platform Blue", "canonical": "#57a3f3", "tonalRamp": ["#002d56", "#004a8f", "#0062b8", "#0070d6", "#2f8ce6", "#57a3f3", "#7fbcff", "#b8dcff"] },
+      "bg": { "role": "neutral", "displayName": "Charcoal Field", "canonical": "#1a1a1a", "tonalRamp": ["#0d0d0d", "#1a1a1a", "#222222", "#282828", "#2f2f2f", "#3e3e3e", "#545454", "#9ba1a9"] },
+      "bg-light": { "role": "neutral", "displayName": "Paper Field", "canonical": "#f5f6f7", "tonalRamp": ["#57606c", "#9aa1ac", "#bfc6d1", "#d7dce4", "#eceef1", "#f5f6f7", "#f7f8fa", "#ffffff"] },
+      "txt": { "role": "neutral", "displayName": "Charcoal Ink", "canonical": "#eff1f5", "tonalRamp": ["#1f2329", "#3a4048", "#57606c", "#767f8a", "#9ba1a9", "#c0c5cc", "#dde0e5", "#eff1f5"] },
+      "toast-panel": { "role": "fixture", "displayName": "Toast Fixture", "canonical": "#22262c", "tonalRamp": ["#0e1013", "#171a1e", "#22262c", "#2c3138", "#3a4048", "#57606c", "#9ba1a9", "#f2f4f7"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles only; drops to 20px at <=560px." },
+      "wordmark": { "displayName": "Wordmark", "purpose": "Auth-page brand line and large profile avatar initial (22px)." },
+      "brand": { "displayName": "Brand", "purpose": "Nav brand wordmark and profile name (18px, +0.2px)." },
+      "title": { "displayName": "Title", "purpose": "Card headings (16px)." },
+      "item-title": { "displayName": "Item Title", "purpose": "App-card names; block buttons at 15px/600." },
+      "body": { "displayName": "Body", "purpose": "All reading text, controls, tables, chat (14px; 1.75 in markdown)." },
+      "label": { "displayName": "Label", "purpose": "Field labels, hints, small controls, md-tabs, back links (13px)." },
+      "badge": { "displayName": "Badge", "purpose": "Pills and paging counters, tabular-nums (12px)." },
+      "mono": { "displayName": "Mono", "purpose": "IDs, preview URLs, raw docs, fenced code, tables (13px)." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 2px rgba(0,0,0,.3)", "purpose": "Defined in dark but applied to nothing at rest; the light theme overrides it to 0 1px 2px rgba(16,24,40,.05) as the only card/app-card lift." },
+      { "name": "shadow-md", "value": "0 8px 24px rgba(0,0,0,.35)", "purpose": "Auth card and toasts only. Light theme: 0 8px 24px rgba(16,24,40,.12)." },
+      { "name": "shadow-hover", "value": "0 2px 8px rgba(0,0,0,.28)", "purpose": "App-card hover, paired with translateY(-1px) and a line-strong border. Light theme: 0 2px 8px rgba(16,24,40,.08)." },
+      { "name": "press-inset", "value": "inset 0 1px 3px rgba(0,0,0,.2)", "purpose": "Button :active press feedback, both themes." }
+    ],
+    "motion": [
+      { "name": "entrance-rise", "value": "rise .28s cubic-bezier(.22,.9,.35,1) both", "purpose": "The single authored page-entry moment on .wrap children, staggered .04s per child up to .16s." },
+      { "name": "auth-rise", "value": "rise .3s cubic-bezier(.22,.9,.35,1) both", "purpose": "Same rise on the auth card." },
+      { "name": "toast-in", "value": "toast-in .25s ease", "purpose": "Toast entry: translateY(8px) + fade." },
+      { "name": "toast-out", "value": "transition .3s then remove", "purpose": "Toast exit (translateX(20px) + fade) set inline by the untouchable api.js." },
+      { "name": "spin", "value": "spin .7s linear infinite", "purpose": "Neutral spinner ring while requests run." },
+      { "name": "state-transition", "value": ".15s ease on background/border/color/box-shadow", "purpose": "All control and card state changes." },
+      { "name": "reduced-motion", "value": "animation:none!important; transition:none!important", "purpose": "prefers-reduced-motion kills every animation and transition." }
+    ],
+    "breakpoints": [
+      { "name": "library-3up", "value": "1100px" },
+      { "name": "library-2up", "value": "900px" },
+      { "name": "stack", "value": "820px" },
+      { "name": "compact", "value": "560px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single gold action per screen; dark ink on gold.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg>开始生成应用</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;cursor:pointer;padding:9px 16px;border-radius:8px;font:600 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;white-space:nowrap;color:#231800;background:#ffa116;transition:background .15s,color .15s,box-shadow .15s}.ds-btn-primary:hover{background:#ffab30;color:#231800}.ds-btn-primary:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.2)}.ds-btn-primary:focus-visible{outline:2px solid #ffa116;outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action: card-colored fill with hairline border.",
+      "html": "<button class=\"ds-btn-ghost\">查看我的应用</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;padding:9px 16px;border-radius:8px;font:600 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;white-space:nowrap;color:#eff1f5;background:#282828;border:1px solid #3e3e3e;transition:background .15s,border-color .15s}.ds-btn-ghost:hover{background:#222222;border-color:#545454}.ds-btn-ghost:focus-visible{outline:2px solid #ffa116;outline-offset:2px}"
+    },
+    {
+      "name": "Deploy Button (ok)",
+      "kind": "button",
+      "refersTo": "button-ok",
+      "description": "Teal verdict button for deploy/success; red danger twin for cancel-deploy and logout.",
+      "html": "<button class=\"ds-btn-ok\">部署</button>",
+      "css": ".ds-btn-ok{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;cursor:pointer;padding:9px 16px;border-radius:8px;font:600 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;white-space:nowrap;color:#04322c;background:#00b8a3;transition:filter .15s}.ds-btn-ok:hover{filter:brightness(1.08)}.ds-btn-ok:focus-visible{outline:2px solid #ffa116;outline-offset:2px}"
+    },
+    {
+      "name": "State Pills",
+      "kind": "chip",
+      "refersTo": "badge-on",
+      "description": "Difficulty-tag pills: teal = deployed, neutral = idle/metadata, red twin for failure.",
+      "html": "<span class=\"ds-pill\">#101</span><span class=\"ds-pill-on\">已部署</span><span class=\"ds-pill-off\">未部署</span>",
+      "css": ".ds-pill,.ds-pill-on,.ds-pill-off{display:inline-flex;align-items:center;gap:4px;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;padding:2px 10px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}.ds-pill{background:#222222;color:#9ba1a9;border:1px solid transparent}.ds-pill-on{color:#3fd0bd;background:rgba(0,184,163,.14);border:1px solid rgba(0,184,163,.4)}.ds-pill-off{color:#9ba1a9;background:#222222;border:1px solid #3e3e3e}"
+    },
+    {
+      "name": "Item Card",
+      "kind": "card",
+      "refersTo": "app-card",
+      "description": "Problem-list anatomy: name, clamped desc, pill row, pinned action footer.",
+      "html": "<div class=\"ds-item\"><div class=\"ds-item-name\">待办清单</div><div class=\"ds-item-desc\">简洁现代的待办事项应用，支持添加、勾选完成、按日期分类和删除。</div><div class=\"ds-item-meta\"><span class=\"ds-pill\">#101</span><span class=\"ds-pill\">HTML</span><span class=\"ds-pill-on\">已部署</span></div><div class=\"ds-item-actions\"><button class=\"ds-btn-sm\">打开</button></div></div>",
+      "css": ".ds-item{background:#282828;border:1px solid #3e3e3e;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;max-width:320px;transition:border-color .15s,box-shadow .15s,transform .15s}.ds-item:hover{border-color:#545454;box-shadow:0 2px 8px rgba(0,0,0,.28);transform:translateY(-1px)}.ds-item-name{font:700 15px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:#eff1f5}.ds-item-desc{color:#9ba1a9;font:400 13px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.ds-item-meta{display:flex;gap:8px;flex-wrap:wrap}.ds-item-actions{display:flex;gap:8px;margin-top:auto;padding-top:4px}.ds-pill,.ds-pill-on{display:inline-flex;font:600 12px/1.5 -apple-system,sans-serif;padding:2px 10px;border-radius:999px}.ds-pill{background:#222222;color:#9ba1a9;border:1px solid transparent}.ds-pill-on{color:#3fd0bd;background:rgba(0,184,163,.14);border:1px solid rgba(0,184,163,.4)}.ds-btn-sm{cursor:pointer;padding:6px 12px;border-radius:6px;border:1px solid transparent;font:600 13px/1.5 -apple-system,sans-serif;color:#231800;background:#ffa116}.ds-btn-sm:hover{background:#ffab30}"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Inset well with hairline border; gold border + soft ring on focus.",
+      "html": "<input class=\"ds-input\" placeholder=\"you@example.com\">",
+      "css": ".ds-input{width:100%;background:#1f1f1f;color:#eff1f5;border:1px solid #3e3e3e;border-radius:8px;padding:10px 12px;font:400 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;outline:none;caret-color:#ffa116;transition:border-color .15s,box-shadow .15s}.ds-input::placeholder{color:#9ba1a9}.ds-input:focus{border-color:#ffa116;box-shadow:0 0 0 3px rgba(255,161,22,.12)}"
+    },
+    {
+      "name": "Nav (active link)",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Solid sticky 56px bar; active link gets ink-bold text and a 2px gold underline pinned to the bar's bottom edge.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-brand\" href=\"#\"><span class=\"ds-logo\"></span>WispCode</a><a class=\"ds-navlink ds-active\" href=\"#\">概览</a><a class=\"ds-navlink\" href=\"#\">我的应用</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:stretch;height:56px;background:#282828;border-bottom:1px solid #3e3e3e;padding:0 24px}.ds-brand{display:flex;align-items:center;gap:8px;font:700 18px/1 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;letter-spacing:.2px;color:#eff1f5;text-decoration:none;margin-right:16px}.ds-logo{width:28px;height:28px;border-radius:6px;background:#ffa116;display:inline-block}.ds-navlink{position:relative;display:inline-flex;align-items:center;padding:0 12px;font:600 14px/1 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:#9ba1a9;text-decoration:none}.ds-navlink:hover{color:#eff1f5}.ds-navlink.ds-active{color:#eff1f5;font-weight:700}.ds-navlink.ds-active::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:2px;background:#ffa116}"
+    },
+    {
+      "name": "Step (active / done)",
+      "kind": "custom",
+      "refersTo": "step-active",
+      "description": "Wizard step: hairline box with numbered dot; gold tint when active, teal dot when done.",
+      "html": "<div class=\"ds-step ds-step-active\"><span class=\"ds-dot\">2</span>生成代码</div><div class=\"ds-step ds-step-done\"><span class=\"ds-dot\">1</span>需求文档</div>",
+      "css": ".ds-step{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #3e3e3e;border-radius:8px;background:#282828;color:#9ba1a9;font:600 14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;transition:border-color .15s,background .15s,color .15s}.ds-step-active{color:#eff1f5;border-color:rgba(255,161,22,.4);background:rgba(255,161,22,.12)}.ds-step-done{color:#eff1f5}.ds-dot{width:26px;height:26px;flex:0 0 26px;border-radius:50%;display:grid;place-items:center;font:700 13px/1 -apple-system,sans-serif;background:#222222;border:1px solid #3e3e3e;color:#9ba1a9;transition:background .15s,border-color .15s,color .15s}.ds-step-active .ds-dot{background:#ffa116;border-color:#ffa116;color:#231800}.ds-step-done .ds-dot{background:#00b8a3;border-color:#00b8a3;color:#04322c}"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Fixed dark fixture panel with an 8px status dot; same fixture in both themes.",
+      "html": "<div class=\"ds-toast ok\">部署成功</div>",
+      "css": ".ds-toast{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:8px;font:600 14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:#f2f4f7;background:#22262c;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.35);animation:ds-toast-in .25s ease}.ds-toast.ok::before{content:'';width:8px;height:8px;border-radius:50%;flex:0 0 8px;background:#19c9a9}.ds-toast.err::before{content:'';width:8px;height:8px;border-radius:50%;flex:0 0 8px;background:#f4645f}@keyframes ds-toast-in{from{transform:translateY(8px);opacity:0}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Problem-Set Console",
+    "overview": "WispCode is a developer workbench where an app is generated, iterated, and shipped — the same job-to-be-done shape as a competitive-programming judge: a list of items, each with a state, each one click from its workspace. The visual world is borrowed deliberately from the LeetCode / 牛客网 canon its users live in daily: flat charcoal (or paper-white) surfaces, hairline borders doing all the structural work, one saturated gold reserved for the primary action and the active marker, and a difficulty-pill vocabulary for state. Density and scanability outrank expression; every screen reads like a problem set, never like a marketing page.\n\nTwo themes ship at full fidelity by pure token swap: LeetCode charcoal dark is the default (the untouchable assets/api.js applies data-theme=\"dark\" on load and the per-page anti-flash script reads the same wisp_theme key), and a 牛客-style paper light overrides it under html[data-theme=\"light\"], each with its own color-scheme. Every page is a console: a sticky solid nav with a 2px gold underline on the active section, a toolbar row for list metadata and paging, and grids of uniform item cards whose pill row reads state at a glance.\n\nNothing glows, nothing floats at rest. Depth is tonal layering — inset wells inside panels inside the page — plus 1px hairlines; shadows appear only as a response (light-theme card lift, hover, overlay). The only authored motion is a single 280 ms rise on page entry with a 40 ms child stagger, plus the toast; icons are drawn 2px-stroke line SVGs, never typed. Type is the system CJK workhorse stack at a 14px body, with weight and ramp steps carrying all hierarchy.",
+    "keyCharacteristics": [
+      "Flat matte surfaces, hairline (1px) borders, zero gradients and zero glass.",
+      "One gold accent (#ffa116) carrying every primary action and active marker, with dark ink on filled controls.",
+      "Difficulty-pill state vocabulary: teal tint = deployed/success, neutral tint = idle, red tint = failure.",
+      "Dual theme by token swap: LeetCode charcoal dark (default) and paper light, each with its own color-scheme.",
+      "System workhorse type stack with CJK fallbacks; nine-step px ramp 12/13/14/15/16/18/20/22/24, weights 400/600/700.",
+      "Line-drawn 24-viewBox SVG icons at 2px stroke, 16px (14px in small controls, 18px inside tinted tiles); no emoji in chrome."
+    ],
+    "rules": [
+      { "name": "The Gold Restraint Rule", "body": "Gold appears only on primary actions, active markers, and the logo. If a screen shows more than one gold-filled control at rest, one of them should be a ghost.", "section": "colors" },
+      { "name": "The State-Color Rule", "body": "State is always a pill: teal tint = live/success, neutral tint = idle, red tint = failure. State is never conveyed by a bare colored word or a colored card border, and neutral states (未部署) never borrow an alarm color.", "section": "colors" },
+      { "name": "The Fixture Rule", "body": "Toasts, spinner tracks, and zebra rows keep their neutral fixture values in both themes; do not tokenize them into the theme swap.", "section": "colors" },
+      { "name": "The Ramp-Only Rule", "body": "Every type size on screen is one of 12 / 13 / 14 / 15 / 16 / 18 / 20 / 22 / 24 px (20px only as the mobile page title, 22px only as wordmark/large-avatar); markdown headings scale in em inside the 14px body. No off-ramp sizes.", "section": "typography" },
+      { "name": "The Two-Weight Rule", "body": "Hierarchy comes from weight and 4px-scale size steps, never from color tinting of headings or letter-spaced eyebrows.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "No surface carries a shadow at rest in the dark theme; elevation is a response to hover or overlay, never decoration.", "section": "elevation" },
+      { "name": "The Dark-Stays-Flat Rule", "body": "The light theme's 1px card lift never migrates to dark — charcoal panels are separated by hairlines alone.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do draw structure with 1px hairlines and tonal insets; borders are the skeleton of every screen.",
+      "Do reserve gold for the single primary action and active markers per screen.",
+      "Do express every state as a tinted pill (teal/neutral/red) with matching text and border tints.",
+      "Do keep both themes in lockstep: every dark token has a light counterpart swapped via data-theme, each theme setting its own color-scheme.",
+      "Do use line-drawn 24-viewBox SVG icons at 2px stroke, sized 16px (14px in small controls, 18px in tinted tiles).",
+      "Do set tabular numerals on every numeric surface (badges, paging, kv, mono)."
+    ],
+    "donts": [
+      "Don't use gradients, glass, blur, or glow — the world is flat matte surfaces.",
+      "Don't add colored side borders or thick accent bars to cards, alerts, or quotes; blockquotes are neutral fills.",
+      "Don't let a shadow appear on a dark-theme surface at rest; in light, only the 1px card lift.",
+      "Don't introduce a second accent hue; blue is for content links and info only.",
+      "Don't set emoji in chrome — icons are drawn, not typed. Emoji arriving inside untouchable JS strings is silenced by CSS where it can be (⚡ logo, 🤖/🧑 chat avatars) or tolerated as content where it cannot (👋 greeting, 👤 owner badge, ▶/⏹ deploy label); neither case is house style.",
+      "Don't alarm a neutral state: 未部署 stays a gray pill, never red.",
+      "Don't step off the type ramp (12–24px) or the radius ramp (4/6/8/10/12/999/50%)."
+    ]
+  }
+}

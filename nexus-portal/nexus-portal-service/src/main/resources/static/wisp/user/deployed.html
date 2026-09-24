@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>已部署应用 · WispCode</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('wisp_theme')==='light'?'light':'dark'}catch(e){}</script>
+<link rel="icon" href="favicon.ico">
 <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
@@ -12,16 +14,16 @@
   <div class="page-title">已部署应用</div>
   <p class="page-sub">全站当前已部署、可公开访问的应用（不分用户）。点击卡片查看应用详情（只读）。</p>
   <div id="alert" class="alert"></div>
-  <div class="card" style="padding:14px 18px">
-    <div class="row" style="align-items:center">
+  <div class="card toolbar">
+    <div class="row">
       <span class="muted" id="total-label">—</span>
-      <div style="flex:1"></div>
-      <button class="btn ghost sm" id="prev" onclick="turn(-1)">‹ 上一页</button>
+      <div class="spacer"></div>
+      <button class="btn ghost sm" id="prev" onclick="turn(-1)"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>上一页</button>
       <span class="badge" id="page-label">1 / 1</span>
-      <button class="btn ghost sm" id="next" onclick="turn(1)">下一页 ›</button>
+      <button class="btn ghost sm" id="next" onclick="turn(1)">下一页<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
   </div>
-  <div id="list" class="app-grid" style="margin-top:18px"><div class="muted loading-inline" style="grid-column:1/-1"><span class="spinner"></span> 加载中…</div></div>
+  <div id="list" class="app-grid mt-16"><div class="muted loading-inline span-all"><span class="spinner"></span> 加载中…</div></div>
 </div>
 
 <script src="assets/api.js"></script>
